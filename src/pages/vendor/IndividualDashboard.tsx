@@ -1,0 +1,289 @@
+import React, { useState, useEffect } from 'react';
+import { useOutletContext, Link } from 'react-router-dom';
+import api from '@/lib/api';
+import { getVendorLogoUrl } from '@/lib/utils';
+import {
+    Building2,
+    AlertTriangle,
+    ArrowUpRight,
+    Activity,
+    Calendar,
+    ChevronRight,
+    Gauge,
+    ShieldCheck,
+    User,
+} from 'lucide-react';
+import { motion } from 'framer-motion';
+import dayjs from 'dayjs';
+import DashboardLoader from '@/lib/loader';
+
+// --- TYPE DEFINITIONS ---
+interface OutletContextType {
+    user: {
+        id: string;
+        name: string;
+        email?: string;
+        role?: string;
+        roles?: string[];
+        bio?: string;
+        vendor_type?: string;
+    };
+}
+
+interface StatCardData {
+    title: string;
+    value: string;
+    change: string;
+    icon: React.ElementType;
+}
+
+interface QuickActionData {
+    text: string;
+    desc: string;
+    icon: React.ElementType;
+    path: string;
+}
+
+interface VendorProfile {
+    id: string;
+    business_name: string;
+    address?: string;
+    account_id?: string;
+    paybill?: string;
+    vendor_type?: string;
+    bank_name?: string;
+    status?: string;
+    logo_url?: string | null;
+    dashboard_settings?: { primary_color?: string; tagline?: string; show_logo_in_sidebar?: boolean };
+    user?: { id: string; name: string; email: string; username?: string };
+}
+
+// --- CONSTANTS & HELPERS ---
+const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return { text: 'Good Morning' };
+    if (hour >= 12 && hour < 18) return { text: 'Good Afternoon' };
+    return { text: 'Good Evening' };
+};
+
+const StatCard = ({ stat, index }: { stat: StatCardData; index: number }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: index * 0.1 }}
+        className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-200 dark:hover:border-blue-800 transition-all duration-300 group"
+    >
+        <div className="flex justify-between items-start">
+            <div>
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{stat.title}</p>
+                <h3 className="text-3xl font-bold text-slate-900 dark:text-white group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">{stat.value}</h3>
+            </div>
+            <div className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 dark:group-hover:text-blue-400 text-slate-400 dark:text-slate-500 transition-colors">
+                <stat.icon className="w-6 h-6" />
+            </div>
+        </div>
+        <div className="mt-4 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            {stat.change}
+        </div>
+    </motion.div>
+);
+
+const IndividualDashboard: React.FC = () => {
+    const { user } = useOutletContext<OutletContextType>();
+    const [profile, setProfile] = useState<VendorProfile | null>(null);
+    const [stats, setStats] = useState<{ total_meters: number; active_meters: number } | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+
+    useEffect(() => {
+        if (!token) return;
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get<{ status: number; vendor: VendorProfile; stats: { total_meters: number; active_meters: number } }>('/vendor/profile');
+                if (res.data.status === 200) {
+                    setProfile(res.data.vendor);
+                    setStats(res.data.stats ?? { total_meters: 0, active_meters: 0 });
+                }
+            } catch (err: any) {
+                setError(err.response?.data?.message || 'Failed to load profile');
+                setProfile(null);
+                setStats({ total_meters: 0, active_meters: 0 });
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProfile();
+    }, [token]);
+
+    const greeting = getGreeting();
+
+    const vendorQuickActions: QuickActionData[] = [
+        { text: 'Profile Info', desc: 'Account details', icon: User, path: '/dashboard/account' },
+        { text: 'My Meters', desc: 'Manage devices', icon: Gauge, path: '/dashboard/meters' },
+        { text: 'Settings', desc: 'System preference', icon: ShieldCheck, path: '/dashboard/system-config' },
+        { text: 'Appearance', desc: 'Customize dashboard', icon: Building2, path: '/dashboard/branding' },
+    ];
+
+    const vendorStats: StatCardData[] = stats
+        ? [
+            { title: 'My Meters', value: stats.total_meters.toString(), change: `${stats.active_meters} Active`, icon: Gauge },
+            { title: 'Type', value: profile?.vendor_type || '—', change: 'Personal Account', icon: User },
+            { title: 'Status', value: profile?.status === 'active' ? 'Active' : (profile?.status || '—'), change: 'Account status', icon: Activity },
+            { title: 'System', value: 'Normal', change: 'Operational', icon: Activity },
+        ]
+        : [];
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 transition-colors">
+                <DashboardLoader title="Loading Dashboard" subtitle="Getting your latest stats..." />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 bg-slate-50 dark:bg-slate-950">
+                <div className="bg-red-50 dark:bg-red-950/20 p-6 rounded-2xl border border-red-100 dark:border-red-900/30 text-center max-w-md">
+                    <AlertTriangle className="w-12 h-12 text-red-900 dark:text-red-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-bold text-red-900 dark:text-red-500">Dashboard Error</h3>
+                    <p className="text-red-700 dark:text-red-400 mt-2 text-sm">{error}</p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 p-6 md:p-8 font-sans text-slate-900 dark:text-slate-100 transition-colors">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
+                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                    <div className="flex items-center gap-3 mb-2">
+                        <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
+                            <Calendar className="w-4 h-4" /> {dayjs().format('dddd, D MMMM YYYY')}
+                        </p>
+                    </div>
+                    <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                        {greeting.text}, <span className="text-blue-900 dark:text-blue-400">{user?.name || profile?.business_name || 'Vendor'}</span>
+                    </h1>
+                    {(profile?.dashboard_settings?.tagline || profile?.business_name) && (
+                        <p className="mt-2 text-slate-600 dark:text-slate-400 max-w-2xl">
+                            {profile?.dashboard_settings?.tagline || `Welcome back.`}
+                        </p>
+                    )}
+                </motion.div>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full shadow-sm text-sm font-medium text-slate-600 dark:text-slate-400">
+                    <div className="w-3 h-3 bg-green-700 dark:bg-green-500 rounded-full animate-pulse" />
+                    Operational
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                {vendorStats.map((stat, index) => (
+                    <StatCard key={`${stat.title}-${index}`} stat={stat} index={index} />
+                ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-8">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        {vendorQuickActions.map((action, idx) => (
+                            <Link key={`${action.text}-${idx}`} to={action.path}>
+                                <motion.div
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-md transition-all cursor-pointer flex flex-col items-center text-center gap-3"
+                                >
+                                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-blue-900 dark:text-blue-400">
+                                        <action.icon className="w-6 h-6" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">{action.text}</h4>
+                                        <p className="text-xs text-slate-500 dark:text-slate-500 mt-0.5">{action.desc}</p>
+                                    </div>
+                                </motion.div>
+                            </Link>
+                        ))}
+                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"
+                    >
+                        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-2">My tools</h3>
+                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">Manage your meters and account settings easily.</p>
+                        <div className="flex flex-wrap gap-4">
+                            <Link to="/dashboard/meters" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+                                My Meters <ArrowUpRight className="w-4 h-4" />
+                            </Link>
+                            <Link to="/dashboard/system-config" className="px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                Preferences <ArrowUpRight className="w-4 h-4" />
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+                <div className="space-y-8">
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden"
+                    >
+                        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
+                            <h3 className="font-bold text-slate-900 dark:text-white">Profile</h3>
+                            <Link to="/dashboard/account" className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 flex items-center">
+                                Edit <ChevronRight className="w-3 h-3 ml-1" />
+                            </Link>
+                        </div>
+                        <div className="p-4 space-y-3">
+                            <div className="flex items-center gap-3">
+                                {profile?.logo_url ? (
+                                    <img src={getVendorLogoUrl(profile.logo_url) || ''} alt="Logo" className="w-12 h-12 rounded-xl object-contain bg-slate-100 dark:bg-slate-800" />
+                                ) : (
+                                    <div className="w-12 h-12 rounded-xl bg-blue-950 dark:bg-blue-800 text-white flex items-center justify-center text-sm font-bold">
+                                        {(profile?.business_name || 'V').substring(0, 2).toUpperCase()}
+                                    </div>
+                                )}
+                                <div>
+                                    <p className="font-bold text-slate-800 dark:text-slate-200">{profile?.business_name || '—'}</p>
+                                    <p className="text-xs text-slate-500">{profile?.vendor_type || 'Individual'} • {profile?.bank_name || '—'}</p>
+                                </div>
+                            </div>
+                            {profile?.address && <p className="text-sm text-slate-600 dark:text-slate-400">{profile.address}</p>}
+                        </div>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        className="bg-[#0A1F44] dark:bg-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden border dark:border-slate-800"
+                    >
+                        <div className="absolute top-0 right-0 opacity-10 transform translate-x-8 -translate-y-8">
+                            <Gauge size={100} />
+                        </div>
+                        <div className="relative z-10">
+                            <h3 className="font-bold text-lg mb-1">Meter overview</h3>
+                            <p className="text-blue-200 dark:text-slate-400 text-xs mb-6">Your registered devices</p>
+                            <div className="flex justify-between items-center border-b border-blue-800 dark:border-slate-800 pb-2">
+                                <span className="text-sm text-blue-100 dark:text-slate-300 flex items-center gap-2">
+                                    <Gauge className="w-4 h-4" /> Total Meters
+                                </span>
+                                <span className="font-bold">{stats?.total_meters ?? 0}</span>
+                            </div>
+                            <div className="flex justify-between items-center pt-2">
+                                <span className="text-sm text-blue-100 dark:text-slate-300 flex items-center gap-2">
+                                    <Activity className="w-4 h-4" /> Active
+                                </span>
+                                <span className="font-bold">{stats?.active_meters ?? 0}</span>
+                            </div>
+                            <Link to="/dashboard/meters" className="mt-6 w-full py-2 bg-white dark:bg-blue-700 text-blue-950 dark:text-white text-sm font-bold rounded-lg flex items-center justify-center hover:bg-blue-50 dark:hover:bg-blue-600 transition-colors">
+                                Manage Devices
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default IndividualDashboard;
