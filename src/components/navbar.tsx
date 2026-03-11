@@ -47,8 +47,8 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
   const isVendor = user?.role === 'vendor' || user?.roles?.includes('vendor');
 
 
-  const NAV_HEIGHT_EXPANDED = 80;
-  const NAV_HEIGHT_CONDENSED = 64;
+  const NAV_HEIGHT_EXPANDED = 88;
+  const NAV_HEIGHT_CONDENSED = 72;
 
   const handleLogout = async () => {
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -126,10 +126,10 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
             height: scrolled ? NAV_HEIGHT_CONDENSED : NAV_HEIGHT_EXPANDED,
           }}
           className={`
-            relative border-b backdrop-blur-xl transition-all duration-500
+            relative border-b backdrop-blur-2xl transition-all duration-500
             ${scrolled
-              ? "bg-white/90 dark:bg-slate-950/95 border-slate-200 dark:border-slate-800 shadow-sm"
-              : "bg-white/50 dark:bg-slate-950/80 border-transparent"
+              ? "bg-white/80 dark:bg-slate-950/80 border-slate-200/60 dark:border-slate-800/60 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
+              : "bg-white/40 dark:bg-slate-950/40 border-transparent"
             }
           `}
         >
@@ -138,41 +138,56 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
             {/* Left: Sidebar Toggle + Logo */}
             <div className="flex items-center gap-4">
               {showSidebarToggle && (
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onToggleSidebar}
-                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300 dark:hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-slate-700 transition-colors group"
+                  className="flex items-center justify-center w-11 h-11 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300/50 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-all group shadow-sm hover:shadow-md"
                   aria-label="Toggle sidebar"
                 >
-                  <Menu className={`h-5 w-5 transition-transform duration-300 ${sidebarOpen ? '' : 'rotate-180 group-hover:scale-110'}`} />
-                </button>
+                  <Menu className={`h-5 w-5 transition-transform duration-500 ${sidebarOpen ? 'rotate-180' : 'group-hover:translate-x-0.5'}`} />
+                </motion.button>
               )}
 
-              <Link to="/dashboard" className="flex items-center gap-3 group">
+              <Link to="/dashboard" className="flex items-center gap-3.5 group">
                 <div className="relative">
                   {user?.role === 'vendor' && vendorProfile?.logo_url ? (
-                    <img
-                      src={getVendorLogoUrl(vendorProfile.logo_url) || ''}
-                      alt={vendorProfile?.business_name || 'Vendor'}
-                      className="h-9 w-9 rounded-lg object-contain bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-600 shadow-lg text-white">
-                      <ShieldCheck className="w-6 h-6" />
+                    <div className="p-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-transform group-hover:scale-105 duration-300">
+                      <img
+                        src={getVendorLogoUrl(vendorProfile.logo_url) || ''}
+                        alt={vendorProfile?.business_name || 'Vendor'}
+                        className="h-7 w-7 rounded-md object-contain"
+                      />
                     </div>
+                  ) : (
+                    <motion.div 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 shadow-sm transition-all group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30"
+                    >
+                      <ShieldCheck className="w-5 h-5 text-blue-900 dark:text-blue-400" />
+                    </motion.div>
                   )}
                 </div>
-                <div className="flex flex-col flex-1">
-                  <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white leading-none group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {user?.role === 'vendor' ? (vendorProfile?.business_name || 'Vendor') : 'Administrator'}
-                  </span>
+                <div className="flex flex-col">
+                  {user?.role === 'vendor' ? (
+                    <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      {vendorProfile?.business_name || 'Vendor'}
+                    </span>
+                  ) : (
+                    <div className="flex items-baseline gap-1.5 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
+                      <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">TokenPaP</span>
+                      <span className="text-xs font-bold tracking-wide text-slate-500 dark:text-slate-400">Utility Dashboard</span>
+                    </div>
+                  )}
                   <div className="mt-1 flex items-center">
                     {user?.role === 'vendor' && vendorProfile?.dashboard_settings?.tagline ? (
-                      <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
                         {vendorProfile.dashboard_settings.tagline}
                       </span>
                     ) : (
-                      <span className="text-[10px] font-bold tracking-widest text-white bg-blue-600 px-1.5 py-0.5 rounded shadow-sm">
-                        PANEL
+                      <span className="text-[8px] font-bold uppercase tracking-widest text-blue-800/60 dark:text-blue-400/60">
+                        {user?.role || 'Admin'} Panel
                       </span>
                     )}
                   </div>
@@ -182,18 +197,24 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
 
             {/* Middle: Enhanced Search (Desktop Only) */}
             {isAdmin && !isMobile && (
-              <div className="flex-1 max-w-md px-8 hidden lg:block">
+              <div className="flex-1 max-w-lg px-12 hidden lg:block">
                 <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                     <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
                   </div>
                   <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-800 rounded-full bg-slate-100/50 dark:bg-slate-900/50 focus:bg-white dark:focus:bg-slate-900 focus:ring-4 focus:ring-blue-100 dark:focus:ring-blue-900/20 focus:border-blue-300 dark:focus:border-blue-700 transition-all sm:text-sm"
-                    placeholder="Search for meters, vendors..."
+                    className={`
+                      block w-full pl-11 pr-12 py-2.5 rounded-2xl
+                      bg-slate-100/50 dark:bg-slate-900/50 border border-transparent
+                      focus:bg-white dark:focus:bg-slate-950 focus:border-blue-500/50
+                      focus:ring-4 focus:ring-blue-500/10 transition-all duration-300
+                      placeholder:text-slate-400 dark:placeholder:text-slate-600 text-sm font-medium
+                    `}
+                    placeholder="Search metrics, users, or settings..."
                   />
                   <div className="absolute inset-y-0 right-3 flex items-center">
-                    <kbd className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-md border border-slate-200 dark:border-slate-700 text-xs font-mono text-slate-400">
+                    <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[10px] font-bold text-slate-400 shadow-sm">
                       ⌘K
                     </kbd>
                   </div>
@@ -206,14 +227,24 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
               {isAdmin && !isMobile && (
                 <>
                   {/* Quick Actions */}
-                  <div className="flex items-center gap-1 mr-2 px-2 border-r border-slate-200 dark:border-slate-800">
-                    <button className="p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-800 transition-all" title="Quick Add">
+                  <div className="flex items-center gap-1.5 mr-3 pr-3 border-r border-slate-200/60 dark:border-slate-800/60">
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-900 transition-all shadow-sm hover:shadow-md border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50" 
+                      title="Add New Meter"
+                    >
                       <Plus className="w-5 h-5" />
-                    </button>
-                    <button className="relative p-2 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-800 transition-all" title="Notifications">
+                    </motion.button>
+                    <motion.button 
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="relative p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-900 transition-all shadow-sm hover:shadow-md border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50" 
+                      title="System Notifications"
+                    >
                       <Bell className="w-5 h-5" />
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-950"></span>
-                    </button>
+                      <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-950 shadow-sm animate-pulse"></span>
+                    </motion.button>
                   </div>
                 </>
               )}

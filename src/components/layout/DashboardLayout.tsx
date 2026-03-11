@@ -21,7 +21,7 @@ interface UserProfile {
 
 const SIDEBAR_WIDTH = 256; // 256px when expanded
 const SIDEBAR_COLLAPSED_WIDTH = 80; // 80px when collapsed
-const NAVBAR_HEIGHT = 64; // 64px for Navbar
+const NAVBAR_HEIGHT = 72; // 72px for Navbar (Condensed)
 const HEADER_HEIGHT = 72; // additional mobile header height
 
 interface VendorProfile {
