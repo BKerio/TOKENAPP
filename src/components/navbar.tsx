@@ -6,7 +6,6 @@ import {
   ShieldCheck, Search, Plus, Bell, Activity
 } from "lucide-react";
 import Swal from 'sweetalert2';
-
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getVendorLogoUrl } from "@/lib/utils";
