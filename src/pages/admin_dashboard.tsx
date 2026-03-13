@@ -241,27 +241,6 @@ const Dashboard: React.FC = () => {
 
   const greeting = getGreeting();
 
-  // Attendance Staff View
-  if (user.roles?.includes('attendance_staff')) {
-    return (
-      <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 p-6 md:p-8 font-sans text-slate-900 dark:text-slate-100 transition-colors">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8">
-          <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-            <div className="flex items-center gap-3 mb-2">
-
-              <p className="text-slate-500 dark:text-slate-400 font-medium flex items-center gap-2">
-                <Calendar className="w-4 h-4" /> {dayjs().format('dddd, D MMMM YYYY')}
-              </p>
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-              {greeting.text}, <span className="text-blue-900 dark:text-blue-400">{user.name || 'User'}</span>
-            </h1>
-          </motion.div>
-        </div>
-      </div>
-    );
-  }
-
 
   // Error State
   if (error) {
@@ -313,16 +292,6 @@ const Dashboard: React.FC = () => {
             <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse"></div>
             System Operational
           </motion.div>
-
-          {user.roles && user.roles.length > 0 && (
-            <div className="flex gap-2 flex-wrap justify-end">
-              {user.roles.map(role => (
-                <span key={role} className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-[10px] uppercase font-bold rounded-md tracking-wider border border-blue-100 dark:border-blue-800">
-                  {role.replace(/_/g, ' ')}
-                </span>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 

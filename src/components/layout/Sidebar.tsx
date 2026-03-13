@@ -1,7 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { getVendorLogoUrl } from '@/lib/utils';
-
 import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -33,7 +31,7 @@ interface SidebarProps {
   onCloseMobile: () => void;
 }
 
-const Sidebar = ({ user, vendorProfile, sidebarOpen, isMobile, onLogout, onCloseMobile }: SidebarProps) => {
+const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: SidebarProps) => {
   const location = useLocation();
 
   const isVendor = user.role === 'vendor' || user.roles?.includes('vendor');

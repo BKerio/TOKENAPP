@@ -42,7 +42,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const handleModeSelect = useCallback((selectedMode: LoginMode) => {
     setMode(selectedMode);
@@ -254,7 +254,7 @@ const Login = () => {
                   type="submit"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.97 }}
-                  className="w-full py-2.5 rounded-xl text-white text-[13px] font-bold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/20"
+                  className="w-full py-2.5 rounded-xl text-white text-[13px] font-bold bg-[#0A1F44] hover:bg-blue-700 shadow-lg shadow-blue-500/20"
                 >
                   Login to dashboard
                 </motion.button>
