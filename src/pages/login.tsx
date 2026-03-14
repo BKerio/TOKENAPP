@@ -116,6 +116,10 @@ const Login = () => {
         icon: "error",
         title: "Error",
         text: "Please enter your phone number",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
       });
       return;
     }
@@ -143,6 +147,10 @@ const Login = () => {
         icon: "error",
         title: "Failed to send OTP",
         text: err.response?.data?.message || "An error occurred",
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
       });
     } finally {
       setIsLoading(false);
@@ -163,6 +171,10 @@ const Login = () => {
           icon: "error",
           title: "Error",
           text: "Please enter a valid 6-digit OTP",
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 3000,
         });
         return;
       }
@@ -192,6 +204,10 @@ const Login = () => {
           icon: "error",
           title: "Verification Failed",
           text: err.response?.data?.message || "Invalid OTP",
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 4000,
         });
       } finally {
         setIsLoading(false);
@@ -207,6 +223,10 @@ const Login = () => {
         icon: "error",
         title: "Error",
         text: msg,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 3000,
       });
 
       return;
@@ -254,6 +274,10 @@ const Login = () => {
           icon: "error",
           title: "Authentication Failed",
           text: msg,
+          toast: true,
+          position: "top-end",
+          showConfirmButton: false,
+          timer: 4000,
         });
       }
     } catch (err: any) {
@@ -268,6 +292,10 @@ const Login = () => {
         icon: "error",
         title: "Error",
         text: msg,
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
       });
     } finally {
       setIsLoading(false);
