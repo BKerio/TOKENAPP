@@ -54,14 +54,30 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [, setError] = useState<string | null>(null);
 
+  const errorShownRef = React.useRef(false);
+
   useEffect(() => {
     const token = searchParams.get("token");
     const userData = searchParams.get("user");
+    const errorParam = searchParams.get("error");
 
-    if (token && userData) {
+    if (errorParam && !errorShownRef.current) {
+      errorShownRef.current = true;
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: decodeURIComponent(errorParam),
+        toast: true,
+        position: "top-end",
+        showConfirmButton: false,
+        timer: 4000,
+      });
+      // Remove query parameters to clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } else if (token && userData) {
       try {
         const user = JSON.parse(decodeURIComponent(userData));
-        login(token, user);
+        login(user, token);
         Swal.fire({
           icon: "success",
           title: "Login Successful",

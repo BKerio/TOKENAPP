@@ -15,7 +15,7 @@ import Branding from '@/pages/vendor/Branding';
 import CustomerManagement from '@/pages/vendor/CustomerManagement';
 import CompanyDashboard from '@/pages/vendor/CompanyDashboard';
 import IndividualDashboard from '@/pages/vendor/IndividualDashboard';
-import LipaTokenNaMpesa from '@/pages/vendor/LipaTokenNaMpesa';
+import LipaTokenNaMpesa from '@/pages/customer/LipaTokenNaMpesa';
 import VendingSettingsPage from '@/pages/admin/vending';
 import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 

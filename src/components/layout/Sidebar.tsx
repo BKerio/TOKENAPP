@@ -78,12 +78,12 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     // Vendor specific view (Meter Management shown as "My Meters" via linkDisplayName)
     if (user.role === 'vendor' || user.roles?.includes('vendor')) {
-      return ['Dashboard', 'Meter Management', 'Customer Overview', 'System Configuration', 'Account Settings', 'Branding', 'Lipia Token na Mpesa'].includes(link.name);
+      return ['Dashboard', 'Meter Management', 'Customer Overview', 'System Configuration', 'Account Settings', 'Branding',].includes(link.name);
     }
 
     // Customer specific view
     if (user.role === 'customer') {
-      return ['Dashboard', 'Account Settings'].includes(link.name);
+      return ['Dashboard', 'Account Settings', 'Lipia Token na Mpesa'].includes(link.name);
     }
 
     // Default: for other roles (attendance staff etc) or fallback
