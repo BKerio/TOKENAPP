@@ -271,7 +271,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                         />
                       ) : (
                         <img
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0284c7&color=fff&bold=true`}
+                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0A1F44&color=fff&bold=true`}
                           alt={user.name}
                           className="w-8 h-8 rounded-full shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
                         />
@@ -296,16 +296,21 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                         <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                           <div className="flex items-center gap-3 mb-3">
                             <img
-                              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0284c7&color=fff&bold=true`}
+                              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0a1f44&color=ffffff&bold=true`}
                               className="w-10 h-10 rounded-xl"
-                              alt=""
+                              alt="avatar"
                             />
                             <div className="overflow-hidden">
-                              <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{user.name}</p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{user.email}</p>
+                              <p className="text-sm font-bold text-red-900 dark:text-slate-100 truncate">
+                                {user.name}
+                              </p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                {user.email}
+                              </p>
                             </div>
                           </div>
-                          <div className="px-3 py-1 rounded-lg bg-blue-100/50 dark:bg-blue-900/20 text-[10px] font-bold text-blue-700 dark:text-blue-300 w-fit uppercase tracking-widest">
+                        
+                          <div className="px-3 py-1 rounded-lg bg-[#0A1F44]/10 dark:bg-[#0A1F44]/20 text-[10px] font-bold text-[#0A1F44] dark:text-blue-300 w-fit uppercase tracking-widest">
                             {user.role || "System Admin"}
                           </div>
                         </div>

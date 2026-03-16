@@ -324,7 +324,7 @@ const Meters = () => {
                         </span>
                     </div>
                     <h1 className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">
-                        {isAdmin ? 'Meter Infrastructure' : 'My Meter Asset Registry'}
+                        {isAdmin ? 'Meter Infrastructure' : 'My Assigned Meters'}
                     </h1>
                     <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 max-w-xl font-medium">
                         {isAdmin
@@ -489,7 +489,9 @@ const Meters = () => {
 
                             <div className="space-y-4 mb-4 relative z-10">
                                 <div>
-                                    <p className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1">SN: {meter.meter_number}</p>
+                                    <p className="text-[13px] font-black text-[#0A1F44] dark:text-[#0A1F44] tracking-widest mb-1">
+                                       Meter Number: {meter.meter_number}
+                                     </p>
                                     <h3 className="text-lg font-black text-gray-900 dark:text-white normal tracking-tighter">
                                         Hardware Unit
                                     </h3>
@@ -593,7 +595,7 @@ const Meters = () => {
                                 <div className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="col-span-1 md:col-span-2 space-y-1.5">
-                                            <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-0.5">Dealer Reference Number</label>
+                                            <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 normal tracking-widest ml-0.5">DRN/PAN(Meter Number)</label>
                                             <div className="relative group/input">
                                                 <Gauge className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 group-focus-within/input:text-gray-900 dark:group-focus-within/input:text-white transition-colors" />
                                                 <input

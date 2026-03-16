@@ -607,7 +607,7 @@ const SystemConfigPage = () => {
                     ? `Manage your ${activeTab === 'sms' ? 'SMS' : 'M-Pesa'} service settings`
                     : `Manage ${activeTab === 'sms' ? 'SMS' : 'M-Pesa'} service settings`}
                   {isVendor && vendorEmail && (
-                    <span className="inline-flex mt-1 md:mt-0 md:ml-3 items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide normal bg-slate-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 shadow-sm">
+                    <span className="inline-flex mt-1 md:mt-0 md:ml-3 items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide normal bg-[#0A1F44]-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 shadow-sm">
                       Vendor: {vendorEmail}
                     </span>
                   )}

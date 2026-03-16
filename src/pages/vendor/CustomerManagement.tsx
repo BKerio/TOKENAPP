@@ -503,11 +503,11 @@ const CustomerManagement = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-slate-50/50 dark:bg-slate-800/20 px-8">
-                                <th className="py-5 px-8 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Customer</th>
-                                <th className="py-5 px-8 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Meter SN</th>
-                                <th className="py-5 px-8 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">Location</th>
-                                <th className="py-5 px-8 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 text-center">Status</th>
-                                <th className="py-5 px-8 text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 dark:border-slate-800 text-right">Actions</th>
+                                <th className="py-5 px-8 text-xs font-black text-slate-400 normal tracking-widest border-b border-slate-100 dark:border-slate-800">Customer</th>
+                                <th className="py-5 px-8 text-xs font-black text-slate-400 normal tracking-widest border-b border-slate-100 dark:border-slate-800">Meter Number(DRN/PAN)</th>
+                                <th className="py-5 px-8 text-xs font-black text-slate-400 normal tracking-widest border-b border-slate-100 dark:border-slate-800">Location</th>
+                                <th className="py-5 px-8 text-xs font-black text-slate-400 normal tracking-widest border-b border-slate-100 dark:border-slate-800 text-center">Status</th>
+                                <th className="py-5 px-8 text-xs font-black text-slate-400 normal tracking-widest border-b border-slate-100 dark:border-slate-800 text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-50 dark:divide-slate-800">

@@ -145,7 +145,9 @@ const Dashboard: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user?.role === 'vendor' || user?.roles?.includes('vendor')) {
+    if (user?.role === 'customer') {
+      navigate('/dashboard/customer', { replace: true });
+    } else if (user?.role === 'vendor' || user?.roles?.includes('vendor')) {
       const vendorType = (user as any).vendor_type;
       if (vendorType === 'Individual') {
         navigate('/dashboard/individual', { replace: true });

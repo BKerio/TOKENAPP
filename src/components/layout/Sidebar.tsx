@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap } from 'lucide-react';
+import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserProfile {
@@ -37,6 +37,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
   const isVendor = user.role === 'vendor' || user.roles?.includes('vendor');
 
   const getDashboardPath = () => {
+    if (user.role === 'customer') return '/dashboard/customer';
     if (isVendor) {
       if (user.vendor_type === 'Company') return '/dashboard/company';
       if (user.vendor_type === 'Individual') return '/dashboard/individual';
@@ -55,6 +56,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'System Logs', icon: Activity, path: '/dashboard/auditlogs' },
     { name: 'System Configuration', icon: ShieldCheck, path: '/dashboard/system-config' },
     { name: 'Lipia Token na Mpesa', icon: Zap, path: '/dashboard/lipa-mpesa' },
+    { name: 'Purchase History', icon: Clock, path: '/dashboard/purchase-history' },
     { name: 'Branding', icon: Building2, path: '/dashboard/branding' },
     { name: 'Account Settings', icon: User, path: '/dashboard/account' },
   ];
@@ -83,7 +85,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     // Customer specific view
     if (user.role === 'customer') {
-      return ['Dashboard', 'Account Settings', 'Lipia Token na Mpesa'].includes(link.name);
+      return ['Dashboard', 'Account Settings', 'Lipia Token na Mpesa', 'Purchase History'].includes(link.name);
     }
 
     // Default: for other roles (attendance staff etc) or fallback
