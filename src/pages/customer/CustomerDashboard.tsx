@@ -1,11 +1,12 @@
 import { motion } from 'framer-motion';
-import { useOutletContext } from 'react-router-dom';
+import { useNavigate, useOutletContext } from 'react-router-dom';
 import { User, Smartphone, Mail, Hash, CreditCard, Activity, CalendarClock, Zap } from 'lucide-react';
 import dayjs from 'dayjs';
 
 const CustomerDashboard = () => {
     // Get the user data that was injected directly by DashboardLayout via Outlet context
     const { user } = useOutletContext<any>();
+    const navigate = useNavigate();
     
     const meter = user?.meter;
     const vendor = user?.vendor;
@@ -42,9 +43,20 @@ const CustomerDashboard = () => {
                         )}
                     </div>
                 </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-emerald-200 dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <span className="text-xs font-bold tracking-wide uppercase">Account Active</span>
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-[#0A1F44] dark:border-emerald-800/60 bg-emerald-50/50 dark:bg-emerald-900/10 text-emerald-700 dark:text-emerald-400">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <span className="text-xs font-bold tracking-wide normal">Account Active</span>
+                    </div>
+                    <motion.button
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        onClick={() => navigate('/dashboard/lipa-mpesa')}
+                        className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#0A1F44] hover:bg-[#0A1F44]/80 text-white shadow-lg shadow-emerald-600/20 transition-all"
+                    >
+                        <Zap size={16} fill="currentColor" />
+                        <span className="text-sm font-bold tracking-tight">Buy Token</span>
+                    </motion.button>
                 </div>
             </header>
 
@@ -222,7 +234,16 @@ const CustomerDashboard = () => {
                             <Activity size={24} />
                         </div>
                         <p className="text-sm font-bold text-slate-500 dark:text-slate-400">No transaction history.</p>
-                        <p className="text-xs mt-1 font-medium">Purchased tokens will be tracked here.</p>
+                        <p className="text-xs mt-1 font-medium mb-6">Purchased tokens will be tracked here.</p>
+                        <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            onClick={() => navigate('/dashboard/lipa-mpesa')}
+                            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-slate-800 text-white text-sm font-bold transition-all shadow-lg"
+                        >
+                            <Zap size={16} fill="currentColor" />
+                            <span>Buy Your First Token</span>
+                        </motion.button>
                     </div>
                 )}
             </section>

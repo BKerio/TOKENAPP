@@ -67,7 +67,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     const isVendorUser = user.role === 'vendor' || user.roles?.includes('vendor');
 
     // Branding, System Configuration, and Customer Management are vendor-only
-    if (['Branding', 'System Configuration', 'Customer Overview', 'Lipia Token na Mpesa'].includes(link.name) && !isVendorUser) {
+    if (['Branding', 'System Configuration', 'Customer Overview'].includes(link.name) && !isVendorUser) {
       return false;
     }
 
