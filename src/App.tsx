@@ -20,50 +20,48 @@ import VendingSettingsPage from '@/pages/admin/vending';
 import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 
+import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
+import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
 
 function App() {
   return (
-    <ThemeProvider defaultTheme="light">
-      <Router future={{ v7_relativeSplatPath: true }}>
-        <div className='min-h-screen bg-white dark:bg-gray-900'>
-
-          <Routes>
-
-            <Route path="/login" element={<Login />} />
-
-            <Route
-              path="/dashboard"
-              element={
-                <RequireAuth>
-                  <DashboardLayout />
-                </RequireAuth>
-              }
-            >
-              <Route path="account" element={<Account />} />
-              <Route path="vendors" element={<Vendors />} />
-              <Route path="vendor-overview" element={<AdminMeter />} />
-              <Route path="meters" element={<Meters />} />
-              <Route path="customer-management" element={<CustomerManagement />} />
-              <Route path="vending-control" element={<VendingSettingsPage />} />
-              <Route path="system-config" element={<SystemConfigPage />} />
-              <Route path="lipa-mpesa" element={<LipaTokenNaMpesa />} />
-              <Route path="branding" element={<Branding />} />
-              <Route path="company" element={<CompanyDashboard />} />
-              <Route path="individual" element={<IndividualDashboard />} />
-              <Route path="customer" element={<CustomerDashboard />} />
-              <Route path="purchase-history" element={<PurchaseHistory />} />
-              <Route index element={<Dashboard />} />
-
-            </Route>
-
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-
-          </Routes>
-
-        </div>
-      </Router>
-    </ThemeProvider>
+    <AccessibilityProvider>
+      <ThemeProvider defaultTheme="light">
+        <Router future={{ v7_relativeSplatPath: true }}>
+          <div className='min-h-screen bg-white dark:bg-gray-900'>
+            <AccessibilityMenu />
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <RequireAuth>
+                    <DashboardLayout />
+                  </RequireAuth>
+                }
+              >
+                <Route path="account" element={<Account />} />
+                <Route path="vendors" element={<Vendors />} />
+                <Route path="vendor-overview" element={<AdminMeter />} />
+                <Route path="meters" element={<Meters />} />
+                <Route path="customer-management" element={<CustomerManagement />} />
+                <Route path="vending-control" element={<VendingSettingsPage />} />
+                <Route path="system-config" element={<SystemConfigPage />} />
+                <Route path="lipa-mpesa" element={<LipaTokenNaMpesa />} />
+                <Route path="branding" element={<Branding />} />
+                <Route path="company" element={<CompanyDashboard />} />
+                <Route path="individual" element={<IndividualDashboard />} />
+                <Route path="customer" element={<CustomerDashboard />} />
+                <Route path="purchase-history" element={<PurchaseHistory />} />
+                <Route index element={<Dashboard />} />
+              </Route>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="*" element={<Navigate to="/login" replace />} />
+            </Routes>
+          </div>
+        </Router>
+      </ThemeProvider>
+    </AccessibilityProvider>
   );
 }
 

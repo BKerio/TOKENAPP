@@ -130,4 +130,45 @@
     background: rgba(0, 0, 0, 0.1);
     border: 1px solid rgba(255, 255, 255, 0.1);
   }
+
+  /* Accessibility Utility Classes */
+  .a11y-dyslexia-font, .a11y-dyslexia-font * {
+    font-family: 'OpenDyslexic', 'Comic Sans MS', sans-serif !important;
+  }
+  
+  .a11y-highlight-links a {
+    text-decoration: underline !important;
+    background-color: yellow !important;
+    color: black !important;
+    font-weight: bold !important;
+  }
+
+  .a11y-line-height, .a11y-line-height * {
+    line-height: 2 !important;
+  }
+
+  .a11y-letter-spacing, .a11y-letter-spacing * {
+    letter-spacing: 0.15em !important;
+  }
+
+  .a11y-high-contrast {
+    filter: contrast(150%) !important;
+  }
+
+  .a11y-invert-colors {
+    filter: invert(100%) !important;
+  }
+
+  .a11y-grayscale {
+    filter: grayscale(100%) !important;
+  }
+
+  .a11y-big-cursor, .a11y-big-cursor * {
+    cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="black" stroke="white" stroke-width="2"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>'), auto !important;
+  }
+
+  .a11y-stop-motion * {
+    animation-play-state: paused !important;
+    transition: none !important;
+  }
 }

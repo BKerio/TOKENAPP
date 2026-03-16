@@ -1,9 +1,8 @@
-import { useState, useRef, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import api from "@/lib/api";
 import Swal from "sweetalert2";
 import withReactContent from "sweetalert2-react-content";
 import { Gauge, Loader2, Smartphone } from "lucide-react";
-import { io, Socket } from "socket.io-client";
 import { useAuth } from "@/hooks/useAuth";
 import Logo from "@/assets/icon-1.png"
 
@@ -15,13 +14,6 @@ const LipaTokenNaMpesa = () => {
   const [loading, setLoading] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{ phone?: string; amount?: string; meterNumber?: string }>({});
   const [showBubbles, setShowBubbles] = useState(false);
-
-  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-  const SOCKET_URL = (import.meta.env.VITE_SOCKET_URL || "").toString();
-
-  const socketRef = useRef<Socket | null>(null);
-  const pendingTimerRef = useRef<number | null>(null);
-  const hardTimeoutRef = useRef<number | null>(null);
 
   const MySwal = withReactContent(Swal);
 
@@ -66,26 +58,53 @@ const LipaTokenNaMpesa = () => {
     return Object.keys(errors).length === 0;
   };
 
-  const connectSocket = () => {
-    if (socketRef.current && socketRef.current.connected) return socketRef.current;
+  const startPolling = (checkoutRequestId: string) => {
+    let attempts = 0;
+    const maxAttempts = 30; // 60 seconds (2s interval)
 
-    const derivedUrl = SOCKET_URL || (API_URL ? API_URL.replace(/\/?api\/?$/, "") : "");
-    socketRef.current = io(derivedUrl, { transports: ["websocket"] });
+    const interval = setInterval(async () => {
+      attempts++;
 
-    return socketRef.current;
+      try {
+        const response = await api.get(`/mpesa/query/${checkoutRequestId}`);
+        const { status, amount: paidAmount, result_desc } = response.data;
+
+        if (status === "confirmed") {
+          clearInterval(interval);
+          Swal.close();
+          MySwal.fire({
+            icon: "success",
+            title: "Payment Successful",
+            text: `KES ${paidAmount} received for Meter: ${meterNumber}`
+          });
+          setShowBubbles(false);
+        } else if (status === "failed") {
+          clearInterval(interval);
+          Swal.close();
+          MySwal.fire({
+            icon: "error",
+            title: "Payment Failed",
+            text: result_desc || "Transaction failed"
+          });
+          setShowBubbles(false);
+        }
+
+        if (attempts >= maxAttempts) {
+          clearInterval(interval);
+          Swal.close();
+          Swal.fire({
+            icon: "info",
+            title: "Payment Pending",
+            text: "We haven't received confirmation yet. Please check your SMS shortly."
+          });
+          setShowBubbles(false);
+        }
+      } catch (error) {
+        console.error("Polling error", error);
+        // Continue polling unless it's a critical error
+      }
+    }, 2000);
   };
-
-  const clearTimers = () => {
-    if (pendingTimerRef.current) window.clearTimeout(pendingTimerRef.current);
-    if (hardTimeoutRef.current) window.clearTimeout(hardTimeoutRef.current);
-  };
-
-  useEffect(() => {
-    return () => {
-      clearTimers();
-      if (socketRef.current) socketRef.current.disconnect();
-    };
-  }, []);
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -114,36 +133,14 @@ const LipaTokenNaMpesa = () => {
       const { CheckoutRequestID } = response.data || {};
 
       if (CheckoutRequestID) {
-        const socket = connectSocket();
-
-        socket.off("transaction_update");
-        socket.emit("join_checkout", { checkoutRequestId: CheckoutRequestID });
-
-        socket.on("transaction_update", (payload: any) => {
-          Swal.close();
-
-          if (payload?.status === "success") {
-            MySwal.fire({
-              icon: "success",
-              title: "Payment Successful",
-              text: `KES ${payload.amount} received for Meter: ${meterNumber}`
-            });
-            setShowBubbles(false);
-          } else {
-            MySwal.fire({
-              icon: "error",
-              title: "Payment Failed",
-              text: payload?.resultDesc || "Transaction failed"
-            });
-            setShowBubbles(false);
-          }
-        });
+        setShowBubbles(true);
+        startPolling(CheckoutRequestID);
+      } else {
+        throw new Error("Missing CheckoutRequestID");
       }
 
-      setShowBubbles(true);
       setPhone("");
       setAmount("");
-      setMeterNumber("");
 
     } catch (error: any) {
       console.error(error);
@@ -176,7 +173,7 @@ const LipaTokenNaMpesa = () => {
           />
 
           <h1 className="text-3xl font-bold text-[#0A1F44] dark:text-white">
-            Lipa Token na M-Pesa
+            Lipia Token na M-Pesa
           </h1>
 
           <p className="text-slate-500 dark:text-slate-400 mt-2">
@@ -192,7 +189,7 @@ const LipaTokenNaMpesa = () => {
           <div>
 
             <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
-              M-Pesa Phone
+              M-Pesa Phone to receive prompt
             </label>
 
             <div className="relative">

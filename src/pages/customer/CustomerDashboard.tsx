@@ -169,7 +169,7 @@ const vendorAbbr = useMemo(() => {
               label: 'Meter Status', 
               value: meter?.status === 'active' ? 'Active' : 'Inactive',
               icon: Power,
-              color: meter?.status === 'active' ? 'text-emerald-600' : 'text-amber-600',
+              color: meter?.status === 'active' ? 'text-[#0A1F44]' : 'text-amber-600',
               bg: meter?.status === 'active' ? 'bg-emerald-50 dark:bg-emerald-900/20' : 'bg-amber-50 dark:bg-amber-900/20'
             },
             { 
