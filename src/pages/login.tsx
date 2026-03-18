@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
-import { Mail, User, Lock, Eye, EyeOff, ChevronDown, CheckCircle2, Phone, Smartphone } from "lucide-react";
+import { Mail, User, Lock, Eye, EyeOff, ChevronDown, CheckCircle2, Phone, User2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 import Logo from "@/assets/icon.png";
@@ -33,8 +33,8 @@ const modeOptions: ModeOption[] = [
   {
     value: "customer",
     label: "Customer Account",
-    description: "Login using your phone number & OTP",
-    icon: <Smartphone className="w-5 h-5" />,
+    description: "Login using your phone number & Google Account",
+    icon: <User2 className="w-5 h-5" />,
   },
 ];
 
