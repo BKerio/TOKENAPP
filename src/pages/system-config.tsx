@@ -836,7 +836,7 @@ const SystemConfigPage = () => {
                 ) : (
                   <li>Ensure your environment is set correctly (sandbox for testing, live for production)</li>
                 )}
-                <li>Ensure your API endpoint URL is correct for your provider</li>
+                <li>Ensure your API endpoint URL is correct for your provider.</li>
               </ul>
             </div>
           </div>
