@@ -73,9 +73,9 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
       return false;
     }
 
-    // Admin/SuperAdmin see everything (except the restricted items above)
+    // Admin/SuperAdmin see everything (except the restricted items above and customer specific items)
     if (user.role === 'admin' || user.role === 'system_admin' || user.roles?.includes('admin')) {
-      return true;
+      return !['Lipia Token na Mpesa', 'Purchase History'].includes(link.name);
     }
 
     // Vendor specific view (Meter Management shown as "My Meters" via linkDisplayName)
