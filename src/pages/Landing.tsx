@@ -21,12 +21,11 @@ function Landing() {
 
             <div className="flex items-center gap-4">
               <div className="hidden md:flex items-center gap-8">
-                <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Features</a>
-                <a href="#benefits" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Benefits</a>
-                <a href="#pricing" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Pricing</a>
+                <a href="/features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Features</a>
+                <a href="/benefits" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Benefits</a>
                 <button 
                   onClick={handleGetStarted}
-                  className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+                  className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
                   Get Started
                 </button>
               </div>
@@ -47,12 +46,11 @@ function Landing() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white dark:bg-gray-950 border-t border-gray-100 dark:border-gray-800">
             <div className="px-4 py-4 space-y-3">
-              <a href="#features" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Features</a>
-              <a href="#benefits" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Benefits</a>
-              <a href="#pricing" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Pricing</a>
+              <a href="/features" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Features</a>
+              <a href="/benefits" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Benefits</a>
               <button 
                 onClick={handleGetStarted}
-                className="w-full bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 transition-colors">
+                className="w-full bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
                 Get Started
               </button>
             </div>
