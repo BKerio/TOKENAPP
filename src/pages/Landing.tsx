@@ -2,7 +2,7 @@ import { Zap, Shield, BarChart3, Coins, ArrowRight, Check, Menu, X } from 'lucid
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export default function Landing() {
+function Landing() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -58,10 +58,6 @@ export default function Landing() {
         <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto">
             <div className="text-center max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
-                <Zap className="w-4 h-4" />
-                Next-Generation Token Management
-              </div>
               <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
                 Simplify Your Token
                 <span className="text-emerald-600"> Utility System</span>
@@ -71,17 +67,7 @@ export default function Landing() {
                 to help you scale your digital asset operations with confidence.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button 
-                  onClick={handleGetStarted}
-                  className="bg-emerald-600 text-white px-8 py-4 rounded-lg hover:bg-emerald-700 transition-all transform hover:scale-105 font-medium flex items-center justify-center gap-2">
-                  Start Free Trial
-                  <ArrowRight className="w-5 h-5" />
-                </button>
-                <button className="border-2 border-gray-300 text-gray-700 px-8 py-4 rounded-lg hover:border-gray-400 transition-colors font-medium">
-                  Watch Demo
-                </button>
               </div>
-              <p className="text-sm text-gray-500 mt-6">No credit card required • 14-day free trial</p>
             </div>
           </div>
         </section>
@@ -217,124 +203,7 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="pricing" className="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-gray-900 mb-4">Simple, Transparent Pricing</h2>
-              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Choose the plan that fits your needs. Scale as you grow.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl shadow-sm p-8 hover:shadow-md transition-shadow">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Starter</h3>
-                <p className="text-gray-600 mb-6">Perfect for small teams</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-gray-900">$49</span>
-                  <span className="text-gray-600">/month</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    Up to 10 tokens
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    5,000 transactions/month
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    Basic analytics
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    Email support
-                  </li>
-                </ul>
-                <button 
-                  onClick={handleGetStarted}
-                  className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:border-gray-400 transition-colors font-medium">
-                  Start Free Trial
-                </button>
-              </div>
-
-              <div className="bg-emerald-600 rounded-xl shadow-lg p-8 relative transform scale-105">
-                <div className="absolute top-0 right-6 bg-amber-400 text-gray-900 px-3 py-1 rounded-b-lg text-sm font-medium">
-                  Popular
-                </div>
-                <h3 className="text-xl font-semibold text-white mb-2">Professional</h3>
-                <p className="text-emerald-100 mb-6">For growing businesses</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-white">$149</span>
-                  <span className="text-emerald-100">/month</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-white">
-                    <Check className="w-5 h-5 text-emerald-200" />
-                    Up to 100 tokens
-                  </li>
-                  <li className="flex items-center gap-2 text-white">
-                    <Check className="w-5 h-5 text-emerald-200" />
-                    50,000 transactions/month
-                  </li>
-                  <li className="flex items-center gap-2 text-white">
-                    <Check className="w-5 h-5 text-emerald-200" />
-                    Advanced analytics
-                  </li>
-                  <li className="flex items-center gap-2 text-white">
-                    <Check className="w-5 h-5 text-emerald-200" />
-                    Priority support
-                  </li>
-                  <li className="flex items-center gap-2 text-white">
-                    <Check className="w-5 h-5 text-emerald-200" />
-                    API access
-                  </li>
-                </ul>
-                <button 
-                  onClick={handleGetStarted}
-                  className="w-full bg-white text-emerald-600 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium">
-                  Start Free Trial
-                </button>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm p-8 hover:shadow-md transition-shadow">
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">Enterprise</h3>
-                <p className="text-gray-600 mb-6">For large organizations</p>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-gray-900">Custom</span>
-                </div>
-                <ul className="space-y-3 mb-8">
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    Unlimited tokens
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    Unlimited transactions
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    Custom analytics
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    24/7 dedicated support
-                  </li>
-                  <li className="flex items-center gap-2 text-gray-700">
-                    <Check className="w-5 h-5 text-emerald-600" />
-                    SLA guarantee
-                  </li>
-                </ul>
-                <button className="w-full border-2 border-gray-300 text-gray-700 py-3 rounded-lg hover:border-gray-400 transition-colors font-medium">
-                  Contact Sales
-                </button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-emerald-600 to-blue-600">
+        <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-900">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-4xl font-bold text-white mb-6">
               Ready to Transform Your Token Management?
@@ -357,8 +226,13 @@ export default function Landing() {
         </section>
       </main>
 
-      <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
+      <footer className="bg-gray-900 text-gray-400 py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+        {/* Watermark */}
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[3rem] sm:text-[5rem] lg:text-[8rem] font-black text-white/10 whitespace-nowrap pointer-events-none select-none z-0 tracking-tighter">
+          TOKENPAP SYSTEM
+        </div>
+
+        <div className="max-w-7xl mx-auto relative z-10">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
@@ -404,3 +278,5 @@ export default function Landing() {
     </div>
   );
 }
+
+export default Landing;
