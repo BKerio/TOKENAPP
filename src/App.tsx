@@ -19,6 +19,7 @@ import LipaTokenNaMpesa from '@/pages/customer/LipaTokenNaMpesa';
 import VendingSettingsPage from '@/pages/admin/vending';
 import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
+import Landing from '@/pages/Landing';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -55,7 +56,7 @@ function App() {
                 <Route path="purchase-history" element={<PurchaseHistory />} />
                 <Route index element={<Dashboard />} />
               </Route>
-              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/" element={<Landing />} />
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
