@@ -53,6 +53,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'Roles & Permissions', icon: Shield, path: '/dashboard/roles-management' },
     { name: 'Vendor Management', icon: Building2, path: '/dashboard/vendors' },
     { name: 'Landlord Management', icon: Home, path: '/dashboard/landlords' },
+    { name: 'My Properties', icon: Home, path: '/dashboard/properties' },
     { name: 'Assigned Meters', icon: Users, path: '/dashboard/vendor-overview' },
     { name: 'Meter Management', icon: Gauge, path: '/dashboard/meters' },
     { name: 'Customer Overview', icon: Users, path: '/dashboard/customer-management' },
@@ -91,9 +92,9 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
       return ['Dashboard', 'Account Settings', 'Lipia Token na Mpesa', 'Purchase History'].includes(link.name);
     }
 
-    // Landlord-specific view — only Dashboard + Account Settings
+    // Landlord-specific view — only Dashboard + Account Settings + Properties
     if (isLandlord) {
-      return ['Dashboard', 'Account Settings'].includes(link.name);
+      return ['Dashboard', 'My Properties', 'Account Settings'].includes(link.name);
     }
 
     // Default: for other roles (attendance staff etc) or fallback

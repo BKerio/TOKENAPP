@@ -112,7 +112,7 @@ const LandlordDashboard: React.FC = () => {
     const quickActions = [
         { text: 'My Profile', desc: 'View & edit details', icon: User, path: '/dashboard/account' },
         { text: 'Payment Info', desc: 'Account & billing', icon: CreditCard, path: '/dashboard/landlord/payment' },
-        { text: 'Properties', desc: 'Manage properties', icon: Home, path: '/dashboard/landlord/properties' },
+        { text: 'Properties', desc: 'Manage properties', icon: Home, path: '/dashboard/properties' },
         { text: 'Security', desc: 'Password & access', icon: ShieldCheck, path: '/dashboard/account' },
     ];
 

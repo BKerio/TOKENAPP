@@ -22,6 +22,7 @@ import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 import Landing from '@/pages/Landing';
 import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
+import MyProperties from '@/pages/landlord/MyProperties';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -47,6 +48,7 @@ function App() {
                 <Route path="vendors" element={<Vendors />} />
                 <Route path="landlords" element={<Landlords />} />
                 <Route path="landlord" element={<LandlordDashboard />} />
+                <Route path="properties" element={<MyProperties />} />
                 <Route path="vendor-overview" element={<AdminMeter />} />
                 <Route path="meters" element={<Meters />} />
                 <Route path="customer-management" element={<CustomerManagement />} />
