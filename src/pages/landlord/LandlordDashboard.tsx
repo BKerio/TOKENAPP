@@ -58,7 +58,7 @@ const StatCard = ({
     delay?: number;
 }) => {
     const colors: Record<string, string> = {
-        emerald: 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400',
+        emerald: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
         blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
         amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
         slate: 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
@@ -69,18 +69,18 @@ const StatCard = ({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay }}
-            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-emerald-500/30 transition-all duration-300 group"
+            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all duration-300 group"
         >
-            <div className="flex justify-between items-start">
-                <div className="min-w-0">
-                    <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+            <div className="flex justify-between items-start gap-3">
+                <div className="flex-1 min-w-0">
+                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{label}</p>
+                    <p className="text-sm font-bold text-slate-900 dark:text-white break-all leading-snug group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
                         {value}
-                    </h3>
-                    {sub && <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">{sub}</p>}
+                    </p>
+                    {sub && <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">{sub}</p>}
                 </div>
-                <div className={`p-3 rounded-xl shrink-0 ${colors[color]}`}>
-                    <Icon size={22} />
+                <div className={`p-2.5 rounded-xl shrink-0 ${colors[color]}`}>
+                    <Icon size={18} />
                 </div>
             </div>
         </motion.div>
@@ -148,14 +148,14 @@ const LandlordDashboard: React.FC = () => {
                     </div>
                     <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
                         {getGreeting()},{' '}
-                        <span className="text-emerald-700 dark:text-emerald-400 capitalize">{displayName}</span>
+                        <span className="text-[#0A1F44] dark:text-blue-400 capitalize">{displayName}</span>
                     </h1>
                     <p className="mt-2 text-slate-600 dark:text-slate-400 max-w-2xl text-sm font-medium opacity-80">
-                        Welcome to your Landlord Portal — manage your property account and details.
+                        Welcome to your Landlord Portal - manage your property account and details.
                     </p>
                 </motion.div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full shadow-sm text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${profile?.status === 'active' ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                    <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${profile?.status === 'active' ? 'bg-green-500' : 'bg-amber-500'}`} />
                     {profile?.status || 'Active'}
                 </div>
             </div>
@@ -179,9 +179,9 @@ const LandlordDashboard: React.FC = () => {
                                 <motion.div
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-emerald-500/30 hover:shadow-md transition-all cursor-pointer flex flex-col items-center text-center gap-3"
+                                    className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-500/30 dark:hover:border-blue-800 hover:shadow-md transition-all cursor-pointer flex flex-col items-center text-center gap-3"
                                 >
-                                    <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-full flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-blue-900 dark:text-blue-400">
                                         <action.icon size={22} />
                                     </div>
                                     <div>
@@ -205,7 +205,7 @@ const LandlordDashboard: React.FC = () => {
                         <div className="flex flex-wrap gap-4">
                             <Link
                                 to="/dashboard/account"
-                                className="px-5 py-2.5 bg-emerald-700 text-white text-sm font-bold rounded-xl hover:bg-emerald-600 transition-all flex items-center gap-2 shadow-sm"
+                                className="px-5 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm"
                             >
                                 Edit My Profile <ChevronRight size={16} />
                             </Link>
@@ -230,14 +230,14 @@ const LandlordDashboard: React.FC = () => {
                             <h3 className="font-bold text-slate-900 dark:text-white">Owner Profile</h3>
                             <Link
                                 to="/dashboard/account"
-                                className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-800 flex items-center gap-1"
+                                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 flex items-center gap-1"
                             >
                                 Edit <ChevronRight className="w-3 h-3" />
                             </Link>
                         </div>
                         <div className="p-5 space-y-4">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-xl bg-emerald-700 text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
+                                <div className="w-12 h-12 rounded-xl bg-[#0A1F44] text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
                                     {displayName.substring(0, 2).toUpperCase()}
                                 </div>
                                 <div className="min-w-0">
@@ -272,15 +272,15 @@ const LandlordDashboard: React.FC = () => {
                     <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="bg-emerald-800 dark:bg-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden border border-emerald-700 dark:border-slate-800"
+                        className="bg-[#0A1F44] dark:bg-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden border border-slate-700 dark:border-slate-800"
                     >
                         <div className="absolute top-0 right-0 opacity-10 transform translate-x-8 -translate-y-8">
                             <Home size={100} />
                         </div>
                         <div className="relative z-10">
                             <h3 className="font-bold text-lg mb-1">Account Status</h3>
-                            <p className="text-emerald-200 dark:text-slate-400 text-xs mb-6 font-medium">Property owner account</p>
-                            <div className="flex justify-between items-center border-b border-emerald-700/50 dark:border-slate-800/50 pb-2 text-sm">
+                            <p className="text-blue-200 dark:text-slate-400 text-xs mb-6 font-medium">Property owner account</p>
+                            <div className="flex justify-between items-center border-b border-blue-800/50 dark:border-slate-800/50 pb-2 text-sm">
                                 <span className="text-emerald-100 flex items-center gap-2">
                                     <Activity size={16} /> Status
                                 </span>
