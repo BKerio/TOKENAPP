@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock } from 'lucide-react';
+import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserProfile {
@@ -35,9 +35,11 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
   const location = useLocation();
 
   const isVendor = user.role === 'vendor' || user.roles?.includes('vendor');
+  const isLandlord = user.role === 'landlord' || user.roles?.includes('landlord');
 
   const getDashboardPath = () => {
     if (user.role === 'customer') return '/dashboard/customer';
+    if (user.role === 'landlord') return '/dashboard/landlord';
     if (isVendor) {
       if (user.vendor_type === 'Company') return '/dashboard/company';
       if (user.vendor_type === 'Individual') return '/dashboard/individual';
@@ -50,6 +52,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'Vending Control', icon: Activity, path: '/dashboard/vending-control' },
     { name: 'Roles & Permissions', icon: Shield, path: '/dashboard/roles-management' },
     { name: 'Vendor Management', icon: Building2, path: '/dashboard/vendors' },
+    { name: 'Landlord Management', icon: Home, path: '/dashboard/landlords' },
     { name: 'Assigned Meters', icon: Users, path: '/dashboard/vendor-overview' },
     { name: 'Meter Management', icon: Gauge, path: '/dashboard/meters' },
     { name: 'Customer Overview', icon: Users, path: '/dashboard/customer-management' },
@@ -86,6 +89,11 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     // Customer specific view
     if (user.role === 'customer') {
       return ['Dashboard', 'Account Settings', 'Lipia Token na Mpesa', 'Purchase History'].includes(link.name);
+    }
+
+    // Landlord-specific view — only Dashboard + Account Settings
+    if (isLandlord) {
+      return ['Dashboard', 'Account Settings'].includes(link.name);
     }
 
     // Default: for other roles (attendance staff etc) or fallback

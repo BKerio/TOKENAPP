@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout';
 import Login from '@/pages/login';
 import Dashboard from '@/pages/admin_dashboard';
 import Vendors from '@/pages/admin/Vendors';
+import Landlords from '@/pages/admin/Landlords';
 import Meters from '@/pages/admin/Meters';
 import Account from '@/pages/admin/Account';
 import SystemConfigPage from '@/pages/system-config';
@@ -20,6 +21,7 @@ import VendingSettingsPage from '@/pages/admin/vending';
 import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 import Landing from '@/pages/Landing';
+import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -43,6 +45,8 @@ function App() {
               >
                 <Route path="account" element={<Account />} />
                 <Route path="vendors" element={<Vendors />} />
+                <Route path="landlords" element={<Landlords />} />
+                <Route path="landlord" element={<LandlordDashboard />} />
                 <Route path="vendor-overview" element={<AdminMeter />} />
                 <Route path="meters" element={<Meters />} />
                 <Route path="customer-management" element={<CustomerManagement />} />

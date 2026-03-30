@@ -261,6 +261,8 @@ const Login = () => {
           } else {
             navigate("/dashboard");
           }
+        } else if (response.data.user.role === "landlord") {
+            navigate("/dashboard/landlord");
         } else if (response.data.user.role === "customer") {
             navigate("/dashboard/customer");
         } else {
