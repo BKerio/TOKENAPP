@@ -1,0 +1,50 @@
+name: Deploy Frontend to Server
+
+on:
+  push:
+    branches:
+      - master
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/frontend
+            
+            # Tell Git it is safe to run commands in this folder
+            git config --global --add safe.directory /var/www/frontend
+            
+            # Fetch latest changes from github
+            git fetch --all
+            # Support both main and master branches depending on your setup
+            git reset --hard origin/$(git symbolic-ref --short HEAD || echo main)
+            git clean -fd
+            
+            # Install Node dependencies
+            echo "Installing dependencies..."
+            npm install --legacy-peer-deps
+            
+            # Build the static site bundle
+            echo "Building Vite application..."
+            npm run build
+            
+            # Fix Ownership permissions for Nginx to read the dist folder
+            chown -R nginx:nginx /var/www/frontend/dist
+            
+            # Fix SELinux permissions so Nginx avoids a 403 Forbidden Error
+            chcon -Rt httpd_sys_content_t /var/www/frontend/dist
+            
+            # Reload Nginx gracefully just in case new static files were dynamically cached
+            systemctl reload nginx
