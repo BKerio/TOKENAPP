@@ -23,10 +23,10 @@ function Landing() {
               <div className="hidden md:flex items-center gap-8">
                 <a href="#features" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Features</a>
                 <a href="#benefits" className="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors">Benefits</a>
-                <button 
+                <button
                   onClick={handleGetStarted}
                   className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                  Get Started
+                  Get Started Today
                 </button>
               </div>
 
@@ -48,7 +48,7 @@ function Landing() {
             <div className="px-4 py-4 space-y-3">
               <a href="#features" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Features</a>
               <a href="#benefits" className="block text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white">Benefits</a>
-              <button 
+              <button
                 onClick={handleGetStarted}
                 className="w-full bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
                 Get Started
@@ -216,7 +216,7 @@ function Landing() {
               Join thousands of teams already using TokenPap to streamline their operations
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button 
+              <button
                 onClick={handleGetStarted}
                 className="bg-white text-emerald-600 px-8 py-4 rounded-lg hover:bg-gray-50 transition-all transform hover:scale-105 font-medium flex items-center justify-center gap-2">
                 Get Started Free
