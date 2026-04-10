@@ -262,9 +262,9 @@ const Login = () => {
             navigate("/dashboard");
           }
         } else if (response.data.user.role === "landlord") {
-            navigate("/dashboard/landlord");
+          navigate("/dashboard/landlord");
         } else if (response.data.user.role === "customer") {
-            navigate("/dashboard/customer");
+          navigate("/dashboard/customer");
         } else {
           navigate("/dashboard");
         }
@@ -322,22 +322,22 @@ const Login = () => {
 
           {/* Logo */}
           <motion.div
-             initial={{ scale: 0.9, opacity: 0 }}
-             animate={{ scale: 1, opacity: 1 }}
-             className="flex flex-col items-center mb-5"
-           >
-             <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3">
-               <img src={Logo} alt="Token Utility System" className="w-12 h-12 object-contain" />
-             </div>
-           
-             <h2 className="text-lg font-bold text-slate-800 dark:text-white text-center">
-               Tokenpap Utility System
-             </h2>
-           
-             <p className="text-[11px] text-slate-400 mt-1 text-center">
-               Powering secure token distribution and seamless utility management
-             </p>
-           </motion.div>
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="flex flex-col items-center mb-5"
+          >
+            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3">
+              <img src={Logo} alt="TokenPap" className="w-16 h-16 object-contain" />
+            </div>
+
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white text-center">
+              TokenPap
+            </h2>
+
+            <p className="text-[11px] text-slate-400 mt-1 text-center">
+              Smart Metering & Vending Solution
+            </p>
+          </motion.div>
 
           <form onSubmit={handleLogin} className="space-y-3.5">
 
@@ -397,7 +397,7 @@ const Login = () => {
                       className="w-5 h-5"
                     />
                   </div>
-                
+
                   <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">
                     Use phone number
                   </span>
@@ -436,8 +436,8 @@ const Login = () => {
                         mode === "email"
                           ? "Enter your email"
                           : mode === "customer"
-                          ? "Enter your phone number"
-                          : "Enter your account ID"
+                            ? "Enter your phone number"
+                            : "Enter your account ID"
                       }
                       value={identifier}
                       disabled={mode === "customer" && isOtpSent && isLoading}
@@ -548,7 +548,7 @@ const Login = () => {
                         Resend OTP
                       </button>
                     )}
-                    
+
                     {!isLoading && (
                       <button
                         type="button"
@@ -580,7 +580,7 @@ const Login = () => {
           </form>
 
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-400">
-            © {new Date().getFullYear()} TokenPap Utility Sytem . All rights reserved.
+            © {new Date().getFullYear()} TokenPap . All rights reserved.
           </div>
         </div>
 
@@ -625,19 +625,17 @@ const Login = () => {
                             key={option.value}
                             onClick={() => handleModeSelect(option.value)}
                             className={`w-full flex items-center gap-3.5 p-3 rounded-xl border transition
-                            ${
-                              isSelected
+                            ${isSelected
                                 ? "border-gray-500 bg-gray-50 dark:bg-gray-900/20 shadow-sm"
                                 : "border-slate-200 dark:border-slate-700/60 hover:bg-slate-50 dark:hover:bg-slate-800"
-                            }`}
+                              }`}
                           >
                             <div
                               className={`w-9 h-9 flex items-center justify-center rounded-lg
-                              ${
-                                isSelected
+                              ${isSelected
                                   ? "bg-gray-500 text-white shadow-md shadow-gray-500/20"
                                   : "bg-slate-100 dark:bg-slate-800 text-slate-500"
-                              }`}
+                                }`}
                             >
                               {option.icon}
                             </div>
