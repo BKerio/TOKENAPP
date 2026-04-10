@@ -1,10 +1,10 @@
 import paramiko
 import time
 
-HOST = "178.79.137.240"
+HOST = "[IP_ADDRESS]"
 PORT = 22
 USERNAME = "root"
-PASSWORD = "TokenPap.0102"
+PASSWORD = "[PASSWORD]"
 DOMAIN = "app.tokenpap.com"
 
 def run_interactive(shell, cmd, wait_time=5):

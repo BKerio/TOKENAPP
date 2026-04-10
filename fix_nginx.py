@@ -1,9 +1,9 @@
 import paramiko
 import time
 
-HOST = "178.79.137.240"
+HOST = "[IP_ADDRESS]"
 USERNAME = "root"
-PASSWORD = "TokenPap.0102"
+PASSWORD = "[PASSWORD]"
 
 def run(client, cmd):
     stdin, stdout, stderr = client.exec_command(cmd)

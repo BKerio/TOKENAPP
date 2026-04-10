@@ -2,10 +2,10 @@ import paramiko
 import time
 import sys
 
-HOST = "178.79.137.240"
+HOST = "[IP_ADDRESS]"
 PORT = 22
 USERNAME = "root"
-PASSWORD = "TokenPap.0102"
+PASSWORD = "[PASSWORD]"
 GITHUB_REPO = "https://github.com/BKerio/TOKENAPP.git"
 APP_DIR = "/var/www/frontend"
 NGINX_SITE = "/etc/nginx/conf.d/frontend.conf"
