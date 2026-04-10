@@ -20,7 +20,6 @@ import LipaTokenNaMpesa from '@/pages/customer/LipaTokenNaMpesa';
 import VendingSettingsPage from '@/pages/admin/vending';
 import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
-import Landing from '@/pages/Landing';
 import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
 import MyProperties from '@/pages/landlord/MyProperties';
 
@@ -62,7 +61,7 @@ function App() {
                 <Route path="purchase-history" element={<PurchaseHistory />} />
                 <Route index element={<Dashboard />} />
               </Route>
-              <Route path="/" element={<Landing />} />
+              <Route path="/" element={<Login />} />
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
