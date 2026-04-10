@@ -26,7 +26,7 @@ function Landing() {
                 <button
                   onClick={handleGetStarted}
                   className="bg-gray-800 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-                  Get Started Today
+                  Contact Us Today
                 </button>
               </div>
 
