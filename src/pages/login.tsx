@@ -517,7 +517,7 @@ const Login = () => {
                       type="submit"
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.97 }}
-                      className="w-full py-2.5 rounded-xl text-white text-[13px] font-bold bg-[#0A1F44] hover:bg-blue-700 shadow-lg shadow-blue-500/20"
+                      className="w-full py-2.5 rounded-xl text-white text-[13px] font-bold bg-[#0A1F44] hover:bg-gray-900 shadow-lg shadow-blue-500/20"
                     >
                       {mode === "customer"
                         ? isOtpSent
