@@ -326,8 +326,8 @@ const Login = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="flex flex-col items-center mb-5"
           >
-            <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3">
-              <img src={Logo} alt="TokenPap" className="w-16 h-16 object-contain" />
+            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3">
+              <img src={Logo} alt="TokenPap" className="w-20 h-20 object-contain" />
             </div>
 
             <h2 className="text-lg font-bold text-slate-800 dark:text-white text-center">
