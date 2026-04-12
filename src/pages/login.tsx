@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { Mail, User, Lock, Eye, EyeOff, ChevronDown, CheckCircle2, Phone, User2 } from "lucide-react";
@@ -569,12 +569,12 @@ const Login = () => {
 
             {mode !== "customer" && (
               <div className="text-center pt-1">
-                <a
-                  href="/forgot-password"
+                <Link
+                  to="/forgot-password"
                   className="text-xs text-slate-500 hover:text-blue-600"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
             )}
           </form>

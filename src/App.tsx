@@ -22,6 +22,7 @@ import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
 import MyProperties from '@/pages/landlord/MyProperties';
+import ForgotPassword from '@/pages/forgotpassword';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -35,6 +36,7 @@ function App() {
             <AccessibilityMenu />
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
                 path="/dashboard"
                 element={
