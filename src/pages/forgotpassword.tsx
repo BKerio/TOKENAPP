@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
-import { Mail, Lock, Eye, EyeOff, Phone, ArrowLeft, KeyRound, ShieldCheck } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Phone, ArrowLeft, ShieldCheck } from "lucide-react";
 import api from "@/lib/api";
 import Logo from "@/assets/icon.png";
 import React from "react";
@@ -236,7 +236,7 @@ const ForgotPassword = () => {
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
-                    <>Send Code <KeyRound size={14} /></>
+                    <>Request Code</>
                   )}
                 </button>
               </motion.form>
