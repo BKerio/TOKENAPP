@@ -24,6 +24,8 @@ import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
 import MyProperties from '@/pages/landlord/MyProperties';
 import ForgotPassword from '@/pages/forgotpassword';
+import Register from '@/pages/register';
+import VendorApprovals from '@/pages/admin/VendorApprovals';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -37,6 +39,7 @@ function App() {
             <AccessibilityMenu />
             <Routes>
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route
                 path="/dashboard"
@@ -48,6 +51,7 @@ function App() {
               >
                 <Route path="account" element={<Account />} />
                 <Route path="vendors" element={<Vendors />} />
+                <Route path="approvals" element={<VendorApprovals />} />
                 <Route path="landlords" element={<Landlords />} />
                 <Route path="landlord" element={<LandlordDashboard />} />
                 <Route path="properties" element={<MyProperties />} />

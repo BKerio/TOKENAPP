@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home, MessageSquare, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserProfile {
@@ -52,6 +52,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'Vending Control', icon: Activity, path: '/dashboard/vending-control' },
     { name: 'Roles & Permissions', icon: Shield, path: '/dashboard/roles-management' },
     { name: 'Vendor Management', icon: Building2, path: '/dashboard/vendors' },
+    { name: 'Account Approvals', icon: ShieldAlert, path: '/dashboard/approvals' },
     { name: 'Landlord Management', icon: Home, path: '/dashboard/landlords' },
     { name: 'My Properties', icon: Home, path: '/dashboard/properties' },
     { name: 'Assigned Meters', icon: Users, path: '/dashboard/vendor-overview' },
@@ -80,7 +81,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     // Admin/SuperAdmin see everything (except the restricted items above and customer specific items)
     if (user.role === 'admin' || user.role === 'system_admin' || user.roles?.includes('admin')) {
-      return !['Lipia Token na Mpesa', 'Purchase History'].includes(link.name);
+      return !['Lipia Token na Mpesa', 'Purchase History', 'My Properties'].includes(link.name);
     }
 
     // Vendor specific view (Meter Management shown as "My Meters" via linkDisplayName)

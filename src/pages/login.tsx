@@ -579,6 +579,13 @@ const Login = () => {
             )}
           </form>
 
+          <p className="mt-8 text-center text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Don't have an account?{" "}
+            <Link to="/register" className="text-blue-600 hover:text-blue-700 font-bold transition-colors">
+              Create Provider Account
+            </Link>
+          </p>
+
           <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 text-center text-xs text-slate-400">
             © {new Date().getFullYear()} TokenPap . All rights reserved.
           </div>
