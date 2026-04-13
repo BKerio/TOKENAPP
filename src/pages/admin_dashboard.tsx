@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Gauge,
   ShieldCheck,
+  MessageSquare,
 } from 'lucide-react';
 import {
   PieChart,
@@ -78,6 +79,11 @@ interface PaginatedResponse<T> {
   last_page: number;
   per_page: number;
   total: number;
+}
+
+interface EnquiryData {
+  _id: string;
+  status: string;
 }
 
 // --- CONSTANTS & HELPERS ---
@@ -175,21 +181,25 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [vendorsRes, metersRes] = await Promise.all([
+        const [vendorsRes, metersRes, enquiriesRes] = await Promise.all([
           api.get<PaginatedResponse<Vendor>>(`/admin/vendors?per_page=1000`),
           api.get<PaginatedResponse<Meter>>(`/admin/meters?per_page=1000`),
+          api.get<EnquiryData[]>(`/admin/enquiries`),
         ]);
 
         const vData = vendorsRes.data.data || [];
         const mData = metersRes.data.data || [];
+        const eData = enquiriesRes.data || [];
 
         const activeVendors = vData.filter((v: Vendor) => v.status === 'active').length;
         const totalMeters = mData.length;
+        const pendingEnquiries = eData.filter(e => e.status === 'pending').length;
 
         setStats([
           { title: 'Total Vendors', value: vData.length.toString(), change: `${activeVendors} Active Accounts`, icon: Building2 },
           { title: 'Total Meters', value: totalMeters.toString(), change: 'Registered Devices', icon: Gauge },
-          { title: 'System Load', value: 'Normal', change: 'Operational Status', icon: Activity },
+          { title: 'Pending Enquiries', value: pendingEnquiries.toString(), change: 'New Website Leads', icon: MessageSquare },
+          { title: 'System Status', value: 'Healthy', change: 'Operational', icon: Activity },
         ]);
 
         setVendors(vData);

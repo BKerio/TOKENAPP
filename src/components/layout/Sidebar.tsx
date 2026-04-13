@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home } from 'lucide-react';
+import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home, MessageSquare } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserProfile {
@@ -59,6 +59,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'Customer Overview', icon: Users, path: '/dashboard/customer-management' },
     { name: 'System Logs', icon: Activity, path: '/dashboard/auditlogs' },
     { name: 'System Configuration', icon: ShieldCheck, path: '/dashboard/system-config' },
+    { name: 'Public Enquiries', icon: MessageSquare, path: '/dashboard/inqueries' },
     { name: 'Lipia Token na Mpesa', icon: Zap, path: '/dashboard/lipa-mpesa' },
     { name: 'Purchase History', icon: Clock, path: '/dashboard/purchase-history' },
     { name: 'Branding', icon: Building2, path: '/dashboard/branding' },

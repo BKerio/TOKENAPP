@@ -18,6 +18,7 @@ import CompanyDashboard from '@/pages/vendor/CompanyDashboard';
 import IndividualDashboard from '@/pages/vendor/IndividualDashboard';
 import LipaTokenNaMpesa from '@/pages/customer/LipaTokenNaMpesa';
 import VendingSettingsPage from '@/pages/admin/vending';
+import Inquery from '@/pages/admin/Inquery';
 import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
@@ -55,6 +56,7 @@ function App() {
                 <Route path="customer-management" element={<CustomerManagement />} />
                 <Route path="vending-control" element={<VendingSettingsPage />} />
                 <Route path="system-config" element={<SystemConfigPage />} />
+                <Route path="inqueries" element={<Inquery />} />
                 <Route path="lipa-mpesa" element={<LipaTokenNaMpesa />} />
                 <Route path="branding" element={<Branding />} />
                 <Route path="company" element={<CompanyDashboard />} />
