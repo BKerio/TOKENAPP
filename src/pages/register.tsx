@@ -397,7 +397,6 @@ const Register = () => {
                 ) : (
                   <>
                     <span className="relative z-10">Submit Registration</span>
-                    <UserCheck size={18} className="relative z-10 group-hover:translate-x-1 transition-transform" />
                   </>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/0 via-white/10 to-blue-600/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
