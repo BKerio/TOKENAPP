@@ -133,7 +133,7 @@ const Register = () => {
             >
               <img src={Logo} alt="TokenPap" className="w-14 h-14 object-contain" />
             </motion.div>
-            <h1 className="text-2xl font-bold bg-gray-400 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-blue-400 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
               Create Provider Account
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
@@ -334,7 +334,7 @@ const Register = () => {
                   <div className="h-4" /> {/* Spacer */}
                   
                   <div className="flex items-center gap-2 mb-2 ml-1">
-                    <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                    <div className="w-1 h-3 bg-gray-500 rounded-full" />
                     <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Login Credentials</h3>
                   </div>
 
