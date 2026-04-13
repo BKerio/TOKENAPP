@@ -19,6 +19,17 @@ const ForgotPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+
+  const maskIdentifier = (value: string) => {
+  if (value.includes("@")) {
+    // Email masking
+    const [name, domain] = value.split("@");
+    return `${name.slice(0, 2)}****@${domain}`;
+  } else {
+    // Phone masking
+    return `${value.slice(0, 2)}****${value.slice(-3)}`;
+  }
+};
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!identifier) {
@@ -201,7 +212,7 @@ const ForgotPassword = () => {
             <h2 className="text-xl font-bold text-slate-800 dark:text-white">Reset Password</h2>
             <p className="text-[11px] text-slate-400 mt-1 text-center font-medium">
               {step === "identifier" && "Enter your email or phone to receive a code"}
-              {step === "otp" && `Verification code sent to ${identifier}`}
+              {step === "otp" && `Verification code sent to ${maskIdentifier(identifier)}`}
               {step === "reset" && "Create a secure new password for your account"}
             </p>
           </div>
