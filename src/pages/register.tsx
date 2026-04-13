@@ -144,7 +144,7 @@ const Register = () => {
           <form onSubmit={handleRegister} className="space-y-5">
             {/* Account Type Selector */}
             <div className="relative">
-              <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2 block ml-1">
+              <label className="text-[11px] font-bold text-slate-400 normal tracking-widest mb-2 block ml-1">
                 Account Type
               </label>
               <button
@@ -335,7 +335,7 @@ const Register = () => {
                   
                   <div className="flex items-center gap-2 mb-2 ml-1">
                     <div className="w-1 h-3 bg-gray-500 rounded-full" />
-                    <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Login Credentials</h3>
+                    <h3 className="text-[11px] font-bold text-slate-400 normal tracking-widest">Login Credentials</h3>
                   </div>
 
                   <div className="relative group">
