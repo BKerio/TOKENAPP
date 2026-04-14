@@ -1,10 +1,10 @@
 import paramiko
 import time
 
-HOST = "178.79.137.240"
+HOST = "<IP_ADDRESS>"
 PORT = 22
 USERNAME = "root"
-PASSWORD = "TokenPap.0102"
+PASSWORD = "your_password_here"
 
 def run_cmd(client, cmd):
     stdin, stdout, stderr = client.exec_command(cmd)
