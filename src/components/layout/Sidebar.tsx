@@ -60,6 +60,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'Customer Overview', icon: Users, path: '/dashboard/customer-management' },
     { name: 'System Logs', icon: Activity, path: '/dashboard/auditlogs' },
     { name: 'System Configuration', icon: ShieldCheck, path: '/dashboard/system-config' },
+    { name: 'Callback Settings', icon: ShieldCheck, path: '/dashboard/callback-settings' },
     { name: 'Public Enquiries', icon: MessageSquare, path: '/dashboard/inqueries' },
     { name: 'Lipia Token na Mpesa', icon: Zap, path: '/dashboard/lipa-mpesa' },
     { name: 'Purchase History', icon: Clock, path: '/dashboard/purchase-history' },
@@ -74,9 +75,17 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
   const sidebarNavLinks = allNavLinks.filter(link => {
     const isVendorUser = user.role === 'vendor' || user.roles?.includes('vendor');
 
-    // Branding, System Configuration, and Customer Management are vendor-only
-    if (['Branding', 'System Configuration', 'Customer Overview'].includes(link.name) && !isVendorUser) {
+    // Branding and Customer Overview are vendor-only.
+    if (['Branding', 'Customer Overview'].includes(link.name) && !isVendorUser) {
       return false;
+    }
+
+    // Role-based visibility for configuration pages
+    if (link.name === 'Callback Settings') {
+        return user.role === 'admin' || user.role === 'system_admin' || user.roles?.includes('admin');
+    }
+    if (link.name === 'System Configuration') {
+        return isVendorUser; // Admins now use Callback Settings instead
     }
 
     // Admin/SuperAdmin see everything (except the restricted items above and customer specific items)

@@ -23,7 +23,8 @@ const LipaTokenNaMpesa = () => {
   const [meterNumber, setMeterNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [minAmount, setMinAmount] = useState<number>(1);
-  const [validationErrors, setValidationErrors] = useState<{ phone?: string; amount?: string; meterNumber?: string }>({});
+  const [validationErrors, setValidationErrors] = useState<{ phone?: string; amount?: string; meterNumber?: string; [key: string]: any }>({});
+  const [pollingError, setPollingError] = useState<string | null>(null);
 
   const [paymentResult, setPaymentResult] = useState<PaymentResult>({ status: 'idle' });
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -97,6 +98,7 @@ const LipaTokenNaMpesa = () => {
 
     pollingStoppedRef.current = false;
     setPaymentResult({ status: 'waiting', meterNumber });
+    setPollingError(null);
 
     const poll = async () => {
       if (pollingStoppedRef.current || attempts >= maxAttempts) {
@@ -138,8 +140,13 @@ const LipaTokenNaMpesa = () => {
           // Still pending or server timeout (25s reached), poll again immediately
           poll();
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Polling error", error);
+        
+        // Detailed error message if available
+        const msg = error.response?.data?.message || error.message || "Connection issue";
+        setPollingError(`Retrying... (${msg})`);
+
         // Wait 2s before retrying on network error to avoid infinite loop
         if (!pollingStoppedRef.current) {
           setTimeout(poll, 2000);
@@ -147,7 +154,11 @@ const LipaTokenNaMpesa = () => {
       }
     };
 
-    poll();
+    // Initial delay of 2s to allow Safaricom to process the request
+    // and for the user to potentially interact before hitting the backend.
+    setTimeout(() => {
+      poll();
+    }, 2000);
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -178,7 +189,18 @@ const LipaTokenNaMpesa = () => {
 
     } catch (error: any) {
       console.error(error);
-      const errorMessage = error.response?.data?.message || 'Unable to initiate payment. Please try again later.';
+      
+      const backendData = error.response?.data;
+      const errorMessage = backendData?.message || 
+                         backendData?.response?.errorMessage || 
+                         backendData?.response?.customerMessage ||
+                         'Unable to initiate payment. Please try again later.';
+      
+      // If backend returns validation errors (422), map them
+      if (error.response?.status === 422 && backendData.errors) {
+        setValidationErrors(backendData.errors);
+      }
+
       setPaymentResult({
         status: 'failed',
         failureReason: errorMessage,
@@ -264,6 +286,18 @@ const LipaTokenNaMpesa = () => {
                       />
                     ))}
                   </div>
+
+                  {/* Polling Error indicator */}
+                  {pollingError && (
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="mt-3 px-3 py-1.5 rounded-lg bg-white/50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/20 flex items-center justify-center gap-2 shadow-sm"
+                    >
+                      <Loader2 className="w-3 h-3 text-amber-600 animate-spin" />
+                      <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tight">{pollingError}</span>
+                    </motion.div>
+                  )}
                 </div>
               )}
 

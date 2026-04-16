@@ -276,18 +276,6 @@ const SystemConfigPage = () => {
                   updated_at: '',
                 },
                 {
-                  id: 13,
-                  key: 'mpesa_callback_url',
-                  value: vendorConfig?.callback_url || '',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Callback URL',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
                   id: 14,
                   key: 'mpesa_transaction_type',
                   value: vendorConfig?.transaction_type || 'CustomerBuyGoodsOnline',
@@ -462,9 +450,6 @@ const SystemConfigPage = () => {
                 break;
               case 'mpesa_env':
                 vendorConfig.env = value;
-                break;
-              case 'mpesa_callback_url':
-                vendorConfig.callback_url = value;
                 break;
               case 'mpesa_transaction_type':
                 vendorConfig.transaction_type = value;

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from '@/components/theme-provider';
 import RequireAuth from '@/components/requireAuth';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import Landing from '@/pages/Landing';
 import Login from '@/pages/login';
 import Dashboard from '@/pages/admin_dashboard';
 import Vendors from '@/pages/admin/Vendors';
@@ -26,6 +27,7 @@ import MyProperties from '@/pages/landlord/MyProperties';
 import ForgotPassword from '@/pages/forgotpassword';
 import Register from '@/pages/register';
 import VendorApprovals from '@/pages/admin/VendorApprovals';
+import GlobalCallback from '@/pages/admin/GlobalCallback';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -38,6 +40,7 @@ function App() {
           <div className='min-h-screen bg-white dark:bg-gray-900'>
             <AccessibilityMenu />
             <Routes>
+              <Route path="/landing" element={<Landing />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
@@ -60,6 +63,7 @@ function App() {
                 <Route path="customer-management" element={<CustomerManagement />} />
                 <Route path="vending-control" element={<VendingSettingsPage />} />
                 <Route path="system-config" element={<SystemConfigPage />} />
+                <Route path="callback-settings" element={<GlobalCallback />} />
                 <Route path="inqueries" element={<Inquery />} />
                 <Route path="lipa-mpesa" element={<LipaTokenNaMpesa />} />
                 <Route path="branding" element={<Branding />} />
@@ -69,7 +73,7 @@ function App() {
                 <Route path="purchase-history" element={<PurchaseHistory />} />
                 <Route index element={<Dashboard />} />
               </Route>
-              <Route path="/" element={<Login />} />
+              <Route path="/" element={<Landing />} />
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
