@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, FormEvent } from "react";
 import api from "@/lib/api";
 import { Gauge, Loader2, Smartphone, CheckCircle2, XCircle, Clock, Copy, Check } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import Logo from "@/assets/icon-1.png";
 import { motion, AnimatePresence } from "framer-motion";
 
 type PaymentStatus = 'idle' | 'sending' | 'waiting' | 'confirmed' | 'failed' | 'timeout';
@@ -223,7 +222,7 @@ const LipaTokenNaMpesa = () => {
         {/* Logo */}
         <div className="text-center mb-8">
          
-          <h1 className="text-5xl font-bold text-[#0A1F44] dark:text-white">
+          <h1 className="text-3xl font-bold text-[#0A1F44] dark:text-white">
             Buy Tokens with M-Pesa
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2">
