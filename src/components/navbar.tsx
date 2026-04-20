@@ -3,12 +3,15 @@ import { Link, useLocation } from "react-router-dom";
 import {
   Menu, Settings, LogOut,
   User as UserIcon, ChevronDown,
-  ShieldCheck, Search, Plus, Bell, Activity
+  ShieldCheck, Search, Plus, Bell, Activity,
+  Mail, Phone, MapPin, ArrowUpRightFromCircle
 } from "lucide-react";
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from "framer-motion";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { getVendorLogoUrl } from "@/lib/utils";
+import TokenPapLogo from "@/components/TokenPapLogo";
+import KenyaFlag from "@/assets/kenya-flag.svg";
 
 // Types
 interface User {
@@ -37,6 +40,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const location = useLocation();
@@ -84,8 +88,27 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
     }
   };
 
-  const handleScroll = useCallback(() => {
-    setScrolled(window.pageYOffset > 20);
+  useEffect(() => {
+    let lastScrollY = window.pageYOffset;
+    
+    const handleScroll = () => {
+      const currentScrollY = window.pageYOffset;
+      setScrolled(currentScrollY > 10);
+
+      // Auto-hide logic: scroll down hides, scroll up shows
+      if (currentScrollY < 50) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY + 15) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY - 10) {
+        setIsVisible(true);
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
@@ -95,11 +118,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener("scroll", handleScroll);
+    
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
       setIsOpen(false);
@@ -107,265 +126,195 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
     window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("resize", handleResize);
     };
-  }, [handleScroll]);
+  }, []);
 
   useEffect(() => {
     setIsOpen(false);
   }, [location]);
 
+  const coverageBarHeight = 44;
+  const navBarBaseHeight = scrolled ? 72 : 88;
+  const totalHeaderHeight = coverageBarHeight + navBarBaseHeight;
+
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 transition-colors duration-300">
+      <header 
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+          isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+        }`}
+      >
+        {/* TOP BAR / COVERAGE BAR */}
+        <div
+          className="w-full bg-white/80 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md"
+          style={{ height: coverageBarHeight }}
+        >
+          <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between pointer-events-auto">
+            <div className="flex items-center gap-4 sm:gap-6">
+              <div className="flex items-center gap-2">
+                <img src={KenyaFlag} alt="Kenya" className="w-5 h-5 rounded-full object-cover shadow-sm ring-1 ring-slate-200 dark:ring-slate-700" />
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Kenya</span>
+              </div>
+              <div className="hidden sm:flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-4">
+                <Mail size={14} className="text-amber-500" />
+                <span className="text-[10px] font-bold text-slate-500 tracking-wide">info@tokenpap.com</span>
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2 text-slate-500">
+                <Phone size={14} className="text-amber-500" />
+                <span className="text-[10px] font-bold tracking-wide">+254 741 099 909</span>
+              </div>
+              <Link 
+                to="/contact" 
+                className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-wider transition-colors shadow-sm"
+              >
+                Support
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* MAIN NAVIGATION BAR */}
         <motion.nav
           initial={false}
-          animate={{
-            height: scrolled ? NAV_HEIGHT_CONDENSED : NAV_HEIGHT_EXPANDED,
-          }}
+          animate={{ height: navBarBaseHeight }}
           className={`
-            relative border-b backdrop-blur-2xl transition-all duration-500
+            w-full border-b backdrop-blur-2xl transition-all duration-500
             ${scrolled
-              ? "bg-white/80 dark:bg-slate-950/80 border-slate-200/60 dark:border-slate-800/60 shadow-[0_4px_30px_rgba(0,0,0,0.03)] dark:shadow-[0_4px_30px_rgba(0,0,0,0.1)]"
-              : "bg-white/40 dark:bg-slate-950/40 border-transparent"
+              ? "bg-white/95 dark:bg-slate-950/95 border-slate-200/60 dark:border-slate-800/60 shadow-xl"
+              : "bg-white/60 dark:bg-slate-950/60 border-transparent"
             }
           `}
         >
-          <div className="w-full px-4 md:px-8 h-full flex justify-between items-center">
-
-            {/* Left: Sidebar Toggle + Logo */}
-            <div className="flex items-center gap-4">
+          <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex justify-between items-center px-0">
+            {/* Left Section */}
+            <div className="flex items-center gap-6 h-full">
               {showSidebarToggle && (
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={onToggleSidebar}
-                  className="flex items-center justify-center w-11 h-11 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-300/50 dark:hover:border-blue-500/30 hover:bg-blue-50/50 dark:hover:bg-slate-800 transition-all group shadow-sm hover:shadow-md"
-                  aria-label="Toggle sidebar"
+                  className="flex items-center justify-center w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
-                  <Menu className={`h-5 w-5 transition-transform duration-500 ${sidebarOpen ? 'rotate-180' : 'group-hover:translate-x-0.5'}`} />
+                  <Menu className={`h-5 w-5 ${sidebarOpen ? 'rotate-90' : ''}`} />
                 </motion.button>
               )}
 
-              <Link to="/dashboard" className="flex items-center gap-3.5 group">
-                <div className="relative">
-                  {user?.role === 'vendor' && vendorProfile?.logo_url ? (
-                    <div className="p-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800/60 shadow-sm transition-transform group-hover:scale-105 duration-300">
-                      <img
-                        src={getVendorLogoUrl(vendorProfile.logo_url) || ''}
-                        alt={vendorProfile?.business_name || 'Vendor'}
-                        className="h-7 w-7 rounded-md object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <motion.div 
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex items-center justify-center w-9 h-9 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 shadow-sm transition-all group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30"
-                    >
-                      <ShieldCheck className="w-5 h-5 text-blue-900 dark:text-blue-400" />
-                    </motion.div>
-                  )}
-                </div>
-                <div className="flex flex-col">
-                  {user?.role === 'vendor' ? (
-                    <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-white leading-none transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      {vendorProfile?.business_name || 'Vendor'}
-                    </span>
-                  ) : (
-                    <div className="flex items-baseline gap-1.5 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
-                      {/* <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white leading-none">TokenPaP</span> */}
-                      <span className="text-xs font-bold tracking-wide text-slate-500 dark:text-slate-400"> Tokenpap Utility Dashboard</span>
-                    </div>
-                  )}
-                  <div className="mt-1 flex items-center">
-                    {user?.role === 'vendor' && vendorProfile?.dashboard_settings?.tagline ? (
-                      <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                        {vendorProfile.dashboard_settings.tagline}
+              <Link to="/dashboard" className="h-full flex items-center group">
+                {user?.role === 'vendor' && vendorProfile?.logo_url ? (
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={getVendorLogoUrl(vendorProfile.logo_url) || ''}
+                      alt="Logo"
+                      className="h-8 w-auto rounded-lg shadow-sm"
+                    />
+                    <div className="flex flex-col">
+                      <span className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                        {vendorProfile.business_name}
                       </span>
-                    ) : (
-                      <span className="text-[8px] font-bold uppercase tracking-widest text-blue-800/60 dark:text-blue-400/60">
-                        {user?.role || 'Admin'} Panel
-                      </span>
-                    )}
+                      <span className="text-[9px] font-bold text-slate-500 uppercase tracking-[0.2em]">Dashboard</span>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div 
+                    className="transition-all duration-500"
+                    style={{ height: scrolled ? '44px' : '52px' }}
+                  >
+                    <TokenPapLogo isScrolled={scrolled} className="h-full w-auto" />
+                  </div>
+                )}
               </Link>
             </div>
 
-            {/* Middle: Enhanced Search (Desktop Only) */}
+            {/* Middle Section (Desktop Dashboard Search) */}
             {isAdmin && !isMobile && (
-              <div className="flex-1 max-w-lg px-12 hidden lg:block">
-                <div className="relative group">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Search className="h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
-                  </div>
+              <div className="hidden lg:flex flex-1 max-w-md px-12">
+                <div className="relative w-full group">
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-amber-500 transition-colors" />
                   <input
                     type="text"
-                    className={`
-                      block w-full pl-11 pr-12 py-2.5 rounded-2xl
-                      bg-slate-100/50 dark:bg-slate-900/50 border border-transparent
-                      focus:bg-white dark:focus:bg-slate-950 focus:border-blue-500/50
-                      focus:ring-4 focus:ring-blue-500/10 transition-all duration-300
-                      placeholder:text-slate-400 dark:placeholder:text-slate-600 text-sm font-medium
-                    `}
-                    placeholder="Search metrics, users, or settings..."
+                    placeholder="Global system search..."
+                    className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-transparent focus:bg-white dark:focus:bg-slate-800 rounded-2xl py-2 pl-10 pr-4 text-sm font-bold transition-all"
                   />
-                  <div className="absolute inset-y-0 right-3 flex items-center">
-                    <kbd className="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-[10px] font-bold text-slate-400 shadow-sm">
-                      ⌘K
-                    </kbd>
-                  </div>
                 </div>
               </div>
             )}
 
-            {/* Right: Actions + Profile */}
-            <div className="flex items-center gap-2 sm:gap-4">
+            {/* Right Section */}
+            <div className="flex items-center gap-3">
               {isAdmin && !isMobile && (
-                <>
-                  {/* Quick Actions */}
-                  <div className="flex items-center gap-1.5 mr-3 pr-3 border-r border-slate-200/60 dark:border-slate-800/60">
-                    <motion.button 
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-900 transition-all shadow-sm hover:shadow-md border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50" 
-                      title="Add New Meter"
-                    >
-                      <Plus className="w-5 h-5" />
-                    </motion.button>
-                    <motion.button 
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
-                      className="relative p-2.5 rounded-xl text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:text-slate-400 dark:hover:text-blue-400 dark:hover:bg-slate-900 transition-all shadow-sm hover:shadow-md border border-transparent hover:border-blue-100 dark:hover:border-blue-900/50" 
-                      title="System Notifications"
-                    >
-                      <Bell className="w-5 h-5" />
-                      <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white dark:border-slate-950 shadow-sm animate-pulse"></span>
-                    </motion.button>
-                  </div>
-                </>
+                <div className="flex items-center gap-1.5 mr-2">
+                  <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"><Plus size={20}/></button>
+                  <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all relative">
+                    <Bell size={20}/>
+                    <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-950 rounded-full"></span>
+                  </button>
+                </div>
               )}
-
+              
               <ThemeToggle />
+              
+              <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-2" />
 
               {user ? (
-                <div className="relative z-50" ref={profileRef}>
+                <div className="relative" ref={profileRef}>
                   <button
                     onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className={`
-                      flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border transition-all duration-300
-                      ${isProfileOpen
-                        ? 'bg-blue-50 border-blue-200 dark:bg-slate-800 dark:border-blue-900/50 ring-2 ring-blue-100 dark:ring-blue-900/20'
-                        : 'bg-white/80 dark:bg-slate-900/80 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 shadow-sm'
-                      }
-                    `}
+                    className="flex items-center gap-2 group p-0.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"
                   >
                     <div className="relative">
-                      {user?.role === 'vendor' && vendorProfile?.logo_url ? (
-                        <img
-                          src={getVendorLogoUrl(vendorProfile.logo_url) || ''}
-                          alt={user.name}
-                          className="w-8 h-8 rounded-full object-cover shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
-                        />
-                      ) : (
-                        <img
-                          src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0A1F44&color=fff&bold=true`}
-                          alt={user.name}
-                          className="w-8 h-8 rounded-full shadow-sm ring-1 ring-slate-200 dark:ring-slate-700"
-                        />
-                      )}
-                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full"></div>
+                      <img
+                        src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=f59e0b&color=fff&bold=true`}
+                        className="w-8 h-8 rounded-full shadow-sm ring-1 ring-slate-200 dark:ring-slate-800"
+                        alt="avatar"
+                      />
+                      <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-white dark:border-slate-950 rounded-full"></div>
                     </div>
-                    <div className="hidden md:block text-left mr-1">
-                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-none">{user.name}</p>
-                      <p className="text-[10px] text-black dark:text-white font-bold normal tracking-wider mt-0.5">{user.role || "Admin"}</p>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isProfileOpen ? 'rotate-180' : ''}`} />
                   </button>
 
                   <AnimatePresence>
                     {isProfileOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: 12, scale: 0.95 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: 12, scale: 0.95 }}
-                        className="absolute right-0 mt-2 w-72 bg-white dark:bg-slate-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
+                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                        className="absolute right-0 mt-3 w-64 bg-white dark:bg-slate-950 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden"
                       >
-                        <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                          <div className="flex items-center gap-3 mb-3">
-                            <img
-                              src={`https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0a1f44&color=ffffff&bold=true`}
-                              className="w-10 h-10 rounded-xl"
-                              alt="avatar"
-                            />
-                            <div className="overflow-hidden">
-                              <p className="text-sm font-bold text-red-900 dark:text-slate-100 truncate">
-                                {user.name}
-                              </p>
-                              <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
-                                {user.email}
-                              </p>
-                            </div>
-                          </div>
-                        
-                          <div className="px-3 py-1 rounded-lg bg-[#0A1F44]/10 dark:bg-[#0A1F44]/20 text-[10px] font-bold text-[#0A1F44] dark:text-blue-300 w-fit uppercase tracking-widest">
-                            {user.role || "System Admin"}
-                          </div>
+                        <div className="p-4 border-b border-slate-100 dark:border-slate-800">
+                          <p className="text-sm font-black text-slate-900 dark:text-white truncate">{user.name}</p>
+                          <p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">{user.role || 'Admin'}</p>
                         </div>
                         <div className="p-2">
-                          {[
-                            { icon: UserIcon, label: "My Profile", path: "/dashboard/manage-account", desc: "View your personal details" },
-                            { icon: Activity, label: "Audit Logs", path: "/dashboard/audit-logs", desc: "System activity records", adminOnly: true },
-                            { icon: Settings, label: "System Config", path: "/dashboard/system-config", desc: "Global system settings", vendorOnly: true },
-                          ].filter(m => {
-                            if (m.adminOnly && !isAdmin) return false;
-                            if (m.vendorOnly && !isVendor) return false;
-                            return true;
-                          }).map((item) => (
-                            <Link
-                              key={item.label}
-                              to={item.path}
-                              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-900 hover:text-blue-600 dark:hover:text-blue-400 transition-all group"
-                            >
-                              <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-900 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 group-hover:text-blue-600 transition-colors">
-                                <item.icon className="w-4 h-4" />
-                              </div>
-                              <div>
-                                <p className="font-semibold text-slate-800 dark:text-slate-200">{item.label}</p>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-500 font-normal">{item.desc}</p>
-                              </div>
-                            </Link>
-                          ))}
-                        </div>
-                        <div className="p-2 border-t border-slate-100 dark:border-slate-800">
-                          <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
-                          >
-                            <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/30">
-                              <LogOut className="w-4 h-4" />
-                            </div>
-                            Sign out of Account
-                          </button>
+                           <button onClick={() => window.location.href='/dashboard/manage-account'} className="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
+                              <UserIcon size={16} /> My Account
+                           </button>
+                           <button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all">
+                              <LogOut size={16} /> Sign Out
+                           </button>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
               ) : (
-                <Link to="/login" className="px-5 py-2.5 rounded-full bg-blue-600 dark:bg-blue-500 text-white text-sm font-bold shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 hover:bg-blue-700 dark:hover:bg-blue-600 transition-all">
-                  Login
-                </Link>
+                <Link to="/login" className="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-5 py-2 rounded-full text-xs font-black uppercase shadow-lg">Login</Link>
               )}
+
+              {/* Mobile Toggle */}
+              <button 
+                onClick={() => setIsOpen(!isOpen)}
+                className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 transition-all"
+              >
+                {isOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
             </div>
           </div>
         </motion.nav>
       </header>
-
-      {/* Spacer */}
-      <div style={{ height: scrolled ? NAV_HEIGHT_CONDENSED : NAV_HEIGHT_EXPANDED }} />
 
       {/* Mobile Menu */}
       <AnimatePresence>
@@ -376,11 +325,39 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm z-40 md:hidden"
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-40 md:hidden"
             />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-[80%] max-w-xs bg-white dark:bg-slate-950 z-50 shadow-2xl md:hidden flex flex-col pt-24 px-6 gap-8"
+            >
+              <div className="space-y-6">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">Navigation</p>
+                <div className="flex flex-col gap-4">
+                  <Link to="/dashboard" className="text-xl font-black text-slate-900 dark:text-white" onClick={() => setIsOpen(false)}>Dashboard</Link>
+                  <Link to="/contact" className="text-xl font-black text-slate-900 dark:text-white" onClick={() => setIsOpen(false)}>Support</Link>
+                </div>
+              </div>
+              
+              <div className="mt-auto mb-12 space-y-4">
+                <ThemeToggle />
+                <button 
+                  onClick={handleLogout}
+                  className="w-full bg-red-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-red-500/20"
+                >
+                  Sign Out
+                </button>
+              </div>
+            </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      {/* Spacer */}
+      <div style={{ height: totalHeaderHeight }} />
     </>
   );
 };

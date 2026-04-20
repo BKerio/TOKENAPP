@@ -4,8 +4,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { Mail, Lock, Eye, EyeOff, Phone, ArrowLeft, ShieldCheck } from "lucide-react";
 import api from "@/lib/api";
-import Logo from "@/assets/icon.png";
 import React from "react";
+import TokenPapLogo from "@/components/TokenPapLogo";
 
 type Step = "identifier" | "otp" | "reset";
 
@@ -205,9 +205,11 @@ const ForgotPassword = () => {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3"
+              className="mb-4"
             >
-              <img src={Logo} alt="TokenPap" className="w-16 h-16 object-contain" />
+              <div className="h-16 w-auto">
+                <TokenPapLogo className="h-full w-auto" />
+              </div>
             </motion.div>
             <h2 className="text-xl font-bold text-slate-800 dark:text-white">Reset Password</h2>
             <p className="text-[11px] text-slate-400 mt-1 text-center font-medium">

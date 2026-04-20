@@ -5,8 +5,8 @@ import Swal from "sweetalert2";
 import { Mail, User, Lock, Eye, EyeOff, ChevronDown, CheckCircle2, Phone, User2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
-import Logo from "@/assets/icon.png";
 import React from "react";
+import TokenPapLogo from "@/components/TokenPapLogo";
 
 type LoginMode = "email" | "accountid" | "customer";
 
@@ -324,19 +324,11 @@ const Login = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col items-center mb-5"
+            className="flex flex-col items-center mb-8"
           >
-            <div className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3">
-              <img src={Logo} alt="TokenPap" className="w-20 h-20 object-contain" />
+            <div className="h-16 w-auto">
+              <TokenPapLogo className="h-full w-auto" />
             </div>
-
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white text-center">
-              TokenPap
-            </h2>
-
-            <p className="text-[11px] text-slate-400 mt-1 text-center">
-              Smart Metering & Vending Solution
-            </p>
           </motion.div>
 
           <form onSubmit={handleLogin} className="space-y-3.5">

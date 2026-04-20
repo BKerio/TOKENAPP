@@ -17,8 +17,8 @@ import {
   Building
 } from "lucide-react";
 import api from "@/lib/api";
-import Logo from "@/assets/icon.png";
 import React from "react";
+import TokenPapLogo from "@/components/TokenPapLogo";
 
 type VendorType = "Individual" | "Company";
 
@@ -129,15 +129,17 @@ const Register = () => {
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-            className="w-24 h-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center shadow-inner mb-3"
+              className="mb-4"
             >
-              <img src={Logo} alt="TokenPap" className="w-14 h-14 object-contain" />
+              <div className="h-16 w-auto">
+                <TokenPapLogo className="h-full w-auto" />
+              </div>
             </motion.div>
-            <h1 className="text-2xl font-bold bg-gray-600 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
               Create Provider Account
             </h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 font-medium">
-              Join the TokenPap Today
+              Join the TokenPap Ecosystem Today
             </p>
           </div>
 
