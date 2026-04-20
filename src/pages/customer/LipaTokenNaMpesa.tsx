@@ -222,14 +222,9 @@ const LipaTokenNaMpesa = () => {
 
         {/* Logo */}
         <div className="text-center mb-8">
-          <img
-            src={Logo}
-            draggable={false}
-            alt="Logo"
-            className="h-14 mx-auto mb-4"
-          />
-          <h1 className="text-3xl font-bold text-[#0A1F44] dark:text-white">
-            Lipia Token na M-Pesa
+         
+          <h1 className="text-5xl font-bold text-[#0A1F44] dark:text-white">
+            Buy Tokens with M-Pesa
           </h1>
           <p className="text-slate-500 dark:text-slate-400 mt-2">
             Enter your details to receive a payment prompt
