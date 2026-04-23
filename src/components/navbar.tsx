@@ -1,10 +1,11 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Menu, Settings, LogOut,
+  Menu, LogOut,
   User as UserIcon, ChevronDown,
-  ShieldCheck, Search, Plus, Bell, Activity,
-  Mail, Phone, MapPin, ArrowUpRightFromCircle
+  Search, Plus, Bell,
+  Mail, Phone,
+  X
 } from "lucide-react";
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from "framer-motion";
@@ -47,11 +48,8 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
   const profileRef = useRef<HTMLDivElement>(null);
 
   const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || user?.roles?.includes('admin') || (!user?.role && user); // Fallback for admin if role missing but user exists
-  const isVendor = user?.role === 'vendor' || user?.roles?.includes('vendor');
 
 
-  const NAV_HEIGHT_EXPANDED = 88;
-  const NAV_HEIGHT_CONDENSED = 72;
 
   const handleLogout = async () => {
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -90,7 +88,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
 
   useEffect(() => {
     let lastScrollY = window.pageYOffset;
-    
+
     const handleScroll = () => {
       const currentScrollY = window.pageYOffset;
       setScrolled(currentScrollY > 10);
@@ -118,7 +116,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
       setIsOpen(false);
@@ -141,10 +139,9 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
 
   return (
     <>
-      <header 
-        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
-          isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-        }`}
+      <header
+        className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+          }`}
       >
         {/* TOP BAR / COVERAGE BAR */}
         <div
@@ -167,8 +164,8 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                 <Phone size={14} className="text-amber-500" />
                 <span className="text-[10px] font-bold tracking-wide">+254 741 099 909</span>
               </div>
-              <Link 
-                to="/contact" 
+              <Link
+                to="/contact"
                 className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-wider transition-colors shadow-sm"
               >
                 Support
@@ -219,7 +216,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                     </div>
                   </div>
                 ) : (
-                  <div 
+                  <div
                     className="transition-all duration-500"
                     style={{ height: scrolled ? '44px' : '52px' }}
                   >
@@ -247,16 +244,16 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
             <div className="flex items-center gap-3">
               {isAdmin && !isMobile && (
                 <div className="flex items-center gap-1.5 mr-2">
-                  <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"><Plus size={20}/></button>
+                  <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all"><Plus size={20} /></button>
                   <button className="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-900 transition-all relative">
-                    <Bell size={20}/>
+                    <Bell size={20} />
                     <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 border-2 border-white dark:border-slate-950 rounded-full"></span>
                   </button>
                 </div>
               )}
-              
+
               <ThemeToggle />
-              
+
               <div className="w-px h-6 bg-slate-200 dark:bg-slate-800 mx-2" />
 
               {user ? (
@@ -289,12 +286,12 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                           <p className="text-[10px] font-bold text-amber-600 dark:text-amber-500 uppercase tracking-widest">{user.role || 'Admin'}</p>
                         </div>
                         <div className="p-2">
-                           <button onClick={() => window.location.href='/dashboard/manage-account'} className="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
-                              <UserIcon size={16} /> My Account
-                           </button>
-                           <button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all">
-                              <LogOut size={16} /> Sign Out
-                           </button>
+                          <button onClick={() => window.location.href = '/dashboard/manage-account'} className="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all">
+                            <UserIcon size={16} /> My Account
+                          </button>
+                          <button onClick={handleLogout} className="w-full flex items-center gap-3 p-3 rounded-xl text-sm font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all">
+                            <LogOut size={16} /> Sign Out
+                          </button>
                         </div>
                       </motion.div>
                     )}
@@ -305,7 +302,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
               )}
 
               {/* Mobile Toggle */}
-              <button 
+              <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 transition-all"
               >
@@ -341,10 +338,10 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                   <Link to="/contact" className="text-xl font-black text-slate-900 dark:text-white" onClick={() => setIsOpen(false)}>Support</Link>
                 </div>
               </div>
-              
+
               <div className="mt-auto mb-12 space-y-4">
                 <ThemeToggle />
-                <button 
+                <button
                   onClick={handleLogout}
                   className="w-full bg-red-600 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-lg shadow-red-500/20"
                 >

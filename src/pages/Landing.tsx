@@ -1,29 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import {
   Zap,
-  Droplets,
-  Activity,
-  Shield,
-  Smartphone,
   TrendingUp,
   MapPin,
-  ChevronRight,
   ArrowRight,
-  CheckCircle2,
-  Play,
   Mail,
   Phone,
-  ArrowUpRightFromCircle
+  Droplets,
+  Home,
+  Building2,
+  Factory,
+  Shield,
+  CreditCard,
+  BarChart3,
+  Wifi,
+  Clock,
+  CheckCircle2,
+  ChevronDown
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import TokenPapLogo from '@/components/TokenPapLogo';
 import { ThemeToggle } from '@/components/theme-toggle';
 
-
-// Components
+// Clean, flat design - no gradients, no animations
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -34,26 +36,33 @@ const Navbar: React.FC = () => {
   const topBarHeight = 40;
   const navBarHeight = isScrolled ? 72 : 88;
 
+  const navLinks = [
+    { label: 'Products', href: '#products' },
+    { label: 'Solutions', href: '#solutions' },
+    { label: 'How It Works', href: '#how-it-works' },
+    { label: 'About', href: '#about' },
+  ];
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
       {/* Top Contact Bar */}
       <div
-        className="w-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 flex items-center h-10 px-6 lg:px-8"
+        className="w-full bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 flex items-center px-6 lg:px-8"
         style={{ height: topBarHeight }}
       >
         <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 font-medium tracking-wide">
-              <MapPin size={14} className="text-amber-500" />
+            <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
+              <MapPin size={14} className="text-amber-600" />
               <span className="uppercase tracking-wider">Nairobi, Kenya</span>
             </div>
-            <div className="hidden sm:flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 font-medium border-l border-gray-100 dark:border-gray-800 pl-6">
-              <Mail size={14} className="text-amber-500" />
+            <div className="hidden sm:flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium border-l border-gray-200 dark:border-gray-800 pl-6">
+              <Mail size={14} className="text-amber-600" />
               <span>info@tokenpap.com</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-gray-500 dark:text-gray-400 font-medium">
-            <Phone size={14} className="text-amber-500" />
+          <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400 font-medium">
+            <Phone size={14} className="text-amber-600" />
             <span>+254 741 099 909</span>
           </div>
         </div>
@@ -61,39 +70,82 @@ const Navbar: React.FC = () => {
 
       {/* Main Navigation */}
       <nav
-        className={`w-full transition-all duration-500 border-b ${
-          isScrolled 
-            ? 'bg-white/95 dark:bg-gray-900/95 backdrop-blur-md shadow-xl border-gray-100 dark:border-gray-800' 
-            : 'bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm border-transparent'
-        }`}
+        className="w-full bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800"
         style={{ height: navBarHeight }}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8 h-full">
           <div className="flex items-center justify-between h-full">
             {/* Logo */}
-            <Link to="/" className="flex items-center group">
-              <div
-                className="transition-all duration-500"
-                style={{ height: isScrolled ? '48px' : '56px' }}
-              >
+            <Link to="/" className="flex items-center">
+              <div style={{ height: isScrolled ? '48px' : '56px' }}>
                 <TokenPapLogo className="h-full w-auto" />
               </div>
             </Link>
 
+            {/* Desktop Nav Links */}
+            <div className="hidden lg:flex items-center gap-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-500 transition-colors"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+
             {/* Right Side Actions */}
-            <div className="flex items-center gap-4 lg:gap-6">
+            <div className="flex items-center gap-4">
               <ThemeToggle />
-              <div className="w-px h-6 bg-gray-200 dark:bg-gray-800" />
+              <div className="hidden sm:block w-px h-6 bg-gray-200 dark:bg-gray-800" />
+
+              {/* Mobile menu button */}
+              <button
+                className="lg:hidden p-2"
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                <ChevronDown
+                  size={20}
+                  className={`text-gray-600 dark:text-gray-300 transition-transform ${mobileMenuOpen ? 'rotate-180' : ''}`}
+                />
+              </button>
+
               <Link
                 to="/login"
-                className="group relative inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-2.5 rounded-full text-sm font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-amber-500/20"
+                className="hidden sm:inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-2.5 rounded-lg text-sm font-bold transition-colors"
               >
                 Get Started
-                <ArrowUpRightFromCircle size={16} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowRight size={16} />
               </Link>
             </div>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 px-6 py-4">
+            <div className="flex flex-col gap-4">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className="text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-500"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ))}
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-2.5 rounded-lg text-sm font-bold transition-colors mt-2"
+              >
+                Get Started
+                <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
+        )}
       </nav>
     </header>
   );
@@ -101,137 +153,309 @@ const Navbar: React.FC = () => {
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-24 pb-20 overflow-hidden bg-white dark:bg-slate-950">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-1/4 -left-20 w-96 h-96 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-[100px] pointer-events-none" />
-      <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-amber-500/5 dark:bg-amber-500/10 rounded-full blur-[120px] pointer-events-none" />
-      
-      {/* Main Content Grid */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full">
+    <section className="relative min-h-[90vh] lg:min-h-screen flex items-center pt-32 pb-20 bg-white dark:bg-slate-950">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 w-full">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
-          {/* Left Column: Text Content */}
-          <motion.div
-            initial={{ opacity: 0, x: -30 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-            className="flex flex-col text-left"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-8 w-fit"
-            >
-              <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              Next-Gen Utility Management
-            </motion.div>
 
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black text-slate-900 dark:text-white mb-8 tracking-tight leading-[1.1]">
-              AI-Powered Utility and Vending <span className="text-blue-600 dark:text-blue-400">Platform for Real Estate</span>
+          {/* Left Column: Text Content */}
+          <div className="flex flex-col text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-xs font-bold text-gray-500 uppercase tracking-widest mb-6 w-fit">
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
+              STS-Compliant Prepaid Metering
+            </div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white mb-6 tracking-tight leading-tight">
+              Smart Utility Management for <span className="text-amber-600">Modern Real Estate</span>
             </h1>
 
-            <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-xl mb-12 leading-relaxed font-bold">
-              TokenPap is an innovative smart metering platform designed for property owners and tenants, 
-              featuring AI-powered tools to accelerate your utility management journey.
+            <p className="text-lg text-slate-600 dark:text-slate-400 max-w-xl mb-10 leading-relaxed font-medium">
+              TokenPap delivers end-to-end prepaid electricity, water, and gas metering solutions.
+              From precision-engineered smart meters to cloud-based management platforms,
+              we help property owners eliminate utility waste and maximize revenue recovery.
             </p>
 
             <div className="flex flex-wrap items-center gap-4">
-              <Link 
+              <Link
                 to="/login"
-                className="group relative bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-full font-black text-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-3 shadow-xl shadow-blue-600/20"
+                className="bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-4 rounded-lg font-black text-lg transition-colors flex items-center gap-3"
               >
                 Get Started
-                <ArrowRight className="transition-transform group-hover:translate-x-1" size={20} />
+                <ArrowRight size={20} />
               </Link>
-              <button 
-                className="px-8 py-4 rounded-full border-2 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white hover:border-blue-600/30 dark:hover:border-blue-400/30 hover:bg-slate-50 dark:hover:bg-slate-900 transition-all font-black text-lg active:scale-95"
+              <a
+                href="#products"
+                className="px-8 py-4 rounded-lg border-2 border-gray-200 dark:border-gray-700 text-slate-700 dark:text-white hover:border-amber-500 dark:hover:border-amber-500 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors font-black text-lg"
               >
                 Explore Solutions
-              </button>
+              </a>
             </div>
 
             {/* Quick Stats Summary */}
-            <div className="mt-16 flex items-center gap-8 border-t border-slate-100 dark:border-slate-900 pt-10">
-               <div>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white">500+</p>
-                  <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Active Meters</p>
-               </div>
-               <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
-               <div>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white">120+</p>
-                  <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Companies</p>
-               </div>
-               <div className="w-px h-8 bg-slate-200 dark:bg-slate-800" />
-               <div>
-                  <p className="text-2xl font-black text-slate-900 dark:text-white">99.9%</p>
-                  <p className="text-[10px] uppercase font-bold text-slate-500 tracking-widest">Uptime Rate</p>
-               </div>
-            </div>
-          </motion.div>
-
-          {/* Right Column: Phone Mockup */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
-            animate={{ opacity: 1, scale: 1, rotate: 0 }}
-            transition={{ duration: 1, ease: "easeOut" }}
-            className="relative flex justify-center lg:justify-end"
-          >
-            {/* Visual Backdrops */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-blue-600/5 dark:bg-blue-600/10 rounded-full blur-[80px] pointer-events-none" />
-            
-            <div className="relative z-20 max-w-[320px] md:max-w-[380px]">
-              <div className="relative group perspective-1000">
-                <motion.div
-                   animate={{ y: [0, -10, 0] }}
-                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                   className="relative z-10"
-                >
-                  <img 
-                    src="/brain/1d02b2d3-7d2f-481d-bd8f-a1ab4953cd0c/tokenpap_mobile_app_mockup_1776674249658.png"
-                    alt="TokenPap App Dashboard"
-                    className="w-full h-auto drop-shadow-[0_35px_35px_rgba(0,0,0,0.15)] dark:drop-shadow-[0_35px_35px_rgba(0,0,0,0.4)] transform-gpu hover:scale-[1.02] transition-transform duration-500"
-                  />
-                </motion.div>
-                
-                {/* Floating Elements (Decorative) */}
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1, duration: 0.5 }}
-                  className="absolute -top-6 -right-6 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-30"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-500/20 flex items-center justify-center">
-                      <Zap className="text-green-600 dark:text-green-400 w-5 h-5" />
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active Status</p>
-                      <p className="text-xs font-black text-slate-900 dark:text-white">Meter #4490 Connected</p>
-                    </div>
-                  </div>
-                </motion.div>
-
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 1.2, duration: 0.5 }}
-                  className="absolute -bottom-6 -left-6 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 z-30"
-                >
-                  <div className="flex items-center gap-3">
-                     <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-500/20 flex items-center justify-center">
-                        <TrendingUp className="text-amber-600 dark:text-amber-400 w-5 h-5" />
-                     </div>
-                     <div>
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Efficiency</p>
-                        <p className="text-xs font-black text-slate-900 dark:text-white">+42% Revenue Recovery</p>
-                     </div>
-                  </div>
-                </motion.div>
+            <div className="mt-12 flex items-center gap-8 border-t border-gray-200 dark:border-gray-800 pt-8">
+              <div>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">500+</p>
+                <p className="text-xs uppercase font-bold text-slate-500 tracking-widest mt-1">Smart Meters Deployed</p>
+              </div>
+              <div className="w-px h-10 bg-gray-200 dark:bg-gray-800" />
+              <div>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">120+</p>
+                <p className="text-xs uppercase font-bold text-slate-500 tracking-widest mt-1">Enterprise Customers</p>
+              </div>
+              <div className="w-px h-10 bg-gray-200 dark:bg-gray-800" />
+              <div>
+                <p className="text-2xl font-black text-slate-900 dark:text-white">99.9%</p>
+                <p className="text-xs uppercase font-bold text-slate-500 tracking-widest mt-1">Uptime Guaranteed</p>
               </div>
             </div>
-          </motion.div>
+          </div>
 
+          {/* Right Column: Clean Product Visual */}
+          <div className="relative flex justify-center lg:justify-end">
+            <div className="relative max-w-[400px] w-full">
+              {/* Main meter image */}
+              <div className="bg-gray-100 dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800">
+                <img
+                  src="/brain/1d02b2d3-7d2f-481d-bd8f-a1ab4953cd0c/tokenpap_mobile_app_mockup_1776674249658.png"
+                  alt="TokenPap Mobile Dashboard"
+                  className="w-full h-auto rounded-xl"
+                />
+              </div>
+
+              {/* Floating status cards - static, no animation */}
+              <div className="absolute -top-4 -right-4 bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                    <Zap className="text-green-600 dark:text-green-400 w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Status</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-white">Meter Connected</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="absolute -bottom-4 -left-4 bg-white dark:bg-gray-900 p-4 rounded-xl shadow-lg border border-gray-200 dark:border-gray-800">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                    <TrendingUp className="text-amber-600 dark:text-amber-400 w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recovery Rate</p>
+                    <p className="text-sm font-black text-slate-900 dark:text-white">+42% Revenue</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Products: React.FC = () => {
+  const products = [
+    {
+      icon: <Zap size={24} />,
+      title: "Prepaid Electricity Meters",
+      description: "STS-compliant prepaid electricity meters with keypad token entry. Compatible with Kenya Power and private utility networks.",
+      features: ["20-digit token entry", "Tamper detection", "Load management", "LCD display"]
+    },
+    {
+      icon: <Droplets size={24} />,
+      title: "Prepaid Water Meters",
+      description: "Smart water metering with remote monitoring. Dallas key, smartcard, and keypad variants for all deployment scenarios.",
+      features: ["Leak detection alerts", "Remote valve control", "Consumption analytics", "STS compliant"]
+    },
+    {
+      icon: <Wifi size={24} />,
+      title: "IoT Smart Meters",
+      description: "LoRa and NB-IoT connected meters for real-time monitoring. Automatic reading and remote disconnection capabilities.",
+      features: ["Real-time data", "Remote disconnect", "Low power design", "Cloud synced"]
+    },
+    {
+      icon: <CreditCard size={24} />,
+      title: "Vending Platform",
+      description: "Cloud-based token vending system with M-Pesa integration. Manage sales, vendors, and customer accounts from one dashboard.",
+      features: ["M-Pesa integration", "SMS token delivery", "Vendor management", "Real-time reporting"]
+    }
+  ];
+
+  return (
+    <section id="products" className="py-24 bg-gray-50 dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
+            Our Products
+          </h2>
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Explore TokenPap's full range of prepaid and smart metering solutions —
+            designed for precision, built for scale, and ready for every utility application.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {products.map((product, index) => (
+            <div
+              key={index}
+              className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 hover:border-amber-500 dark:hover:border-amber-500 transition-colors group"
+            >
+              <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-4 group-hover:bg-amber-500 group-hover:text-white dark:group-hover:bg-amber-500 transition-colors">
+                {product.icon}
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                {product.title}
+              </h3>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4 leading-relaxed">
+                {product.description}
+              </p>
+              <ul className="space-y-2">
+                {product.features.map((feature, fIndex) => (
+                  <li key={fIndex} className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <CheckCircle2 size={14} className="text-amber-500" />
+                    {feature}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const Solutions: React.FC = () => {
+  const solutions = [
+    {
+      icon: <Home size={32} />,
+      title: "Residential",
+      description: "Individual unit prepaid sub metering with M-Pesa token payments. Automated billing and leak detection for apartments and gated communities.",
+      stats: "500+ Units Managed"
+    },
+    {
+      icon: <Building2 size={32} />,
+      title: "Commercial",
+      description: "Multi-tariff sub meter management for shopping malls and office complexes. Common area cost allocation and peak load monitoring.",
+      stats: "120+ Properties"
+    },
+    {
+      icon: <Factory size={32} />,
+      title: "Industrial",
+      description: "3-phase prepaid sub meters with power factor monitoring. Demand side management and shift-based consumption analysis.",
+      stats: "50+ Installations"
+    }
+  ];
+
+  return (
+    <section id="solutions" className="py-24 bg-white dark:bg-slate-950">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
+            Solutions by Sector
+          </h2>
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            TokenPap serves a wide spectrum of customers — from individual landlords to national utilities.
+            Explore tailored prepaid and smart metering solutions built for your sector.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-8">
+          {solutions.map((solution, index) => (
+            <div
+              key={index}
+              className="bg-gray-50 dark:bg-gray-900 rounded-2xl p-8 border border-gray-200 dark:border-gray-800"
+            >
+              <div className="w-16 h-16 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 mb-6">
+                {solution.icon}
+              </div>
+              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">
+                {solution.title}
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+                {solution.description}
+              </p>
+              <div className="pt-6 border-t border-gray-200 dark:border-gray-800">
+                <p className="text-sm font-bold text-amber-600 uppercase tracking-wider">
+                  {solution.stats}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const HowItWorks: React.FC = () => {
+  const steps = [
+    {
+      number: "01",
+      title: "Evaluate",
+      description: "Free site analysis and consultation. We assess your property's utility infrastructure and recommend the optimal metering solution.",
+      icon: <BarChart3 size={24} />
+    },
+    {
+      number: "02",
+      title: "Install",
+      description: "Qualified technicians install STS-compliant meters with minimal disruption. Full testing and commissioning included.",
+      icon: <Shield size={24} />
+    },
+    {
+      number: "03",
+      title: "Vend",
+      description: "Tenants purchase prepaid tokens via M-Pesa, bank transfer, or authorized vendors. Instant SMS delivery of 20-digit tokens.",
+      icon: <CreditCard size={24} />
+    },
+    {
+      number: "04",
+      title: "Monitor",
+      description: "Track real-time consumption, revenue, and meter health from your cloud dashboard. Automated alerts for anomalies and leaks.",
+      icon: <BarChart3 size={24} />
+    }
+  ];
+
+  return (
+    <section id="how-it-works" className="py-24 bg-gray-50 dark:bg-gray-950">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
+            How It Works
+          </h2>
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            From evaluation to ongoing monitoring, TokenPap provides a complete turnkey
+            solution for prepaid utility management.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {steps.map((step, index) => (
+            <div key={index} className="relative">
+              <div className="bg-white dark:bg-gray-900 rounded-xl p-6 border border-gray-200 dark:border-gray-800 h-full">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-4xl font-black text-gray-200 dark:text-gray-800">
+                    {step.number}
+                  </span>
+                  <div className="w-10 h-10 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                    {step.icon}
+                  </div>
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                  {step.title}
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+              {index < steps.length - 1 && (
+                <div className="hidden lg:block absolute top-1/2 -right-3 transform -translate-y-1/2">
+                  <ArrowRight size={20} className="text-gray-300 dark:text-gray-700" />
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -241,72 +465,68 @@ const Hero: React.FC = () => {
 const Features: React.FC = () => {
   const features = [
     {
-      icon: <Zap className="w-6 h-6" />,
-      title: "Prepaid Electricity",
-      description: "Advanced STS-compliant meters with seamless token generation and instant top-up capabilities."
+      icon: <Shield size={24} />,
+      title: "STS Compliant",
+      description: "All meters conform to IEC 62055-41 Standard Transfer Specification for secure token encryption and interoperability."
     },
     {
-      icon: <Droplets className="w-6 h-6" />,
-      title: "Smart Water metering",
-      description: "Precision ultrasonic flow sensors with leak detection and consumption analytics."
+      icon: <Clock size={24} />,
+      title: "24/7 Monitoring",
+      description: "Cloud-based platform provides round-the-clock monitoring of all connected meters with instant anomaly detection."
     },
     {
-      icon: <Activity className="w-6 h-6" />,
-      title: "Real-time Analytics",
-      description: "AI-driven consumption patterns and predictive maintenance alerts via cloud dashboard."
+      icon: <CreditCard size={24} />,
+      title: "M-Pesa Integration",
+      description: "Native integration with Kenya's M-Pesa for seamless token purchases and automatic payment reconciliation."
     },
     {
-      icon: <Shield className="w-6 h-6" />,
-      title: "Tamper Detection",
-      description: "Industrial-grade security with magnetic field detection and remote disconnect capabilities."
+      icon: <BarChart3 size={24} />,
+      title: "Revenue Analytics",
+      description: "Comprehensive dashboards tracking revenue recovery, consumption patterns, and predictive maintenance alerts."
     },
     {
-      icon: <Smartphone className="w-6 h-6" />,
-      title: "Mobile Management",
-      description: "Native iOS and Android apps for tenants and property managers on the go."
+      icon: <Wifi size={24} />,
+      title: "Remote Management",
+      description: "LoRa and NB-IoT connectivity enables remote meter reading, tariff updates, and emergency disconnect from anywhere."
     },
     {
-      icon: <TrendingUp className="w-6 h-6" />,
-      title: "Revenue Recovery",
-      description: "Eliminate non-technical losses and improve collection rates by up to 40%."
+      icon: <Droplets size={24} />,
+      title: "Leak Detection",
+      description: "Smart algorithms detect unusual flow patterns and automatically alert property managers to potential leaks."
     }
   ];
 
   return (
-    <section id="products" className="py-32 bg-slate-50 dark:bg-slate-950 relative">
+    <section className="py-24 bg-white dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-20"
-        >
-          <h2 className="text-3xl md:text-5xl font-black text-slate-900 dark:text-white mb-6">
-            End-to-End <span className="text-amber-500">Utility Solutions</span>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-black text-slate-900 dark:text-white mb-4">
+            Why Choose TokenPap
           </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-lg max-w-2xl mx-auto font-medium">
-            From precision-engineered hardware to cloud-based management platforms,
-            we provide complete infrastructure for the modern utility ecosystem.
+          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+            Built for the unique challenges of utility management in East Africa,
+            our platform combines industrial-grade hardware with intelligent software.
           </p>
-        </motion.div>
+        </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {features.map((feature, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: idx * 0.1 }}
-              whileHover={{ y: -5 }}
-              className="group p-8 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-amber-500/30 shadow-sm hover:shadow-xl transition-all duration-300"
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              className="flex gap-4 p-6 rounded-xl border border-gray-200 dark:border-gray-800 hover:border-amber-500 dark:hover:border-amber-500 transition-colors"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-6 group-hover:bg-amber-500 group-hover:text-white transition-all duration-300">
+              <div className="w-12 h-12 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
                 {feature.icon}
               </div>
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-3">{feature.title}</h3>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm font-medium">{feature.description}</p>
-            </motion.div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
+                  {feature.title}
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -314,35 +534,25 @@ const Features: React.FC = () => {
   );
 };
 
-
-
 const CTA: React.FC = () => {
   return (
-    <section className="py-32 bg-slate-50 dark:bg-slate-950 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/10 to-blue-500/10 dark:from-amber-600/20 dark:to-blue-600/20" />
-      <div className="max-w-5xl mx-auto px-6 lg:px-8 relative z-10 text-center">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-4xl md:text-6xl font-black text-slate-900 dark:text-white mb-6">
-            Ready to Transform Your<br />
-            <span className="text-amber-500">Utility Infrastructure?</span>
-          </h2>
-          <p className="text-slate-600 dark:text-slate-400 text-xl mb-12 max-w-2xl mx-auto font-medium leading-relaxed">
-            Join 120+ enterprises across East Africa already leveraging TokenPap's
-            intelligent utility systems.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button className="bg-amber-500 hover:bg-amber-600 text-slate-900 px-8 py-4 rounded-full font-black text-lg transition-all hover:scale-105 shadow-xl shadow-amber-500/30">
-              Schedule a Demo
-            </button>
-            <button className="px-8 py-4 rounded-full border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white hover:bg-white dark:hover:bg-slate-900 transition-all font-bold shadow-sm">
-              Contact Sales
-            </button>
-          </div>
-        </motion.div>
+    <section className="py-24 bg-amber-500 dark:bg-amber-600">
+      <div className="max-w-5xl mx-auto px-6 lg:px-8 text-center">
+        <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-6">
+          Ready to Transform Your<br />Utility Infrastructure?
+        </h2>
+        <p className="text-slate-800 dark:text-slate-900 text-xl mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
+          Join 120+ enterprises across East Africa already leveraging TokenPap's
+          intelligent utility systems. Schedule a free site evaluation today.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <button className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-lg font-black text-lg transition-colors">
+            Schedule a Demo
+          </button>
+          <button className="px-8 py-4 rounded-lg border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors font-bold">
+            Contact Sales
+          </button>
+        </div>
       </div>
     </section>
   );
@@ -350,7 +560,7 @@ const CTA: React.FC = () => {
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-white dark:bg-slate-950 border-t border-slate-100 dark:border-slate-900 py-20">
+    <footer className="bg-white dark:bg-slate-950 border-t border-gray-200 dark:border-gray-800 py-16">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-2">
@@ -359,42 +569,49 @@ const Footer: React.FC = () => {
             </Link>
             <p className="text-slate-600 dark:text-slate-400 max-w-sm mb-6 leading-relaxed font-medium">
               Pioneering prepaid and smart metering solutions across East Africa.
-              Based in Nairobi, serving the continent with cutting-edge utility technology.
+              Based in Nairobi's Silicon Savannah, serving the continent with
+              cutting-edge utility technology and STS-compliant systems.
             </p>
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
-                <MapPin size={16} className="text-amber-500" />
+                <MapPin size={16} className="text-amber-600" />
                 <span>Nairobi, Kenya • Silicon Savannah</span>
               </div>
               <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
-                <Mail size={16} className="text-amber-500" />
+                <Mail size={16} className="text-amber-600" />
                 <span>info@tokenpap.com</span>
+              </div>
+              <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-sm font-medium">
+                <Phone size={16} className="text-amber-600" />
+                <span>+254 741 099 909</span>
               </div>
             </div>
           </div>
 
           <div>
-            <h4 className="text-slate-900 dark:text-white font-bold mb-4 uppercase tracking-widest text-[11px]">Products</h4>
+            <h4 className="text-slate-900 dark:text-white font-bold mb-4 uppercase tracking-widest text-xs">Products</h4>
             <ul className="space-y-3 text-slate-600 dark:text-slate-400 text-sm font-medium">
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Smart Meters</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Water Sensors</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Cloud Platform</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Mobile Apps</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Prepaid Electricity</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Prepaid Water</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">IoT Smart Meters</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Vending Platform</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Mobile App</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-slate-900 dark:text-white font-bold mb-4 uppercase tracking-widest text-[11px]">Company</h4>
+            <h4 className="text-slate-900 dark:text-white font-bold mb-4 uppercase tracking-widest text-xs">Company</h4>
             <ul className="space-y-3 text-slate-600 dark:text-slate-400 text-sm font-medium">
-              <li><a href="#" className="hover:text-amber-500 transition-colors">About Us</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Careers</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Partners</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Contact</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">About Us</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Careers</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Partners</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Blog</a></li>
+              <li><a href="#" className="hover:text-amber-600 transition-colors">Contact</a></li>
             </ul>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-slate-100 dark:border-slate-900 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div className="pt-8 border-t border-gray-200 dark:border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-slate-500 text-sm font-medium">
             © {new Date().getFullYear()} TokenPap Technologies. All rights reserved.
           </p>
@@ -410,12 +627,15 @@ const Footer: React.FC = () => {
 };
 
 // Main App Component
-const TokenPapLanding: React.FC = () => {
+const Landing: React.FC = () => {
   return (
-    <div className="bg-white dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-200 font-sans selection:bg-amber-500/30 transition-colors duration-500">
+    <div className="bg-white dark:bg-slate-950 min-h-screen text-slate-900 dark:text-slate-200 font-sans selection:bg-amber-500/30">
       <Navbar />
       <main>
         <Hero />
+        <Products />
+        <Solutions />
+        <HowItWorks />
         <Features />
         <CTA />
       </main>
@@ -424,4 +644,4 @@ const TokenPapLanding: React.FC = () => {
   );
 };
 
-export default TokenPapLanding;
+export default Landing;
