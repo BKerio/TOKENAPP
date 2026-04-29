@@ -93,6 +93,12 @@ const Navbar: React.FC = () => {
                   {link.label}
                 </a>
               ))}
+              <Link
+                to="/track-token"
+                className="text-sm font-bold text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 transition-colors flex items-center gap-1.5"
+              >
+                Track Token
+              </Link>
             </div>
 
             {/* Right Side Actions */}
@@ -136,6 +142,13 @@ const Navbar: React.FC = () => {
                   {link.label}
                 </a>
               ))}
+              <Link
+                to="/track-token"
+                className="text-sm font-bold text-amber-600 dark:text-amber-500 hover:text-amber-700 dark:hover:text-amber-400 mt-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Track Token
+              </Link>
               <Link
                 to="/login"
                 className="inline-flex items-center justify-center gap-2 bg-amber-500 hover:bg-amber-600 text-slate-900 px-6 py-2.5 rounded-lg text-sm font-bold transition-colors mt-2"

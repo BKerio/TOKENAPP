@@ -28,6 +28,7 @@ import ForgotPassword from '@/pages/forgotpassword';
 import Register from '@/pages/register';
 import VendorApprovals from '@/pages/admin/VendorApprovals';
 import GlobalCallback from '@/pages/admin/GlobalCallback';
+import TrackToken from '@/pages/customer/TrackToken';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
@@ -74,6 +75,7 @@ function App() {
                 <Route index element={<Dashboard />} />
               </Route>
               <Route path="/" element={<Landing />} />
+              <Route path="/track-token" element={<TrackToken />} />
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
