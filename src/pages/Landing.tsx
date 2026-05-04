@@ -393,10 +393,10 @@ const Hero: React.FC = () => {
 
 const StatsBar: React.FC = () => {
   const stats = [
-    { value: '12+', label: 'Years Experience' },
-    { value: '17K+', label: 'Meters Installed' },
-    { value: '200M', label: 'Liters Water Saved' },
-    { value: '94%', label: 'Revenue Recovery' },
+    { value: '500+', label: 'Smart Meters Deployed' },
+    { value: '120+', label: 'Enterprise Customers' },
+    { value: '6+', label: 'Innovations Hub' },
+    { value: '99.9%', label: 'Uptime Probability' },
   ];
 
   return (
@@ -695,7 +695,7 @@ const Footer: React.FC = () => {
         </div>
 
         <div className="pt-12 border-t border-slate-900 flex flex-col md:row justify-between items-center gap-6">
-          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">© {new Date().getFullYear()} TokenPap Technologies. All rights reserved.</p>
+          <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">© {new Date().getFullYear()} TokenPap . All rights reserved.</p>
           <div className="flex gap-8">
             <Link to="/login" className="text-amber-500 font-black text-xs uppercase tracking-widest">Login</Link>
             <Link to="/register" className="text-white font-black text-xs uppercase tracking-widest">Register</Link>
