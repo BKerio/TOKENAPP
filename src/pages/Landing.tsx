@@ -20,6 +20,16 @@ import api from '@/lib/api';
 import TokenPapLogo from '@/components/TokenPapLogo';
 import { ThemeToggle } from '@/components/theme-toggle';
 
+// Testimonial Assets
+import PicKPA from "@/assets/testimonials/Picture1.png";
+import PicRailways from "@/assets/testimonials/Picture12.png";
+import PicCoop from "@/assets/testimonials/Picture3.png";
+import PicKPLC from "@/assets/testimonials/Picture20.png";
+import PicVilcom from "@/assets/testimonials/Picture11.png";
+import PicDrone from "@/assets/testimonials/Picture5.png";
+import PicSign from "@/assets/testimonials/signvrse.png";
+import PicIndo from "@/assets/testimonials/Picture18.png";
+
 // --- Types ---
 interface Transaction {
   _id: string;
@@ -171,7 +181,46 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+      {/* Background Image with Overlay */}
+      <div className="absolute inset-0 z-0">
+        <img
+          src="/hero_bg.png"
+          alt="Smart Infrastructure"
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-white dark:from-slate-950/30 dark:via-slate-950/10 dark:to-slate-950" />
+      </div>
 
+      {/* Meshed Design Blobs */}
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-50 dark:opacity-30">
+        <motion.div 
+          animate={{ 
+            x: [0, 100, -50, 0], 
+            y: [0, -50, 100, 0],
+            scale: [1, 1.2, 0.9, 1]
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-amber-500/20 blur-[120px]"
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, -80, 120, 0], 
+            y: [0, 100, -80, 0],
+            scale: [1, 0.9, 1.1, 1]
+          }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/15 blur-[100px]"
+        />
+        <motion.div 
+          animate={{ 
+            x: [0, 50, -100, 0], 
+            y: [0, 120, 50, 0],
+            scale: [1, 1.1, 0.8, 1]
+          }}
+          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-rose-500/10 blur-[130px]"
+        />
+      </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full py-20 text-center">
         <motion.div
@@ -186,7 +235,21 @@ const Hero: React.FC = () => {
           </span>
 
           <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter leading-[0.95]">
-            Save More <i className="font-serif italic font-light text-amber-600">Every Month</i> <br />
+            Save More <span className="relative inline-block">
+              <i className="font-serif italic font-light text-amber-600">Every Month</i>
+              <svg className="absolute -bottom-2 left-0 w-full h-3 overflow-visible pointer-events-none" viewBox="0 0 200 20" fill="none">
+                <motion.path
+                  initial={{ pathLength: 0, opacity: 0 }}
+                  animate={{ pathLength: 1, opacity: 1 }}
+                  transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
+                  d="M5 15C35 12 65 18 95 15C125 12 155 18 195 13"
+                  stroke="currentColor"
+                  strokeWidth="6"
+                  strokeLinecap="round"
+                  className="text-amber-500/40 dark:text-amber-400/30"
+                />
+              </svg>
+            </span> <br />
             With Smart Meters
           </h1>
 
@@ -195,68 +258,108 @@ const Hero: React.FC = () => {
             Precision-engineered prepaid meters for water and electricity.
           </p>
 
-          {/* Integrated Search Bar */}
-          <div className="max-w-2xl mx-auto mb-16">
-            <form
-              onSubmit={handleSearch}
-              className="relative group p-2 bg-white/40 dark:bg-slate-900/40 backdrop-blur-2xl rounded-2xl border border-white/50 dark:border-slate-700/50 shadow-2xl flex flex-col md:flex-row gap-3"
-            >
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Enter Meter or Phone Number..."
-                  className="w-full bg-transparent pl-12 pr-4 py-4 rounded-xl text-slate-950 dark:text-white focus:outline-none text-lg font-medium"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-amber-500 hover:bg-amber-600 text-slate-950 px-8 py-4 rounded-xl font-black text-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          {/* Separated Search & History Controls */}
+          <div className="max-w-4xl mx-auto mb-16">
+            <div className="grid md:grid-cols-2 gap-6">
+              
+              {/* Card 1: Find Tokens by Meter */}
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white dark:border-slate-800 shadow-2xl text-left"
               >
-                {loading ? <Loader2 className="animate-spin" /> : 'Find Tokens'}
-              </button>
-            </form>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950">
+                    <Zap size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-950 dark:text-white uppercase tracking-tight">Meter Search</h3>
+                    <p className="text-xs text-slate-500">Find your latest 20-digit token</p>
+                  </div>
+                </div>
+                <form onSubmit={handleSearch} className="flex flex-col gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <input 
+                      type="text" 
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
+                      placeholder="Enter Meter Number..."
+                      className="w-full bg-white/50 dark:bg-slate-950/50 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    />
+                  </div>
+                  <button 
+                    type="submit"
+                    disabled={loading}
+                    className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 py-3 rounded-xl font-black transition-all flex items-center justify-center gap-2"
+                  >
+                    {loading ? <Loader2 className="animate-spin" size={18} /> : 'Fetch Token'}
+                  </button>
+                </form>
+              </motion.div>
 
-            {/* Quick Search Results Dropdown */}
+              {/* Card 2: Purchase History by Phone */}
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-slate-800/50 shadow-2xl text-left"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                    <TrendingUp size={20} />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-slate-950 dark:text-white uppercase tracking-tight">Latest History</h3>
+                    <p className="text-xs text-slate-500">View recent purchase trends</p>
+                  </div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Access your complete vending history and analytics in one tap.</p>
+                  <Link 
+                    to="/track-token"
+                    className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white py-3 rounded-xl font-black border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-2"
+                  >
+                    Track All Tokens
+                    <ArrowRight size={18} />
+                  </Link>
+                </div>
+              </motion.div>
+
+            </div>
+
+            {/* Results Area (Shared or Specific) */}
             <AnimatePresence>
               {hasSearched && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute left-6 right-6 md:left-auto md:right-auto md:w-[672px] mt-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-left max-h-[400px] overflow-y-auto z-50"
+                  className="mt-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-left overflow-hidden z-50"
                 >
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-slate-900 dark:text-white">Search Results</h3>
-                    <button onClick={() => setHasSearched(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">Close</button>
+                    <h3 className="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
+                    <button onClick={() => setHasSearched(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">Clear</button>
                   </div>
 
                   {results.length > 0 ? (
-                    <div className="space-y-4">
-                      {results.map((tx) => (
-                        <div key={tx._id} className="p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-100 dark:border-slate-800">
+                    <div className="grid sm:grid-cols-2 gap-4">
+                      {results.slice(0, 4).map((tx) => (
+                        <div key={tx._id} className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
                           <div className="flex justify-between items-center mb-2">
-                            <span className="text-xs font-black text-amber-600 uppercase tracking-widest">Amount Paid</span>
-                            <span className="text-xs text-slate-400">{new Date(tx.created_at).toLocaleDateString()}</span>
+                            <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">KES {tx.amount.toLocaleString()}</span>
+                            <span className="text-[10px] text-slate-400">{new Date(tx.created_at).toLocaleDateString()}</span>
                           </div>
                           <div className="flex justify-between items-end">
-                            <p className="text-xl font-black text-slate-900 dark:text-white">KES {tx.amount.toLocaleString()}</p>
-                            <div className="flex flex-col items-end">
-                              <span className="text-[10px] text-slate-400 uppercase font-bold">Token</span>
-                              <p className="font-mono font-bold text-amber-600">{tx.tokens[0] || 'Pending'}</p>
-                            </div>
+                            <p className="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                              {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'No Token'}
+                            </p>
                           </div>
                         </div>
                       ))}
                     </div>
                   ) : (
-                    <p className="text-center py-8 text-slate-500">{error || 'No tokens found for this number.'}</p>
+                    <p className="text-center py-8 text-slate-500">{error || 'No results found.'}</p>
                   )}
-                  <Link
-                    to="/track-token"
+                  <Link 
+                    to="/track-token" 
                     className="block text-center mt-6 text-sm font-bold text-amber-600 hover:underline"
                   >
                     View detailed history
@@ -425,58 +528,83 @@ const Showcase: React.FC = () => {
 };
 
 const Testimonials: React.FC = () => {
-  const testimonials = [
-    { name: "John Doe", role: "Property Manager", quote: "TokenPap has completely automated our billing process.", avatar: "https://i.pravatar.cc/150?u=1" },
-    { name: "Jane Smith", role: "Landlord", quote: "The best ROI we've seen in years.", avatar: "https://i.pravatar.cc/150?u=2" },
-    { name: "Alex Ke", role: "Utility Director", quote: "Reliable, secure, and incredibly easy to use.", avatar: "https://i.pravatar.cc/150?u=3" },
-    { name: "Sarah M.", role: "Estate Agent", quote: "Tenants love the transparency of the app.", avatar: "https://i.pravatar.cc/150?u=4" },
-    { name: "Mike R.", role: "Tech Lead", quote: "The API integration is seamless and powerful.", avatar: "https://i.pravatar.cc/150?u=5" },
+  const testimonialsData = [
+    { name: "Kenya Ports Authority", role: "Public Infrastructure", quote: "Working with this team exceeded our expectations. Their innovative problem solving and deep expertise helped us modernize operations.", avatar: PicKPA },
+    { name: "Kenya Railways", role: "Transport & Logistics", quote: "Their dedication to excellence shone through. Our IT infrastructure is now faster, more reliable, and future-ready.", avatar: PicRailways },
+    { name: "Co-operative Bank", role: "Financial Services", quote: "Outstanding results under tight timelines. Their expert guidance transformed our digital banking platform.", avatar: PicCoop },
+    { name: "Kenya Power", role: "Energy Utility", quote: "The impact on our billing and grid-management systems has been remarkable. A robust, scalable solution.", avatar: PicKPLC },
+    { name: "Vilcom Networks", role: "Telecommunications", quote: "Intuitive dashboards and robust security features. The result is a more transparent, efficient service.", avatar: PicVilcom },
+    { name: "Precision Drones", role: "Tech & IoT", quote: "Expertise in IoT and data analytics took our operations to the next level. Seamless collaboration throughout.", avatar: PicDrone },
+    { name: "SignVrse", role: "Digital Signage", quote: "Professionalism and design sensibility impressed us. Powerful remote management and rich analytics.", avatar: PicSign },
+    { name: "Indonesian Embassy", role: "Diplomatic Mission", quote: "Created a secure, multilingual portal. Handled sensitive data with the utmost professionalism.", avatar: PicIndo },
   ];
 
+  const [activeIndex, setActiveIndex] = useState(0);
+
   return (
-    <section className="py-32 bg-white dark:bg-slate-950 overflow-hidden">
-      <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center mb-20">
+    <section className="py-32 bg-white dark:bg-slate-950 overflow-hidden relative">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 text-center mb-20 relative z-10">
+        <span className="text-amber-600 font-black uppercase tracking-widest text-sm mb-4 block">Social Proof</span>
         <h2 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white">What Our <span className="text-amber-600">Clients</span> Say</h2>
       </div>
 
-      <div className="relative h-[600px] flex items-center justify-center">
-        {/* Radial Layout Mockup */}
-        <div className="relative w-[500px] h-[500px] flex items-center justify-center">
+      <div className="relative h-[700px] flex items-center justify-center">
+        {/* Rotating Outer Ring */}
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
+          className="relative w-[500px] h-[500px] flex items-center justify-center"
+        >
+          {/* Decorative Circles */}
           <div className="absolute inset-0 border-[1px] border-dashed border-slate-200 dark:border-slate-800 rounded-full" />
           <div className="absolute inset-20 border-[1px] border-dashed border-slate-200 dark:border-slate-800 rounded-full" />
-
-          <div className="z-20 bg-white dark:bg-slate-900 p-10 rounded-full shadow-2xl border border-amber-500/20 text-center max-w-[300px]">
-            <Quote className="text-amber-600 mx-auto mb-4" size={32} />
-            <p className="text-sm font-medium italic text-slate-600 dark:text-slate-300">
-              "TokenPap has transformed how we manage utilities across our portfolio of 500+ units."
-            </p>
-          </div>
-
-          {testimonials.map((t, i) => {
-            const angle = (i * 360) / testimonials.length;
+          
+          {testimonialsData.map((t, i) => {
+            const angle = (i * 360) / testimonialsData.length;
             return (
-              <motion.div
+              <div
                 key={i}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: i * 0.2 }}
                 className="absolute"
                 style={{
                   transform: `rotate(${angle}deg) translate(250px) rotate(-${angle}deg)`
                 }}
               >
-                <div className="relative group">
-                  <div className="w-16 h-16 rounded-full border-4 border-white dark:border-slate-800 overflow-hidden shadow-xl group-hover:scale-125 transition-transform cursor-pointer">
+                {/* Counter-rotating the internal content to stay upright */}
+                <motion.div
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 100, repeat: Infinity, ease: "linear" }}
+                  className="relative group"
+                  onMouseEnter={() => setActiveIndex(i)}
+                >
+                  <div className={`w-16 h-16 rounded-full border-4 transition-all duration-500 overflow-hidden shadow-xl cursor-pointer ${activeIndex === i ? 'scale-125 border-amber-500 shadow-amber-500/20' : 'border-white dark:border-slate-800 grayscale opacity-60 hover:grayscale-0 hover:opacity-100'}`}>
                     <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
                   </div>
-                  <div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 bg-white dark:bg-slate-800 p-3 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none min-w-[150px]">
-                    <p className="font-bold text-xs text-slate-950 dark:text-white">{t.name}</p>
-                    <p className="text-[10px] text-slate-500">{t.role}</p>
-                  </div>
-                </div>
-              </motion.div>
+                </motion.div>
+              </div>
             );
           })}
+        </motion.div>
+
+        {/* Static Center Content */}
+        <div className="absolute z-20 pointer-events-none flex items-center justify-center">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeIndex}
+              initial={{ opacity: 0, scale: 0.9, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: -10 }}
+              className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-2xl p-10 rounded-full shadow-3xl border border-amber-500/10 text-center max-w-[320px] aspect-square flex flex-col items-center justify-center"
+            >
+              <Quote className="text-amber-600 mb-4 opacity-50" size={32} />
+              <p className="text-sm font-medium italic text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+                "{testimonialsData[activeIndex].quote}"
+              </p>
+              <div>
+                <p className="font-black text-xs text-slate-950 dark:text-white uppercase tracking-wider">{testimonialsData[activeIndex].name}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">{testimonialsData[activeIndex].role}</p>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>
