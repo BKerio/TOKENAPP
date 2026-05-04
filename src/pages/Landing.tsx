@@ -55,8 +55,8 @@ const Navbar: React.FC = () => {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${isScrolled
-          ? 'bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 py-3'
-          : 'bg-transparent py-6'
+        ? 'bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-slate-200/50 dark:border-slate-800/50 py-3'
+        : 'bg-transparent py-6'
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
@@ -171,15 +171,7 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/hero_bg.png"
-          alt="Smart Infrastructure"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-white dark:from-slate-950/30 dark:via-slate-950/10 dark:to-slate-950" />
-      </div>
+
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full py-20 text-center">
         <motion.div
