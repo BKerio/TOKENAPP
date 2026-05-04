@@ -181,39 +181,31 @@ const Hero: React.FC = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0 z-0">
-        <img
-          src="/hero_bg.png"
-          alt="Smart Infrastructure"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-white/30 via-white/10 to-white dark:from-slate-950/30 dark:via-slate-950/10 dark:to-slate-950" />
-      </div>
+
 
       {/* Meshed Design Blobs */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-50 dark:opacity-30">
-        <motion.div 
-          animate={{ 
-            x: [0, 100, -50, 0], 
+        <motion.div
+          animate={{
+            x: [0, 100, -50, 0],
             y: [0, -50, 100, 0],
             scale: [1, 1.2, 0.9, 1]
           }}
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-amber-500/20 blur-[120px]"
         />
-        <motion.div 
-          animate={{ 
-            x: [0, -80, 120, 0], 
+        <motion.div
+          animate={{
+            x: [0, -80, 120, 0],
             y: [0, 100, -80, 0],
             scale: [1, 0.9, 1.1, 1]
           }}
           transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
           className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/15 blur-[100px]"
         />
-        <motion.div 
-          animate={{ 
-            x: [0, 50, -100, 0], 
+        <motion.div
+          animate={{
+            x: [0, 50, -100, 0],
             y: [0, 120, 50, 0],
             scale: [1, 1.1, 0.8, 1]
           }}
@@ -261,9 +253,9 @@ const Hero: React.FC = () => {
           {/* Separated Search & History Controls */}
           <div className="max-w-4xl mx-auto mb-16">
             <div className="grid md:grid-cols-2 gap-6">
-              
+
               {/* Card 1: Find Tokens by Meter */}
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -5 }}
                 className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white dark:border-slate-800 shadow-2xl text-left"
               >
@@ -279,15 +271,15 @@ const Hero: React.FC = () => {
                 <form onSubmit={handleSearch} className="flex flex-col gap-3">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       value={query}
                       onChange={(e) => setQuery(e.target.value)}
                       placeholder="Enter Meter Number..."
                       className="w-full bg-white/50 dark:bg-slate-950/50 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
                     />
                   </div>
-                  <button 
+                  <button
                     type="submit"
                     disabled={loading}
                     className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 py-3 rounded-xl font-black transition-all flex items-center justify-center gap-2"
@@ -298,7 +290,7 @@ const Hero: React.FC = () => {
               </motion.div>
 
               {/* Card 2: Purchase History by Phone */}
-              <motion.div 
+              <motion.div
                 whileHover={{ y: -5 }}
                 className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-slate-800/50 shadow-2xl text-left"
               >
@@ -313,7 +305,7 @@ const Hero: React.FC = () => {
                 </div>
                 <div className="flex flex-col gap-3">
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Access your complete vending history and analytics in one tap.</p>
-                  <Link 
+                  <Link
                     to="/track-token"
                     className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white py-3 rounded-xl font-black border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-2"
                   >
@@ -358,8 +350,8 @@ const Hero: React.FC = () => {
                   ) : (
                     <p className="text-center py-8 text-slate-500">{error || 'No results found.'}</p>
                   )}
-                  <Link 
-                    to="/track-token" 
+                  <Link
+                    to="/track-token"
                     className="block text-center mt-6 text-sm font-bold text-amber-600 hover:underline"
                   >
                     View detailed history
@@ -558,7 +550,7 @@ const Testimonials: React.FC = () => {
           {/* Decorative Circles */}
           <div className="absolute inset-0 border-[1px] border-dashed border-slate-200 dark:border-slate-800 rounded-full" />
           <div className="absolute inset-20 border-[1px] border-dashed border-slate-200 dark:border-slate-800 rounded-full" />
-          
+
           {testimonialsData.map((t, i) => {
             const angle = (i * 360) / testimonialsData.length;
             return (
