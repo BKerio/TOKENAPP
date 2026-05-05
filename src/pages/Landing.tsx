@@ -12,7 +12,9 @@ import {
   ChevronDown,
   Search,
   Loader2,
-  Quote
+  Quote,
+  Copy,
+  Check
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -331,19 +333,43 @@ const Hero: React.FC = () => {
                   </div>
 
                   {results.length > 0 ? (
-                    <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="grid sm:grid-cols-2 gap-3">
                       {results.slice(0, 4).map((tx) => (
-                        <div key={tx._id} className="p-4 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[10px] font-black text-amber-600 uppercase tracking-widest">KES {tx.amount.toLocaleString()}</span>
-                            <span className="text-[10px] text-slate-400">{new Date(tx.created_at).toLocaleDateString()}</span>
+                        <motion.div
+                          key={tx._id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="relative p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group overflow-hidden"
+                        >
+                          {/* Visual Accent */}
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
+                          
+                          <div className="flex justify-between items-start mb-2 pl-2">
+                            <div>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Receipt</p>
+                              <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">KES {tx.amount.toLocaleString()}</span>
+                            </div>
+                            <div className="text-right">
+                              <span className="text-[9px] font-bold text-slate-400 block">{new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                              <span className="text-[8px] font-medium text-slate-500 block uppercase">Meter: {tx.meter?.meter_number.slice(-4) || '...'}</span>
+                            </div>
                           </div>
-                          <div className="flex justify-between items-end">
-                            <p className="font-mono text-sm font-bold text-slate-900 dark:text-white">
-                              {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'No Token'}
-                            </p>
+
+                          <div className="bg-amber-50 dark:bg-amber-500/5 rounded-lg p-2 mt-1 border border-amber-500/10 flex items-center justify-between group-hover:bg-amber-500/10 transition-colors">
+                            <code className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-500 tracking-wider">
+                              {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'VENDING...'}
+                            </code>
+                            <button 
+                              onClick={() => {
+                                if(tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
+                              }}
+                              className="p-1.5 hover:bg-amber-500/20 rounded-md transition-colors"
+                              title="Copy Token"
+                            >
+                              <Copy className="text-amber-600" size={12} />
+                            </button>
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   ) : (
