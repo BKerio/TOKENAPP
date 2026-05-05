@@ -56,10 +56,9 @@ const Navbar: React.FC = () => {
   }, []);
 
   const navLinks = [
-    { label: 'Products', href: '#products' },
-    { label: 'Solutions', href: '#solutions' },
-    { label: 'How It Works', href: '#how-it-works' },
-    { label: 'About', href: '#about' },
+    { label: 'Products', href: 'products' },
+    { label: 'How It Works', href: 'how-it-works' },
+    { label: 'Success Stories', href: 'testimonials' },
   ];
 
   return (
@@ -676,9 +675,9 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8">Quick Links</h4>
             <ul className="space-y-4 font-bold text-sm">
-              <li><a href="#products" className="hover:text-amber-500 transition-colors">Products</a></li>
-              <li><a href="#solutions" className="hover:text-amber-500 transition-colors">Solutions</a></li>
-              <li><a href="#how-it-works" className="hover:text-amber-500 transition-colors">How It Works</a></li>
+              <li><a href="products" className="hover:text-amber-500 transition-colors">Products</a></li>
+              <li><a href="solutions" className="hover:text-amber-500 transition-colors">Solutions</a></li>
+              <li><a href="how-it-works" className="hover:text-amber-500 transition-colors">How It Works</a></li>
               <li><Link to="/track-token" className="hover:text-amber-500 transition-colors">Track Token</Link></li>
             </ul>
           </div>
@@ -686,10 +685,10 @@ const Footer: React.FC = () => {
           <div>
             <h4 className="text-white font-black uppercase tracking-widest text-xs mb-8">Support</h4>
             <ul className="space-y-4 font-bold text-sm">
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Help Center</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">API Docs</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Terms of Service</a></li>
-              <li><a href="#" className="hover:text-amber-500 transition-colors">Privacy Policy</a></li>
+              <li><Link to="/help" className="hover:text-amber-500 transition-colors">Help Center</Link></li>
+              <li><Link to="/api-docs" className="hover:text-amber-500 transition-colors">API Docs</Link></li>
+              <li><Link to="/terms" className="hover:text-amber-500 transition-colors">Terms of Service</Link></li>
+              <li><Link to="/privacy" className="hover:text-amber-500 transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>

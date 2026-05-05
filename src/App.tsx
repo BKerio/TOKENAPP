@@ -30,6 +30,12 @@ import VendorApprovals from '@/pages/admin/VendorApprovals';
 import GlobalCallback from '@/pages/admin/GlobalCallback';
 import TrackToken from '@/pages/customer/TrackToken';
 
+// Support Pages
+import ApiDocs from '@/pages/support/ApiDocs';
+import PrivacyPolicy from '@/pages/support/PrivacyPolicy';
+import TermsOfService from '@/pages/support/TermsOfService';
+import HelpCenter from '@/pages/support/HelpCenter';
+
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
 
@@ -76,6 +82,13 @@ function App() {
               </Route>
               <Route path="/" element={<Landing />} />
               <Route path="/track-token" element={<TrackToken />} />
+              
+              {/* Support & Legal */}
+              <Route path="/api-docs" element={<ApiDocs />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/help" element={<HelpCenter />} />
+
               <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </div>
