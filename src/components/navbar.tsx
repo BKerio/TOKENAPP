@@ -35,9 +35,10 @@ interface NavbarProps {
   showSidebarToggle?: boolean;
   sidebarOpen?: boolean;
   onLogout?: () => void;
+  hideTopBar?: boolean;
 }
 
-const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = false, sidebarOpen, onLogout }: NavbarProps) => {
+const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = false, sidebarOpen, onLogout, hideTopBar = false }: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -133,7 +134,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
     setIsOpen(false);
   }, [location]);
 
-  const coverageBarHeight = 44;
+  const coverageBarHeight = hideTopBar ? 0 : 44;
   const navBarBaseHeight = scrolled ? 72 : 88;
   const totalHeaderHeight = coverageBarHeight + navBarBaseHeight;
 
@@ -144,35 +145,37 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
           }`}
       >
         {/* TOP BAR / COVERAGE BAR */}
-        <div
-          className="w-full bg-white/80 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md"
-          style={{ height: coverageBarHeight }}
-        >
-          <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between pointer-events-auto">
-            <div className="flex items-center gap-4 sm:gap-6">
-              <div className="flex items-center gap-2">
-                <img src={KenyaFlag} alt="Kenya" className="w-5 h-5 rounded-full object-cover shadow-sm ring-1 ring-slate-200 dark:ring-slate-700" />
-                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Kenya</span>
+        {!hideTopBar && (
+          <div
+            className="w-full bg-white/80 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md"
+            style={{ height: coverageBarHeight }}
+          >
+            <div className="max-w-7xl mx-auto h-full px-4 md:px-8 flex items-center justify-between pointer-events-auto">
+              <div className="flex items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-2">
+                  <img src={KenyaFlag} alt="Kenya" className="w-5 h-5 rounded-full object-cover shadow-sm ring-1 ring-slate-200 dark:ring-slate-700" />
+                  <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-none">Kenya</span>
+                </div>
+                <div className="hidden sm:flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-4">
+                  <Mail size={14} className="text-amber-500" />
+                  <span className="text-[10px] font-bold text-slate-500 tracking-wide">info@tokenpap.com</span>
+                </div>
               </div>
-              <div className="hidden sm:flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-4">
-                <Mail size={14} className="text-amber-500" />
-                <span className="text-[10px] font-bold text-slate-500 tracking-wide">info@tokenpap.com</span>
+              <div className="flex items-center gap-4">
+                <div className="hidden sm:flex items-center gap-2 text-slate-500">
+                  <Phone size={14} className="text-amber-500" />
+                  <span className="text-[10px] font-bold tracking-wide">+254 741 099 909</span>
+                </div>
+                <Link
+                  to="/contact"
+                  className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-wider transition-colors shadow-sm"
+                >
+                  Support
+                </Link>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2 text-slate-500">
-                <Phone size={14} className="text-amber-500" />
-                <span className="text-[10px] font-bold tracking-wide">+254 741 099 909</span>
-              </div>
-              <Link
-                to="/contact"
-                className="bg-amber-500 hover:bg-amber-600 text-white px-3 py-1.5 rounded-sm text-[9px] font-black uppercase tracking-wider transition-colors shadow-sm"
-              >
-                Support
-              </Link>
             </div>
           </div>
-        </div>
+        )}
 
         {/* MAIN NAVIGATION BAR */}
         <motion.nav
