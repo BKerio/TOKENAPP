@@ -95,27 +95,52 @@ const HelpCenter: React.FC = () => {
         </div>
 
         {/* Contact Support */}
-        <div className="mt-32 text-center">
+        <div className="mt-32 text-center pb-20">
           <h2 className="text-2xl font-black mb-12">Still need help?</h2>
           <div className="flex flex-wrap justify-center gap-8">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-amber-500/20">
+            {/* WhatsApp Chat */}
+            <a 
+              href="https://wa.me/254741099909" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex items-center gap-4 bg-emerald-500/5 hover:bg-emerald-500/10 p-4 rounded-3xl transition-colors border border-emerald-500/10"
+            >
+              <div className="w-12 h-12 bg-emerald-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-emerald-500/20">
                 <MessageCircle />
               </div>
               <div className="text-left">
-                <p className="text-xs font-black uppercase text-slate-400">Live Chat</p>
-                <p className="font-bold">Available 24/7</p>
+                <p className="text-xs font-black uppercase text-emerald-600">WhatsApp Chat</p>
+                <p className="font-bold">Chat with us now</p>
               </div>
-            </div>
-            <div className="flex items-center gap-4">
+            </a>
+
+            {/* Email Support */}
+            <a 
+              href="mailto:info@tokenpap.com"
+              className="flex items-center gap-4 bg-amber-500/5 hover:bg-amber-500/10 p-4 rounded-3xl transition-colors border border-amber-500/10"
+            >
+              <div className="w-12 h-12 bg-amber-500 text-white rounded-full flex items-center justify-center shadow-lg shadow-amber-500/20">
+                <Search />
+              </div>
+              <div className="text-left">
+                <p className="text-xs font-black uppercase text-amber-600">Email Support</p>
+                <p className="font-bold">info@tokenpap.com</p>
+              </div>
+            </a>
+
+            {/* Call Support */}
+            <a 
+              href="tel:+254741099909"
+              className="flex items-center gap-4 bg-slate-900/5 hover:bg-slate-900/10 p-4 rounded-3xl transition-colors border border-slate-900/10"
+            >
               <div className="w-12 h-12 bg-slate-950 text-white rounded-full flex items-center justify-center shadow-lg">
                 <Phone />
               </div>
               <div className="text-left">
                 <p className="text-xs font-black uppercase text-slate-400">Call Us</p>
-                <p className="font-bold">+254 700 000 000</p>
+                <p className="font-bold">+254 741 099 909</p>
               </div>
-            </div>
+            </a>
           </div>
         </div>
       </div>

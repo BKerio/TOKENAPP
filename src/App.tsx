@@ -38,12 +38,14 @@ import HelpCenter from '@/pages/support/HelpCenter';
 
 import { AccessibilityProvider } from '@/components/ui/AccessibilityContext';
 import { AccessibilityMenu } from '@/components/ui/AccessibilityMenu';
+import ScrollToTop from '@/components/ScrollToTop';
 
 function App() {
   return (
     <AccessibilityProvider>
       <ThemeProvider defaultTheme="light">
         <Router future={{ v7_relativeSplatPath: true }}>
+          <ScrollToTop />
           <div className='min-h-screen bg-white dark:bg-gray-900'>
             <AccessibilityMenu />
             <Routes>

@@ -58,7 +58,7 @@ const PrivacyPolicy: React.FC = () => {
             <p className="text-sm text-slate-500 mb-6">
               If you have any questions or concerns regarding this policy, please contact our data protection officer.
             </p>
-            <a href="mailto:privacy@tokenpap.com" className="text-amber-600 font-bold hover:underline">privacy@tokenpap.com</a>
+            <a href="mailto:info@tokenpap.com" className="text-amber-600 font-bold hover:underline">info@tokenpap.com</a>
           </div>
         </motion.div>
       </div>

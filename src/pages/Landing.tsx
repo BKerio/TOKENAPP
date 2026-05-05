@@ -663,12 +663,25 @@ const Footer: React.FC = () => {
               Leading the smart utility revolution in East Africa.
               Efficiency, Transparency, Precision.
             </p>
-            <div className="flex gap-4">
-              {[Phone, Mail, MapPin].map((Icon, i) => (
-                <div key={i} className="w-10 h-10 rounded-full border border-slate-800 flex items-center justify-center hover:bg-amber-500 hover:text-slate-950 transition-all cursor-pointer">
-                  <Icon size={18} />
+            <div className="space-y-4">
+              <div className="flex items-center gap-4 text-slate-400 font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-amber-500">
+                  <Phone size={18} />
                 </div>
-              ))}
+                <span>+254 741 099 909</span>
+              </div>
+              <div className="flex items-center gap-4 text-slate-400 font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-amber-500">
+                  <Mail size={18} />
+                </div>
+                <span>info@tokenpap.com</span>
+              </div>
+              <div className="flex items-center gap-4 text-slate-400 font-bold text-sm">
+                <div className="w-10 h-10 rounded-xl bg-slate-900 flex items-center justify-center text-amber-500">
+                  <MapPin size={18} />
+                </div>
+                <span>Nairobi, Kenya</span>
+              </div>
             </div>
           </div>
 
