@@ -14,7 +14,6 @@ import {
   Loader2,
   Quote,
   Copy,
-  Check
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -343,7 +342,7 @@ const Hero: React.FC = () => {
                         >
                           {/* Visual Accent */}
                           <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
-                          
+
                           <div className="flex justify-between items-start mb-2 pl-2">
                             <div>
                               <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Receipt</p>
@@ -359,9 +358,9 @@ const Hero: React.FC = () => {
                             <code className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-500 tracking-wider">
                               {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'VENDING...'}
                             </code>
-                            <button 
+                            <button
                               onClick={() => {
-                                if(tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
+                                if (tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
                               }}
                               className="p-1.5 hover:bg-amber-500/20 rounded-md transition-colors"
                               title="Copy Token"
