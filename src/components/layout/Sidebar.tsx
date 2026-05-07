@@ -118,7 +118,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     const result = await Swal.fire({
       title: 'Ready to leave?',
-      text: 'You are about to sign out of tokenpap.',
+      text: 'You are about to sign out of tokenpap?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
