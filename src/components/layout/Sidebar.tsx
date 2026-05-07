@@ -122,7 +122,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: isDarkMode ? '#334155' : '#94a3b8',
+      cancelButtonColor: isDarkMode ? '#335543' : '#94a3b8',
       confirmButtonText: 'Sign Out',
       cancelButtonText: 'Stay',
       background: isDarkMode ? '#020617' : '#ffffff', // slate-950 or white
