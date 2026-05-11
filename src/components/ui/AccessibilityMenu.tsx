@@ -144,11 +144,11 @@ export const AccessibilityMenu = () => {
       <AnimatePresence>
         {isOpen && (
           <motion.div 
-            initial={{ x: '-100%' }}
+            initial={{ x: '100%' }}
             animate={{ x: 0 }}
-            exit={{ x: '-100%' }}
+            exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed z-[1000] top-0 left-0 h-full w-[360px] bg-white dark:bg-slate-900 shadow-[10px_0_30px_rgba(0,0,0,0.1)] flex flex-col border-r border-slate-200 dark:border-slate-800"
+            className="fixed z-[1000] top-0 right-0 h-full w-[360px] bg-white dark:bg-slate-900 shadow-[-10px_0_30px_rgba(0,0,0,0.1)] flex flex-col border-l border-slate-200 dark:border-slate-800"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-slate-800">
