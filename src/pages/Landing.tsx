@@ -153,22 +153,7 @@ const Navbar: React.FC = () => {
   );
 };
 
-const useMousePosition = () => {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({
-        x: (e.clientX / window.innerWidth - 0.5) * 40,
-        y: (e.clientY / window.innerHeight - 0.5) * 40,
-      });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  return mousePosition;
-};
 
 const DeviceMockups = () => {
   return (
@@ -326,7 +311,6 @@ const DeviceMockups = () => {
 };
 
 const Hero: React.FC = () => {
-  const mouse = useMousePosition();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Transaction[]>([]);
@@ -359,35 +343,20 @@ const Hero: React.FC = () => {
            style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
       />
 
-      {/* Meshed Design Blobs */}
+      {/* Meshed Design Blobs - Static */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-50 dark:opacity-40">
-        <motion.div
-          animate={{
-            x: [0, -120, 80, 0],
-            y: [0, 150, -100, 0],
-            scale: [1, 0.8, 1.2, 1],
-            rotate: [0, -90, -180, 0]
-          }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[10%] -right-[15%] w-[50%] h-[50%] rounded-full bg-indigo-500/20 blur-[120px]"
-        />
+        <div className="absolute top-[10%] -right-[15%] w-[50%] h-[50%] rounded-full bg-indigo-500/20 blur-[120px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full py-12">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <motion.div
-            animate={{ x: mouse.x * -0.1, y: mouse.y * -0.1 }}
-            className="text-center lg:text-left"
-          >
+          <div className="text-center lg:text-left">
 
             <h1 className="text-5xl md:text-6xl lg:text-8xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter leading-[0.95] drop-shadow-2xl">
               Save More <span className="relative inline-block">
                 <i className="font-serif italic font-light text-amber-600">Every Month</i>
                 <svg className="absolute -bottom-2 left-0 w-full h-3 overflow-visible pointer-events-none" viewBox="0 0 200 20" fill="none">
-                  <motion.path
-                    initial={{ pathLength: 0, opacity: 0 }}
-                    animate={{ pathLength: 1, opacity: 1 }}
-                    transition={{ duration: 1.5, delay: 0.8, ease: "easeInOut" }}
+                  <path
                     d="M5 15C35 12 65 18 95 15C125 12 155 18 195 13"
                     stroke="currentColor"
                     strokeWidth="6"
@@ -409,10 +378,7 @@ const Hero: React.FC = () => {
               <div className="grid md:grid-cols-2 gap-6">
 
                 {/* Card 1: Find Tokens by Meter */}
-                <motion.div
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none text-left relative overflow-hidden group"
-                >
+                <div className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none text-left relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-5">
@@ -445,13 +411,10 @@ const Hero: React.FC = () => {
                       </button>
                     </form>
                   </div>
-                </motion.div>
+                </div>
 
                 {/* Card 2: Purchase History by Phone */}
-                <motion.div
-                  whileHover={{ y: -8, scale: 1.02 }}
-                  className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.2rem] border border-white/50 dark:border-white/5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-none text-left relative overflow-hidden group"
-                >
+                <div className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.2rem] border border-white/50 dark:border-white/5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-none text-left relative overflow-hidden group">
                   <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   <div className="relative z-10">
                     <div className="flex items-center gap-3 mb-5">
@@ -474,106 +437,90 @@ const Hero: React.FC = () => {
                       </Link>
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
               </div>
 
-              {/* Results Area (Shared or Specific) */}
-              <AnimatePresence>
-                {hasSearched && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="mt-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-left overflow-hidden z-50 relative"
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
-                      <button onClick={() => setHasSearched(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">Clear</button>
-                    </div>
+              {/* Results Area */}
+              {hasSearched && (
+                <div className="mt-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-left overflow-hidden z-50 relative">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
+                    <button onClick={() => setHasSearched(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">Clear</button>
+                  </div>
 
-                    {results.length > 0 ? (
-                      <div className="grid sm:grid-cols-2 gap-3">
-                        {results.slice(0, 4).map((tx) => (
-                          <motion.div
-                            key={tx._id}
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="relative p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group overflow-hidden"
-                          >
-                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
-                            <div className="flex justify-between items-start mb-2 pl-2">
-                              <div>
-                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Receipt</p>
-                                <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">KES {tx.amount.toLocaleString()}</span>
-                              </div>
-                              <div className="text-right">
-                                <span className="text-[9px] font-bold text-slate-400 block">{new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
-                                <span className="text-[8px] font-medium text-slate-500 block uppercase">Meter: {tx.meter?.meter_number.slice(-4) || '...'}</span>
-                              </div>
+                  {results.length > 0 ? (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {results.slice(0, 4).map((tx) => (
+                        <div
+                          key={tx._id}
+                          className="relative p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group overflow-hidden"
+                        >
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
+                          <div className="flex justify-between items-start mb-2 pl-2">
+                            <div>
+                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Receipt</p>
+                              <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">KES {tx.amount.toLocaleString()}</span>
                             </div>
-                            <div className="bg-amber-50 dark:bg-amber-500/5 rounded-lg p-2 mt-1 border border-amber-500/10 flex items-center justify-between group-hover:bg-amber-500/10 transition-colors">
-                              <code className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-500 tracking-wider">
-                                {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'VENDING...'}
-                              </code>
-                              <button
-                                onClick={() => {
-                                  if (tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
-                                }}
-                                className="p-1.5 hover:bg-amber-500/20 rounded-md transition-colors"
-                                title="Copy Token"
-                              >
-                                <Copy className="text-amber-600" size={12} />
-                              </button>
+                            <div className="text-right">
+                              <span className="text-[9px] font-bold text-slate-400 block">{new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                              <span className="text-[8px] font-medium text-slate-500 block uppercase">Meter: {tx.meter?.meter_number.slice(-4) || '...'}</span>
                             </div>
-                          </motion.div>
-                        ))}
-                      </div>
-                    ) : (
-                      <p className="text-center py-8 text-slate-500">{error || 'No results found.'}</p>
-                    )}
-                    <Link
-                      to="/track-token"
-                      className="block text-center mt-6 text-sm font-bold text-amber-600 hover:underline"
-                    >
-                      View detailed history
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                          </div>
+                          <div className="bg-amber-50 dark:bg-amber-500/5 rounded-lg p-2 mt-1 border border-amber-500/10 flex items-center justify-between group-hover:bg-amber-500/10 transition-colors">
+                            <code className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-500 tracking-wider">
+                              {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'VENDING...'}
+                            </code>
+                            <button
+                              onClick={() => {
+                                if (tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
+                              }}
+                              className="p-1.5 hover:bg-amber-500/20 rounded-md transition-colors"
+                              title="Copy Token"
+                            >
+                              <Copy className="text-amber-600" size={12} />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-center py-8 text-slate-500">{error || 'No results found.'}</p>
+                  )}
+                  <Link
+                    to="/track-token"
+                    className="block text-center mt-6 text-sm font-bold text-amber-600 hover:underline"
+                  >
+                    View detailed history
+                  </Link>
+                </div>
+              )}
             </div>
 
-            {/* Floating Feature Icons */}
+            {/* Feature Icons */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5 max-w-xl mx-auto lg:mx-0">
               {[
                 { icon: <Zap className="text-amber-500" />, label: 'Prepaid Power', color: 'amber' },
                 { icon: <Droplets className="text-blue-500" />, label: 'Smart Water', color: 'blue' },
                 { icon: <Shield className="text-emerald-500" />, label: 'STS Secured', color: 'emerald' },
               ].map((item, i) => (
-                <motion.div
+                <div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.5 + (i * 0.1) }}
-                  whileHover={{ scale: 1.05, y: -5 }}
-                  className="flex items-center gap-4 p-4 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white dark:border-white/10 shadow-lg shadow-black/5 hover:shadow-amber-500/5 transition-all"
+                  className="flex items-center gap-4 p-4 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white dark:border-white/10 shadow-lg shadow-black/5 transition-all"
                 >
                   <div className={`w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-inner flex items-center justify-center shrink-0`}>
                     {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
                   </div>
                   <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight">{item.label}</span>
-                </motion.div>
+                </div>
               ))}
             </div>
-          </motion.div>
+          </div>
 
           {/* Right Column: Device Mockups */}
-          <motion.div 
-            animate={{ x: mouse.x * 0.2, y: mouse.y * 0.2 }}
-            className="hidden lg:block relative"
-          >
+          <div className="hidden lg:block relative">
             <DeviceMockups />
-          </motion.div>
+          </div>
         </div>
       </div>
 
