@@ -352,7 +352,7 @@ const Hero: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div className="text-center lg:text-left">
 
-            <h1 className="text-5xl md:text-6xl lg:text-8xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter leading-[0.95] drop-shadow-2xl">
+            <h1 className="text-5xl md:text-6xl lg:text-8xl font-normal text-slate-950 dark:text-white mb-8 tracking-tighter leading-[0.95] drop-shadow-2xl">
               Save More <span className="relative inline-block">
                 <i className="font-serif italic font-light text-amber-600">Every Month</i>
                 <svg className="absolute -bottom-2 left-0 w-full h-3 overflow-visible pointer-events-none" viewBox="0 0 200 20" fill="none">
@@ -518,7 +518,7 @@ const Hero: React.FC = () => {
           </div>
 
           {/* Right Column: Device Mockups */}
-          <div className="hidden lg:block relative">
+          <div className="relative flex justify-center w-full mt-[-60px] mb-[-200px] sm:mt-0 sm:mb-[-80px] lg:mt-0 lg:mb-0 scale-[0.55] sm:scale-[0.8] lg:scale-100 origin-top">
             <DeviceMockups />
           </div>
         </div>
