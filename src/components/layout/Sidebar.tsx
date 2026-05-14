@@ -62,7 +62,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'System Configuration', icon: ShieldCheck, path: '/dashboard/system-config' },
     { name: 'Callback Settings', icon: ShieldCheck, path: '/dashboard/callback-settings' },
     { name: 'Public Enquiries', icon: MessageSquare, path: '/dashboard/inqueries' },
-    { name: 'Lipia Token na Mpesa', icon: Zap, path: '/dashboard/lipa-mpesa' },
+    { name: 'Lipa Tokens na Mpesa', icon: Zap, path: '/dashboard/lipa-mpesa' },
     { name: 'Purchase History', icon: Clock, path: '/dashboard/purchase-history' },
     { name: 'Branding', icon: Building2, path: '/dashboard/branding' },
     { name: 'Account Settings', icon: User, path: '/dashboard/account' },
@@ -90,7 +90,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     // Admin/SuperAdmin see everything (except the restricted items above and customer specific items)
     if (user.role === 'admin' || user.role === 'system_admin' || user.roles?.includes('admin')) {
-      return !['Lipia Token na Mpesa', 'Purchase History', 'My Properties'].includes(link.name);
+      return !['Lipa Tokens na Mpesa', 'Purchase History', 'My Properties'].includes(link.name);
     }
 
     // Vendor specific view (Meter Management shown as "My Meters" via linkDisplayName)
@@ -100,7 +100,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     // Customer specific view
     if (user.role === 'customer') {
-      return ['Dashboard', 'Account Settings', 'Lipia Token na Mpesa', 'Purchase History'].includes(link.name);
+      return ['Dashboard', 'Account Settings', 'Lipa Tokens na Mpesa', 'Purchase History'].includes(link.name);
     }
 
     // Landlord-specific view — only Dashboard + Account Settings + Properties
