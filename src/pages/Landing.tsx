@@ -153,7 +153,180 @@ const Navbar: React.FC = () => {
   );
 };
 
+const useMousePosition = () => {
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 40,
+        y: (e.clientY / window.innerHeight - 0.5) * 40,
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  return mousePosition;
+};
+
+const DeviceMockups = () => {
+  return (
+    <div className="relative w-full h-[600px] flex items-center justify-center pointer-events-none">
+      {/* Background Glow - Static */}
+      <div className="absolute inset-0 bg-amber-500/5 blur-[120px] rounded-full" />
+
+      {/* Tablet (Large Device) - Replicating the Dashboard */}
+      <div 
+        className="absolute z-10 w-[420px] h-[540px] bg-[#f8fafc] dark:bg-slate-900 rounded-[2.5rem] border-[12px] border-slate-800 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5)] overflow-hidden"
+        style={{ transform: 'translateX(0px) translateY(-100px) rotate(-2deg)' }}
+      >
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent z-20" />
+        
+        {/* Mock Screen Content */}
+        <div className="relative h-full flex flex-col z-10 text-slate-900 dark:text-white">
+          {/* Dashboard Header */}
+          <div className="bg-white dark:bg-slate-800 px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+             <TokenPapLogo className="h-5" />
+             <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-slate-950 font-black text-xs">BK</div>
+             </div>
+          </div>
+
+          <div className="flex-1 p-6 space-y-4 overflow-hidden">
+            {/* Assigned Meter Card */}
+            <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm flex items-center justify-between">
+               <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center text-white font-bold text-xs">BK</div>
+                  <div>
+                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-tight">My Assigned Meter</p>
+                     <p className="text-xs font-black">6007270***009</p>
+                  </div>
+               </div>
+               <div className="text-right">
+                  <p className="text-[8px] font-bold text-slate-400 uppercase">Total Spent</p>
+                  <p className="text-sm font-black text-amber-600">Ksh 780.00</p>
+               </div>
+            </div>
+
+            {/* Status Row */}
+            <div className="grid grid-cols-2 gap-3">
+               {[
+                 { label: 'Meter Status', value: 'Active', icon: <Zap size={10} className="text-green-500" /> },
+                 { label: 'Transactions', value: '5', icon: <TrendingUp size={10} className="text-blue-500" /> },
+               ].map((item, i) => (
+                 <div key={i} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 flex items-center gap-3">
+                    <div className="w-6 h-6 rounded-lg bg-slate-50 dark:bg-slate-900 flex items-center justify-center">{item.icon}</div>
+                    <div>
+                       <p className="text-[7px] font-bold text-slate-400 uppercase">{item.label}</p>
+                       <p className="text-[10px] font-black">{item.value}</p>
+                    </div>
+                 </div>
+               ))}
+            </div>
+
+            {/* Latest Token Card */}
+            <div className="bg-slate-900 dark:bg-slate-950 p-5 rounded-2xl text-white relative overflow-hidden">
+               <div className="absolute top-0 right-0 p-3 opacity-20"><Zap size={40} /></div>
+               <div className="relative z-10">
+                  <p className="text-[9px] font-black text-amber-500 uppercase mb-2">Latest Token</p>
+                  <div className="bg-white/10 p-3 rounded-lg border border-white/10 mb-3">
+                     <p className="font-mono text-xs tracking-widest">7890-4861-7234-9285-5435</p>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <span className="text-[9px] text-slate-400">May 12, 2026</span>
+                     <span className="text-xs font-black text-amber-500">Ksh 120</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Recent Transactions List */}
+            <div className="space-y-2">
+               <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Recent Transactions</p>
+               {[1, 1, 2].map((amt, i) => (
+                 <div key={i} className="bg-white dark:bg-slate-800 p-3 rounded-xl border border-slate-50 dark:border-slate-700 flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                       <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600"><Zap size={10} /></div>
+                       <div>
+                          <p className="text-[10px] font-black">Ksh {amt}</p>
+                          <p className="text-[7px] text-slate-400">May {12 - i}, 2026</p>
+                       </div>
+                    </div>
+                    <span className="text-[7px] font-black text-green-500 uppercase tracking-widest">Success</span>
+                 </div>
+               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Phone (Small Device) - Replicating Mobile View */}
+      <div 
+        className="absolute z-20 w-[200px] h-[430px] bg-white dark:bg-slate-950 rounded-[2.8rem] border-[8px] border-slate-900 shadow-[0_40px_80px_-15px_rgba(0,0,0,0.6)] overflow-hidden"
+        style={{ transform: 'translateX(100px) translateY(-240px) rotate(6deg)' }}
+      >
+        {/* Notch */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-slate-900 rounded-b-2xl z-30" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent z-20" />
+        
+        {/* Mock Screen Content */}
+        <div className="relative h-full flex flex-col pt-12 z-10 text-slate-900 dark:text-white">
+          <div className="px-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center">
+             <div className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 flex flex-col justify-center items-center gap-0.5">
+                <div className="w-3 h-0.5 bg-slate-400" />
+                <div className="w-3 h-0.5 bg-slate-400" />
+             </div>
+             <TokenPapLogo className="h-4" />
+             <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-slate-950 text-[10px] font-black">BK</div>
+          </div>
+          
+          <div className="p-5 space-y-5">
+             <div className="text-center">
+                <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest">My Assigned Meter</p>
+                <p className="text-[11px] font-black text-slate-900 dark:text-white">6007270***0009</p>
+             </div>
+
+             <div className="bg-slate-900 dark:bg-slate-800 p-4 rounded-2xl text-center shadow-lg shadow-amber-500/10">
+                <p className="text-[12px] font-black text-white mb-1">Ksh 780.00</p>
+                <p className="text-[7px] font-bold text-slate-400 uppercase">Total Spent</p>
+             </div>
+
+             <button className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 py-3 rounded-xl font-black text-[10px] uppercase shadow-lg shadow-amber-500/20 transition-transform active:scale-95 flex items-center justify-center gap-2">
+                <Zap size={12} fill="currentColor" />
+                purchase token
+             </button>
+
+             <div className="space-y-3">
+                <p className="text-[8px] font-black text-slate-400 uppercase">Latest Activity</p>
+                <div className="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                   <div className="flex items-center gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-600"><Zap size={10} /></div>
+                      <div>
+                         <p className="text-[9px] font-black">Ksh 120.00</p>
+                         <p className="text-[6px] text-slate-400">May 12, 2026</p>
+                      </div>
+                   </div>
+                   <span className="text-[6px] font-black text-green-500 uppercase">Success</span>
+                </div>
+             </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="mt-auto bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 p-3 flex justify-around">
+             {[1,2,3,4].map(i => (
+                <div key={i} className="w-5 h-5 rounded-lg bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                   <div className="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600" />
+                </div>
+             ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Hero: React.FC = () => {
+  const mouse = useMousePosition();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<Transaction[]>([]);
@@ -180,233 +353,228 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-
+    <section className="relative min-h-screen flex items-center justify-center pt-8 overflow-hidden bg-white dark:bg-slate-950">
+      {/* Background Grid Pattern */}
+      <div className="absolute inset-0 z-0 opacity-[0.03] dark:opacity-[0.08] pointer-events-none" 
+           style={{ backgroundImage: 'radial-gradient(#000 1px, transparent 1px)', backgroundSize: '40px 40px' }} 
+      />
 
       {/* Meshed Design Blobs */}
-      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-50 dark:opacity-30">
+      <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-50 dark:opacity-40">
         <motion.div
           animate={{
-            x: [0, 100, -50, 0],
-            y: [0, -50, 100, 0],
-            scale: [1, 1.2, 0.9, 1]
+            x: [0, -120, 80, 0],
+            y: [0, 150, -100, 0],
+            scale: [1, 0.8, 1.2, 1],
+            rotate: [0, -90, -180, 0]
           }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full bg-amber-500/20 blur-[120px]"
-        />
-        <motion.div
-          animate={{
-            x: [0, -80, 120, 0],
-            y: [0, 100, -80, 0],
-            scale: [1, 0.9, 1.1, 1]
-          }}
-          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
-          className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] rounded-full bg-indigo-500/15 blur-[100px]"
-        />
-        <motion.div
-          animate={{
-            x: [0, 50, -100, 0],
-            y: [0, 120, 50, 0],
-            scale: [1, 1.1, 0.8, 1]
-          }}
-          transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-[10%] left-[20%] w-[45%] h-[45%] rounded-full bg-rose-500/10 blur-[130px]"
+          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute top-[10%] -right-[15%] w-[50%] h-[50%] rounded-full bg-indigo-500/20 blur-[120px]"
         />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full py-20 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="max-w-4xl mx-auto"
-        >
-          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-500 text-xs font-black uppercase tracking-[0.2em] mb-8">
-            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-            Smart Utility Evolution
-          </span>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8 w-full py-12">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <motion.div
+            animate={{ x: mouse.x * -0.1, y: mouse.y * -0.1 }}
+            className="text-center lg:text-left"
+          >
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter leading-[0.95]">
-            Save More <span className="relative inline-block">
-              <i className="font-serif italic font-light text-amber-600">Every Month</i>
-              <svg className="absolute -bottom-2 left-0 w-full h-3 overflow-visible pointer-events-none" viewBox="0 0 200 20" fill="none">
-                <motion.path
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 1.2, delay: 0.8, ease: "easeOut" }}
-                  d="M5 15C35 12 65 18 95 15C125 12 155 18 195 13"
-                  stroke="currentColor"
-                  strokeWidth="6"
-                  strokeLinecap="round"
-                  className="text-amber-500/40 dark:text-amber-400/30"
-                />
-              </svg>
-            </span> <br />
-            With Smart Meters
-          </h1>
+            <h1 className="text-5xl md:text-6xl lg:text-8xl font-black text-slate-950 dark:text-white mb-8 tracking-tighter leading-[0.95] drop-shadow-2xl">
+              Save More <span className="relative inline-block">
+                <i className="font-serif italic font-light text-amber-600">Every Month</i>
+                <svg className="absolute -bottom-2 left-0 w-full h-3 overflow-visible pointer-events-none" viewBox="0 0 200 20" fill="none">
+                  <motion.path
+                    initial={{ pathLength: 0, opacity: 0 }}
+                    animate={{ pathLength: 1, opacity: 1 }}
+                    transition={{ duration: 1.5, delay: 0.8, ease: "easeInOut" }}
+                    d="M5 15C35 12 65 18 95 15C125 12 155 18 195 13"
+                    stroke="currentColor"
+                    strokeWidth="6"
+                    strokeLinecap="round"
+                    className="text-amber-500/40 dark:text-amber-400/30"
+                  />
+                </svg>
+              </span> <br />
+              With Smart Meters
+            </h1>
 
-          <p className="text-xl text-slate-700 dark:text-slate-300 mb-12 max-w-2xl mx-auto leading-relaxed">
-            Revolutionize your utility management with TokenPap.
-            Precision-engineered prepaid meters for water and electricity.
-          </p>
+            <p className="text-xl text-slate-700 dark:text-slate-300 mb-12 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+              Revolutionize your utility management with TokenPap.
+              Precision-engineered prepaid meters for water and electricity.
+            </p>
 
-          {/* Separated Search & History Controls */}
-          <div className="max-w-4xl mx-auto mb-16">
-            <div className="grid md:grid-cols-2 gap-6">
+            {/* Separated Search & History Controls */}
+            <div className="max-w-2xl mx-auto lg:mx-0 mb-16">
+              <div className="grid md:grid-cols-2 gap-6">
 
-              {/* Card 1: Find Tokens by Meter */}
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white dark:border-slate-800 shadow-2xl text-left"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-slate-950">
-                    <Zap size={20} />
+                {/* Card 1: Find Tokens by Meter */}
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="p-6 bg-white/60 dark:bg-slate-900/60 backdrop-blur-2xl rounded-[2rem] border border-white dark:border-white/10 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-none text-left relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-slate-950 shadow-lg shadow-amber-500/30">
+                        <Zap size={22} fill="currentColor" />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-slate-950 dark:text-white uppercase tracking-tight text-sm">Meter Search</h3>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Instant Retrieval</p>
+                      </div>
+                    </div>
+                    <form onSubmit={handleSearch} className="flex flex-col gap-4">
+                      <div className="relative">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <input
+                          type="text"
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          placeholder="Enter Meter Number..."
+                          className="w-full bg-white dark:bg-slate-950/80 pl-12 pr-4 py-3.5 rounded-2xl border border-slate-200 dark:border-white/5 focus:outline-none focus:ring-2 focus:ring-amber-500/50 transition-all font-medium placeholder:text-slate-400"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 py-3.5 rounded-2xl font-black transition-all flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 active:scale-95"
+                      >
+                        {loading ? <Loader2 className="animate-spin" size={18} /> : 'Fetch Token'}
+                        {!loading && <ArrowRight size={18} />}
+                      </button>
+                    </form>
                   </div>
-                  <div>
-                    <h3 className="font-black text-slate-950 dark:text-white uppercase tracking-tight">Meter Search</h3>
-                    <p className="text-xs text-slate-500">Find your latest 20-digit token</p>
+                </motion.div>
+
+                {/* Card 2: Purchase History by Phone */}
+                <motion.div
+                  whileHover={{ y: -8, scale: 1.02 }}
+                  className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-[2.2rem] border border-white/50 dark:border-white/5 shadow-[0_30px_60px_-15px_rgba(0,0,0,0.08)] dark:shadow-none text-left relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 shadow-sm">
+                        <TrendingUp size={22} />
+                      </div>
+                      <div>
+                        <h3 className="font-black text-slate-950 dark:text-white uppercase tracking-tight text-sm">Latest History</h3>
+                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Smart Insights</p>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                      <p className="text-[13px] text-slate-600 dark:text-slate-400 mb-1 leading-snug">Access your complete vending history and advanced consumption analytics.</p>
+                      <Link
+                        to="/track-token"
+                        className="w-full bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-900 dark:text-white py-3.5 rounded-2xl font-black border border-slate-200 dark:border-white/5 transition-all flex items-center justify-center gap-2 shadow-sm"
+                      >
+                        Track Insights
+                        <ArrowRight size={18} />
+                      </Link>
+                    </div>
                   </div>
-                </div>
-                <form onSubmit={handleSearch} className="flex flex-col gap-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                    <input
-                      type="text"
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      placeholder="Enter Meter Number..."
-                      className="w-full bg-white/50 dark:bg-slate-950/50 pl-10 pr-4 py-3 rounded-xl border border-slate-200 dark:border-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/50"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 py-3 rounded-xl font-black transition-all flex items-center justify-center gap-2"
+                </motion.div>
+
+              </div>
+
+              {/* Results Area (Shared or Specific) */}
+              <AnimatePresence>
+                {hasSearched && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="mt-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-left overflow-hidden z-50 relative"
                   >
-                    {loading ? <Loader2 className="animate-spin" size={18} /> : 'Fetch Token'}
-                  </button>
-                </form>
-              </motion.div>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
+                      <button onClick={() => setHasSearched(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">Clear</button>
+                    </div>
 
-              {/* Card 2: Purchase History by Phone */}
-              <motion.div
-                whileHover={{ y: -5 }}
-                className="p-6 bg-white/40 dark:bg-slate-900/40 backdrop-blur-xl rounded-3xl border border-white/50 dark:border-slate-800/50 shadow-2xl text-left"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
-                    <TrendingUp size={20} />
-                  </div>
-                  <div>
-                    <h3 className="font-black text-slate-950 dark:text-white uppercase tracking-tight">Latest History</h3>
-                    <p className="text-xs text-slate-500">View recent purchase trends</p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">Access your complete vending history and analytics in one tap.</p>
-                  <Link
-                    to="/track-token"
-                    className="w-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-900 dark:text-white py-3 rounded-xl font-black border border-slate-200 dark:border-slate-700 transition-all flex items-center justify-center gap-2"
-                  >
-                    Track All Tokens
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
-              </motion.div>
-
+                    {results.length > 0 ? (
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {results.slice(0, 4).map((tx) => (
+                          <motion.div
+                            key={tx._id}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            className="relative p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group overflow-hidden"
+                          >
+                            <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
+                            <div className="flex justify-between items-start mb-2 pl-2">
+                              <div>
+                                <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Receipt</p>
+                                <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">KES {tx.amount.toLocaleString()}</span>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-[9px] font-bold text-slate-400 block">{new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
+                                <span className="text-[8px] font-medium text-slate-500 block uppercase">Meter: {tx.meter?.meter_number.slice(-4) || '...'}</span>
+                              </div>
+                            </div>
+                            <div className="bg-amber-50 dark:bg-amber-500/5 rounded-lg p-2 mt-1 border border-amber-500/10 flex items-center justify-between group-hover:bg-amber-500/10 transition-colors">
+                              <code className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-500 tracking-wider">
+                                {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'VENDING...'}
+                              </code>
+                              <button
+                                onClick={() => {
+                                  if (tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
+                                }}
+                                className="p-1.5 hover:bg-amber-500/20 rounded-md transition-colors"
+                                title="Copy Token"
+                              >
+                                <Copy className="text-amber-600" size={12} />
+                              </button>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-center py-8 text-slate-500">{error || 'No results found.'}</p>
+                    )}
+                    <Link
+                      to="/track-token"
+                      className="block text-center mt-6 text-sm font-bold text-amber-600 hover:underline"
+                    >
+                      View detailed history
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Results Area (Shared or Specific) */}
-            <AnimatePresence>
-              {hasSearched && (
+            {/* Floating Feature Icons */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 max-w-xl mx-auto lg:mx-0">
+              {[
+                { icon: <Zap className="text-amber-500" />, label: 'Prepaid Power', color: 'amber' },
+                { icon: <Droplets className="text-blue-500" />, label: 'Smart Water', color: 'blue' },
+                { icon: <Shield className="text-emerald-500" />, label: 'STS Secured', color: 'emerald' },
+              ].map((item, i) => (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="mt-6 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-2xl p-6 text-left overflow-hidden z-50"
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + (i * 0.1) }}
+                  whileHover={{ scale: 1.05, y: -5 }}
+                  className="flex items-center gap-4 p-4 rounded-3xl bg-white/40 dark:bg-white/5 backdrop-blur-xl border border-white dark:border-white/10 shadow-lg shadow-black/5 hover:shadow-amber-500/5 transition-all"
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
-                    <button onClick={() => setHasSearched(false)} className="text-slate-400 hover:text-slate-600 transition-colors text-sm">Clear</button>
+                  <div className={`w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 shadow-inner flex items-center justify-center shrink-0`}>
+                    {React.cloneElement(item.icon as React.ReactElement, { size: 20 })}
                   </div>
-
-                  {results.length > 0 ? (
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {results.slice(0, 4).map((tx) => (
-                        <motion.div
-                          key={tx._id}
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          className="relative p-3 bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-all group overflow-hidden"
-                        >
-                          {/* Visual Accent */}
-                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-500" />
-
-                          <div className="flex justify-between items-start mb-2 pl-2">
-                            <div>
-                              <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none mb-1">Receipt</p>
-                              <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">KES {tx.amount.toLocaleString()}</span>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-[9px] font-bold text-slate-400 block">{new Date(tx.created_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</span>
-                              <span className="text-[8px] font-medium text-slate-500 block uppercase">Meter: {tx.meter?.meter_number.slice(-4) || '...'}</span>
-                            </div>
-                          </div>
-
-                          <div className="bg-amber-50 dark:bg-amber-500/5 rounded-lg p-2 mt-1 border border-amber-500/10 flex items-center justify-between group-hover:bg-amber-500/10 transition-colors">
-                            <code className="font-mono text-[11px] font-black text-amber-700 dark:text-amber-500 tracking-wider">
-                              {tx.tokens[0] ? tx.tokens[0].match(/.{1,4}/g)?.join('-') : 'VENDING...'}
-                            </code>
-                            <button
-                              onClick={() => {
-                                if (tx.tokens[0]) navigator.clipboard.writeText(tx.tokens[0]);
-                              }}
-                              className="p-1.5 hover:bg-amber-500/20 rounded-md transition-colors"
-                              title="Copy Token"
-                            >
-                              <Copy className="text-amber-600" size={12} />
-                            </button>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-center py-8 text-slate-500">{error || 'No results found.'}</p>
-                  )}
-                  <Link
-                    to="/track-token"
-                    className="block text-center mt-6 text-sm font-bold text-amber-600 hover:underline"
-                  >
-                    View detailed history
-                  </Link>
+                  <span className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tighter leading-tight">{item.label}</span>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              ))}
+            </div>
+          </motion.div>
 
-          {/* Floating Feature Icons */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-3xl mx-auto">
-            {[
-              { icon: <Zap className="text-amber-500" />, label: 'Prepaid Power' },
-              { icon: <Droplets className="text-blue-500" />, label: 'Smart Water' },
-              { icon: <Shield className="text-emerald-500" />, label: 'STS Secured' },
-            ].map((item, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 + (i * 0.1) }}
-                className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm border border-white/20 dark:border-slate-800/20"
-              >
-                <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-800 shadow-lg flex items-center justify-center">
-                  {item.icon}
-                </div>
-                <span className="text-sm font-bold text-slate-900 dark:text-white">{item.label}</span>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+          {/* Right Column: Device Mockups */}
+          <motion.div 
+            animate={{ x: mouse.x * 0.2, y: mouse.y * 0.2 }}
+            className="hidden lg:block relative"
+          >
+            <DeviceMockups />
+          </motion.div>
+        </div>
       </div>
 
       {/* Decorative Bottom Wave */}
