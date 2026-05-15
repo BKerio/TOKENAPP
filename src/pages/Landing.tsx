@@ -106,6 +106,7 @@ const Navbar: React.FC = () => {
     { label: 'Products', href: 'products' },
     { label: 'How It Works', href: 'how-it-works' },
     { label: 'Success Stories', href: 'testimonials' },
+    { label: 'Contact Us', href: 'contact' },
   ];
 
   return (
