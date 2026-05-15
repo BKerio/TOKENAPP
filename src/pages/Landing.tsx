@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Zap,
   TrendingUp,
@@ -48,6 +48,49 @@ interface Transaction {
 }
 
 // --- Components ---
+const Counter = ({ target, suffix = "", duration = 2000 }: { target: number; suffix?: string; duration?: number }) => {
+  const [count, setCount] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 } 
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => {
+      if (ref.current) observer.unobserve(ref.current);
+    };
+  }, []); 
+
+  useEffect(() => {
+    if (!isVisible || target <= 0) return;
+
+    const startTime = performance.now();
+    const updateCount = (currentTime: number) => {
+      const elapsedTime = currentTime - startTime;
+      const progress = Math.min(elapsedTime / duration, 1);
+      const currentCount = Math.floor(progress * target);
+
+      setCount(isFinite(currentCount) ? currentCount : target); 
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCount);
+      } else {
+        setCount(target); 
+      }
+    };
+
+    requestAnimationFrame(updateCount);
+    return () => {}; 
+  }, [target, duration, isVisible]);
+
+  const displayCount = isFinite(count) ? count : 0;
+  return <span ref={ref}>{displayCount}{suffix}</span>;
+};
 
 const Navbar: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -535,10 +578,10 @@ const Hero: React.FC = () => {
 
 const StatsBar: React.FC = () => {
   const stats = [
-    { value: '500+', label: 'Smart Meters Deployed' },
-    { value: '120+', label: 'Enterprise Customers' },
-    { value: '6+', label: 'Innovations Hub' },
-    { value: '99.9%', label: 'Uptime Probability' },
+    { value: 500, suffix: '+', label: 'Smart Meters Deployed' },
+    { value: 120, suffix: '+', label: 'Enterprise Customers' },
+    { value: 6, suffix: '+', label: 'Innovations Hub' },
+    { value: 99.9, suffix: '%', label: 'Uptime Probability' },
   ];
 
   return (
@@ -546,7 +589,9 @@ const StatsBar: React.FC = () => {
       <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 md:p-12 border border-slate-200 dark:border-slate-800 shadow-2xl grid grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((stat, i) => (
           <div key={i} className="text-center lg:border-r last:border-0 border-slate-100 dark:border-slate-800 px-4">
-            <h3 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white mb-2">{stat.value}</h3>
+            <h3 className="text-4xl md:text-5xl font-black text-slate-950 dark:text-white mb-2">
+              <Counter target={stat.value} suffix={stat.suffix} />
+            </h3>
             <p className="text-xs font-black uppercase tracking-widest text-slate-400">{stat.label}</p>
           </div>
         ))}
