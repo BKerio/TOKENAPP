@@ -64,8 +64,8 @@ const vendorAbbr = useMemo(() => {
     return token.match(/.{1,4}/g)?.join('-') || token;
   };
 
-  // Calculate quick stats
-  const totalSpent = recentTransactions
+  // Calculate quick stats - prioritize backend total_spent if available
+  const totalSpent = user?.total_spent ?? recentTransactions
     .filter((tx: any) => tx.status === 'success')
     .reduce((acc: number, tx: any) => acc + (tx.amount || 0), 0);
     
