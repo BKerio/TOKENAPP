@@ -31,6 +31,9 @@ import PicDrone from "@/assets/testimonials/Picture5.png";
 import PicSign from "@/assets/testimonials/signvrse.png";
 import PicIndo from "@/assets/testimonials/Picture18.png";
 
+// --- Images ---
+import MeterImage from '@/assets/smart_meter.avif';
+
 // --- Types ---
 interface Transaction {
   _id: string;
@@ -501,8 +504,8 @@ const Hero: React.FC = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 gap-5 max-w-xl mx-auto lg:mx-0">
               {[
                 { icon: <Zap className="text-amber-500" />, label: 'Prepaid Power', color: 'amber' },
-                { icon: <Droplets className="text-blue-500" />, label: 'Smart Water', color: 'blue' },
-                { icon: <Shield className="text-emerald-500" />, label: 'STS Secured', color: 'emerald' },
+                { icon: <Droplets className="text-amber-500" />, label: 'Smart Water', color: 'blue' },
+                { icon: <Shield className="text-amber-500" />, label: 'STS Secured', color: 'emerald' },
               ].map((item, i) => (
                 <div
                   key={i}
@@ -564,13 +567,13 @@ const Features: React.FC = () => {
       icon: <Droplets size={32} />,
       title: "Smart Water Control",
       description: "Leak detection, remote valve control, and consumption analytics. The future of water management.",
-      color: "bg-blue-500"
+      color: "bg-amber-500"
     },
     {
       icon: <Wifi size={32} />,
       title: "IoT Connectivity",
       description: "LoRa and NB-IoT connected meters for real-time monitoring and automatic remote reading.",
-      color: "bg-emerald-500"
+      color: "bg-amber-500"
     }
   ];
 
@@ -605,9 +608,10 @@ const Features: React.FC = () => {
           <div className="relative">
             <div className="aspect-square bg-slate-100 dark:bg-slate-900 rounded-[3rem] overflow-hidden shadow-3xl">
               <img
-                src="https://images.pexels.com/photos/9875441/pexels-photo-9875441.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                //src="https://images.pexels.com/photos/9875441/pexels-photo-9875441.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                src={MeterImage}
                 alt="Smart Meter Technology"
-                className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                className="w-full h-full object-cover"
               />
             </div>
             {/* Floating Overlay Card */}
