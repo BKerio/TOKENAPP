@@ -117,13 +117,13 @@ const LipaTokenNaMpesa = () => {
 
         if (pollingStoppedRef.current) return;
 
-        if (status === "confirmed") {
+        if (status === "confirmed" && tokens && tokens.length > 0) {
           pollingStoppedRef.current = true;
           setPaymentResult({
             status: 'confirmed',
             amount: paidAmount,
             mpesaReceipt: mpesa_receipt,
-            tokens: tokens || [],
+            tokens: tokens,
             meterNumber,
           });
           setLoading(false);
