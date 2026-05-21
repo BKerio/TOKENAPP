@@ -1,10 +1,27 @@
 import { useState, useEffect, useRef, FormEvent } from "react";
 import api from "@/lib/api";
-import { Gauge, Loader2, Smartphone, CheckCircle2, XCircle, Clock, Copy, Check } from "lucide-react";
+import {
+  Gauge,
+  Loader2,
+  Smartphone,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Copy,
+  Check,
+  CreditCard,
+  Zap,
+  Building2,
+  Hash,
+  ChevronRight,
+  Info,
+  Shield,
+} from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 
-type PaymentStatus = 'idle' | 'sending' | 'waiting' | 'confirmed' | 'failed' | 'timeout';
+type PaymentStatus = "idle" | "sending" | "waiting" | "confirmed" | "failed" | "timeout";
+type PaymentMethod = "stk" | "paybill";
 
 interface PaymentResult {
   status: PaymentStatus;
@@ -15,6 +32,8 @@ interface PaymentResult {
   meterNumber?: string;
 }
 
+const NCBA_BUSINESS_NUMBER = "880100";
+
 const LipaTokenNaMpesa = () => {
   const { user } = useAuth();
   const [phone, setPhone] = useState("");
@@ -22,27 +41,32 @@ const LipaTokenNaMpesa = () => {
   const [meterNumber, setMeterNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [minAmount, setMinAmount] = useState<number>(1);
-  const [validationErrors, setValidationErrors] = useState<{ phone?: string; amount?: string; meterNumber?: string; [key: string]: any }>({});
+  const [validationErrors, setValidationErrors] = useState<{
+    phone?: string;
+    amount?: string;
+    meterNumber?: string;
+    [key: string]: any;
+  }>({});
   const [pollingError, setPollingError] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stk");
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
-  const [paymentResult, setPaymentResult] = useState<PaymentResult>({ status: 'idle' });
+  const [paymentResult, setPaymentResult] = useState<PaymentResult>({ status: "idle" });
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pollingStoppedRef = useRef<boolean>(false);
 
-
-  // Cleanup polling on unmount
   useEffect(() => {
     return () => {
       if (pollingRef.current) clearInterval(pollingRef.current);
     };
   }, []);
 
-  // Auto-fetch meter number for customers
   useEffect(() => {
-    if (user && user.role === 'customer') {
-      api.get("/admin/me")
-        .then(res => {
+    if (user && user.role === "customer") {
+      api
+        .get("/admin/me")
+        .then((res) => {
           const meter = res.data.user?.meter;
           if (meter && meter.meter_number) {
             setMeterNumber(meter.meter_number);
@@ -52,34 +76,30 @@ const LipaTokenNaMpesa = () => {
           }
           if (res.data.user?.phone) {
             let displayPhone = res.data.user.phone;
-            if (displayPhone.startsWith('254')) {
-              displayPhone = '0' + displayPhone.slice(3);
+            if (displayPhone.startsWith("254")) {
+              displayPhone = "0" + displayPhone.slice(3);
             }
             setPhone(displayPhone);
           }
         })
-        .catch(err => console.error("Failed to fetch customer details", err));
+        .catch((err) => console.error("Failed to fetch customer details", err));
     }
   }, [user]);
 
   const validateInputs = () => {
     const errors: { phone?: string; amount?: string; meterNumber?: string } = {};
-
     if (!/^(01|07)\d{8}$/.test(phone)) {
       errors.phone = "Enter valid phone number (0712345678)";
     }
-
     const numericAmount = Number(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
       errors.amount = "Enter valid amount";
     } else if (numericAmount < minAmount) {
       errors.amount = `Minimum purchase amount is KES ${minAmount}`;
     }
-
     if (!meterNumber || meterNumber.trim().length < 5) {
       errors.meterNumber = "Enter a valid meter number";
     }
-
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -91,70 +111,66 @@ const LipaTokenNaMpesa = () => {
     });
   };
 
+  const copyField = (value: string, key: string) => {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedField(key);
+      setTimeout(() => setCopiedField(null), 2000);
+    });
+  };
+
   const startPolling = (checkoutRequestId: string) => {
     let attempts = 0;
-    const maxAttempts = 10; // With 25s long-polling, 10 attempts cover >4 minutes
+    const maxAttempts = 10;
 
     pollingStoppedRef.current = false;
-    setPaymentResult({ status: 'waiting', meterNumber });
+    setPaymentResult({ status: "waiting", meterNumber });
     setPollingError(null);
 
     const poll = async () => {
       if (pollingStoppedRef.current || attempts >= maxAttempts) {
         if (attempts >= maxAttempts && !pollingStoppedRef.current) {
-          setPaymentResult({ status: 'timeout', meterNumber });
+          setPaymentResult({ status: "timeout", meterNumber });
           setLoading(false);
         }
         return;
       }
-
       attempts++;
-
       try {
-        // Long poll: backend will wait up to 25s for the callback
         const response = await api.get(`/mpesa/query/${checkoutRequestId}?wait=1`);
-        const { status, amount: paidAmount, mpesa_receipt, failure_reason, result_desc, tokens } = response.data;
-
+        const { status, amount: paidAmount, mpesa_receipt, failure_reason, result_desc, tokens } =
+          response.data;
         if (pollingStoppedRef.current) return;
-
         if (status === "confirmed" && tokens && tokens.length > 0) {
           pollingStoppedRef.current = true;
           setPaymentResult({
-            status: 'confirmed',
+            status: "confirmed",
             amount: paidAmount,
             mpesaReceipt: mpesa_receipt,
-            tokens: tokens,
+            tokens,
             meterNumber,
           });
           setLoading(false);
         } else if (status === "failed") {
           pollingStoppedRef.current = true;
           setPaymentResult({
-            status: 'failed',
+            status: "failed",
             failureReason: failure_reason || result_desc || "Transaction failed",
             meterNumber,
           });
           setLoading(false);
         } else {
-          // Still pending or server timeout (25s reached), poll again immediately
           poll();
         }
       } catch (error: any) {
         console.error("Polling error", error);
-        
-        // Detailed error message if available
         const msg = error.response?.data?.message || error.message || "Connection issue";
         setPollingError(`Retrying... (${msg})`);
-
-        // Wait 2s before retrying on network error to avoid infinite loop
         if (!pollingStoppedRef.current) {
           setTimeout(poll, 2000);
         }
       }
     };
 
-    // Initial delay of 2s to allow Safaricom to process the request
-    // and for the user to potentially interact before hitting the backend.
     setTimeout(() => {
       poll();
     }, 2000);
@@ -164,358 +180,491 @@ const LipaTokenNaMpesa = () => {
     e.preventDefault();
     setValidationErrors({});
     if (!validateInputs()) return;
-
     setLoading(true);
-    setPaymentResult({ status: 'sending' });
-
+    setPaymentResult({ status: "sending" });
     try {
       const formattedPhone = "254" + phone.slice(-9);
       const numericAmount = Number(amount);
-
       const response = await api.post("/mpesa/stkpush", {
         phone: formattedPhone,
         amount: numericAmount,
-        reference: meterNumber
+        reference: meterNumber,
       });
-
       const { CheckoutRequestID } = response.data || {};
-
       if (CheckoutRequestID) {
         startPolling(CheckoutRequestID);
       } else {
         throw new Error("Missing CheckoutRequestID");
       }
-
     } catch (error: any) {
       console.error(error);
-      
       const backendData = error.response?.data;
-      const errorMessage = backendData?.message || 
-                         backendData?.response?.errorMessage || 
-                         backendData?.response?.customerMessage ||
-                         'Unable to initiate payment. Please try again later.';
-      
-      // If backend returns validation errors (422), map them
+      const errorMessage =
+        backendData?.message ||
+        backendData?.response?.errorMessage ||
+        backendData?.response?.customerMessage ||
+        "Unable to initiate payment. Please try again later.";
       if (error.response?.status === 422 && backendData.errors) {
         setValidationErrors(backendData.errors);
       }
-
-      setPaymentResult({
-        status: 'failed',
-        failureReason: errorMessage,
-      });
+      setPaymentResult({ status: "failed", failureReason: errorMessage });
       setLoading(false);
     }
   };
 
   const resetPayment = () => {
-    setPaymentResult({ status: 'idle' });
+    setPaymentResult({ status: "idle" });
     setAmount("");
     setCopiedToken(null);
   };
 
+  const paybillSteps = [
+    { icon: "1", label: "Open M-Pesa", desc: "Go to M-Pesa on your phone" },
+    { icon: "2", label: "Lipa na M-Pesa", desc: "Select 'Lipa na M-Pesa'" },
+    { icon: "3", label: "Select Paybill", desc: "Choose 'Paybill' option" },
+    {
+      icon: "4",
+      label: "Business Number",
+      desc: (
+        <span>
+          Enter <span className="font-bold text-[#0A1F44] dark:text-blue-300">{NCBA_BUSINESS_NUMBER}</span>
+        </span>
+      ),
+    },
+    {
+      icon: "5",
+      label: "Account Number",
+      desc: (
+        <span>
+          Enter your meter number{" "}
+          {meterNumber && (
+            <span className="font-bold text-[#0A1F44] dark:text-blue-300">{meterNumber}</span>
+          )}
+        </span>
+      ),
+    },
+    { icon: "6", label: "Enter Amount & PIN", desc: "Enter the amount and confirm with your M-Pesa PIN" },
+  ];
+
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-100 dark:bg-slate-950 transition">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-950 transition">
+      <div className="w-full max-w-md">
 
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-8">
-
-        {/* Logo */}
-        <div className="text-center mb-8">
-         
-          <h1 className="text-3xl font-bold text-[#0A1F44] dark:text-white">
-            Buy Tokens with M-Pesa
-          </h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-2">
-            Enter your details to receive a payment prompt
+        {/* Header */}
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-bold text-[#0A1F44] dark:text-white">Buy Tokens with M-Pesa</h1>
+          <p className="text-slate-500 dark:text-slate-400 mt-1 text-sm">
+            Choose your preferred payment method
           </p>
         </div>
 
-        {/* Real-time Status Panel */}
+        {/* Method Tabs */}
+        <div className="flex gap-2 mb-5 bg-white dark:bg-slate-900 p-1.5 rounded-2xl shadow border border-slate-200 dark:border-slate-800">
+          <button
+            onClick={() => { setPaymentMethod("stk"); resetPayment(); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              paymentMethod === "stk"
+                ? "bg-[#0A1F44] text-white shadow-md"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            <Zap className="w-4 h-4" />
+            STK Push
+          </button>
+          <button
+            onClick={() => { setPaymentMethod("paybill"); resetPayment(); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold transition-all duration-200 ${
+              paymentMethod === "paybill"
+                ? "bg-[#0A1F44] text-white shadow-md"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            Paybill (NCBA)
+          </button>
+        </div>
+
         <AnimatePresence mode="wait">
-          {paymentResult.status !== 'idle' && (
+
+          {/* ── STK PUSH PANEL ── */}
+          {paymentMethod === "stk" && (
             <motion.div
-              key={paymentResult.status}
-              initial={{ opacity: 0, y: -10, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.97 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6"
+              key="stk"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ duration: 0.25 }}
+              className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-8"
             >
-              {/* Sending STK Push */}
-              {paymentResult.status === 'sending' && (
-                <div className="rounded-2xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/80 dark:bg-blue-950/40 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Loader2 className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 dark:text-gray-900 text-sm">Sending M-Pesa Prompt</p>
-                      <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-0.5">Connecting to Safaricom...</p>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-2 mb-5">
+                <div className="p-2 bg-[#0A1F44]/10 rounded-xl">
+                  <Zap className="w-5 h-5 text-[#0A1F44] dark:text-blue-300" />
                 </div>
-              )}
-
-              {/* Waiting for user to enter PIN */}
-              {paymentResult.status === 'waiting' && (
-                <div className="rounded-2xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/80 dark:bg-amber-950/30 p-5">
-                  <div className="flex items-center gap-3">
-                    <div className="relative">
-                      <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">Waiting for Payment</p>
-                      <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Check your phone and enter M-Pesa PIN</p>
-                    </div>
-                  </div>
-                  {/* Animated progress dots */}
-                  <div className="mt-3 flex justify-center gap-1.5">
-                    {[0, 1, 2, 3, 4].map((i) => (
-                      <motion.span
-                        key={i}
-                        className="w-2 h-2 rounded-full bg-amber-400 dark:bg-amber-500"
-                        animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
-                        transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.15 }}
-                      />
-                    ))}
-                  </div>
-
-                  {/* Polling Error indicator */}
-                  {pollingError && (
-                    <motion.div 
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-3 px-3 py-1.5 rounded-lg bg-white/50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/20 flex items-center justify-center gap-2 shadow-sm"
-                    >
-                      <Loader2 className="w-3 h-3 text-amber-600 animate-spin" />
-                      <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tight">{pollingError}</span>
-                    </motion.div>
-                  )}
+                <div>
+                  <p className="font-bold text-[#0A1F44] dark:text-white text-sm">Instant STK Push</p>
+                  <p className="text-xs text-slate-400">Receive prompt on your phone automatically</p>
                 </div>
-              )}
+              </div>
 
-              {/* Payment Confirmed */}
-              {paymentResult.status === 'confirmed' && (
-                <div className="rounded-2xl border border-[#0A1F44]/20 dark:border-[#0A1F44]/50 bg-[#0A1F44]/5 dark:bg-[#0A1F44]/20 p-5 space-y-4">
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    >
-                      <CheckCircle2 className="w-7 h-7 text-[#0A1F44] dark:text-blue-300" />
-                    </motion.div>
-                    <div>
-                      <p className="font-bold text-[#0A1F44] dark:text-blue-200 text-sm">Payment Successful</p>
-                      <p className="text-xs text-[#0A1F44]/70 dark:text-blue-300/70 mt-0.5">
-                        KES {paymentResult.amount} received
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Receipt Details */}
-                  <div className="space-y-2 text-xs">
-                    {paymentResult.mpesaReceipt && (
-                      <div className="flex justify-between items-center py-1.5 px-3 rounded-lg bg-[#0A1F44]/8 dark:bg-[#0A1F44]/20">
-                        <span className="text-[#0A1F44] dark:text-blue-300 font-medium">M-Pesa Receipt Number</span>
-                        <span className="font-mono font-bold text-[#0A1F44] dark:text-blue-100">{paymentResult.mpesaReceipt}</span>
+              {/* Status Panel */}
+              <AnimatePresence mode="wait">
+                {paymentResult.status !== "idle" && (
+                  <motion.div
+                    key={paymentResult.status}
+                    initial={{ opacity: 0, y: -10, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.97 }}
+                    transition={{ duration: 0.3 }}
+                    className="mb-6"
+                  >
+                    {paymentResult.status === "sending" && (
+                      <div className="rounded-2xl border border-blue-200 dark:border-blue-800/50 bg-blue-50/80 dark:bg-blue-950/40 p-5">
+                        <div className="flex items-center gap-3">
+                          <Loader2 className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" />
+                          <div>
+                            <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm">Sending M-Pesa Prompt</p>
+                            <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-0.5">Connecting to Safaricom...</p>
+                          </div>
+                        </div>
                       </div>
                     )}
-                    {paymentResult.meterNumber && (
-                      <div className="flex justify-between items-center py-1.5 px-3 rounded-lg bg-[#0A1F44]/8 dark:bg-[#0A1F44]/20">
-                        <span className="text-[#0A1F44] dark:text-blue-300 font-medium">Meter Number(DRN/PAN)</span>
-                        <span className="font-mono font-bold text-[#0A1F44] dark:text-blue-100">{paymentResult.meterNumber}</span>
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Generated Tokens */}
-                  {paymentResult.tokens && paymentResult.tokens.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs font-semibold text-[#0A1F44] dark:text-blue-300 uppercase tracking-wider">Your Token(s)</p>
-                      {paymentResult.tokens.map((token, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: idx * 0.1 }}
-                          className="flex items-center justify-between gap-2 p-3 rounded-xl bg-[#0A1F44]/8 dark:bg-[#0A1F44]/30 border border-[#0A1F44]/20 dark:border-[#0A1F44]/40"
-                        >
-                          <span className="font-mono text-sm font-bold text-[#0A1F44] dark:text-blue-100 tracking-wider break-all">
-                            {token.replace(/(.{4})/g, '$1-').replace(/-$/, '')}
-                          </span>
-                          <button
-                            onClick={() => copyToken(token)}
-                            className="shrink-0 p-1.5 rounded-lg hover:bg-[#0A1F44]/15 dark:hover:bg-[#0A1F44]/40 transition-colors"
-                            title="Copy token"
+                    {paymentResult.status === "waiting" && (
+                      <div className="rounded-2xl border border-amber-200 dark:border-amber-800/50 bg-amber-50/80 dark:bg-amber-950/30 p-5">
+                        <div className="flex items-center gap-3">
+                          <div className="relative">
+                            <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-amber-500 rounded-full animate-pulse" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-amber-800 dark:text-amber-300 text-sm">Waiting for Payment</p>
+                            <p className="text-xs text-amber-600/70 dark:text-amber-400/70 mt-0.5">Check your phone and enter M-Pesa PIN</p>
+                          </div>
+                        </div>
+                        <div className="mt-3 flex justify-center gap-1.5">
+                          {[0, 1, 2, 3, 4].map((i) => (
+                            <motion.span
+                              key={i}
+                              className="w-2 h-2 rounded-full bg-amber-400 dark:bg-amber-500"
+                              animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+                              transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.15 }}
+                            />
+                          ))}
+                        </div>
+                        {pollingError && (
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mt-3 px-3 py-1.5 rounded-lg bg-white/50 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/20 flex items-center justify-center gap-2"
                           >
-                            {copiedToken === token ? (
-                              <Check className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" />
-                            ) : (
-                              <Copy className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" />
-                            )}
-                          </button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  )}
+                            <Loader2 className="w-3 h-3 text-amber-600 animate-spin" />
+                            <span className="text-[10px] font-bold text-amber-700 dark:text-amber-400 uppercase tracking-tight">{pollingError}</span>
+                          </motion.div>
+                        )}
+                      </div>
+                    )}
 
-                  <button
-                    onClick={resetPayment}
-                    className="w-full mt-2 py-2.5 text-sm font-semibold text-white bg-[#0A1F44] hover:bg-[#081735] rounded-xl border border-[#0A1F44] transition-colors"
-                  >
-                    Make Another Purchase
-                  </button>
-                </div>
-              )}
+                    {paymentResult.status === "confirmed" && (
+                      <div className="rounded-2xl border border-[#0A1F44]/20 dark:border-[#0A1F44]/50 bg-[#0A1F44]/5 dark:bg-[#0A1F44]/20 p-5 space-y-4">
+                        <div className="flex items-center gap-3">
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 15 }}>
+                            <CheckCircle2 className="w-7 h-7 text-[#0A1F44] dark:text-blue-300" />
+                          </motion.div>
+                          <div>
+                            <p className="font-bold text-[#0A1F44] dark:text-blue-200 text-sm">Payment Successful</p>
+                            <p className="text-xs text-[#0A1F44]/70 dark:text-blue-300/70 mt-0.5">KES {paymentResult.amount} received</p>
+                          </div>
+                        </div>
+                        <div className="space-y-2 text-xs">
+                          {paymentResult.mpesaReceipt && (
+                            <div className="flex justify-between items-center py-1.5 px-3 rounded-lg bg-[#0A1F44]/8 dark:bg-[#0A1F44]/20">
+                              <span className="text-[#0A1F44] dark:text-blue-300 font-medium">M-Pesa Receipt</span>
+                              <span className="font-mono font-bold text-[#0A1F44] dark:text-blue-100">{paymentResult.mpesaReceipt}</span>
+                            </div>
+                          )}
+                          {paymentResult.meterNumber && (
+                            <div className="flex justify-between items-center py-1.5 px-3 rounded-lg bg-[#0A1F44]/8 dark:bg-[#0A1F44]/20">
+                              <span className="text-[#0A1F44] dark:text-blue-300 font-medium">Meter (DRN/PAN)</span>
+                              <span className="font-mono font-bold text-[#0A1F44] dark:text-blue-100">{paymentResult.meterNumber}</span>
+                            </div>
+                          )}
+                        </div>
+                        {paymentResult.tokens && paymentResult.tokens.length > 0 && (
+                          <div className="space-y-2">
+                            <p className="text-xs font-semibold text-[#0A1F44] dark:text-blue-300 uppercase tracking-wider">Your Token(s)</p>
+                            {paymentResult.tokens.map((token, idx) => (
+                              <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="flex items-center justify-between gap-2 p-3 rounded-xl bg-[#0A1F44]/8 dark:bg-[#0A1F44]/30 border border-[#0A1F44]/20 dark:border-[#0A1F44]/40"
+                              >
+                                <span className="font-mono text-sm font-bold text-[#0A1F44] dark:text-blue-100 tracking-wider break-all">
+                                  {token.replace(/(.{4})/g, "$1-").replace(/-$/, "")}
+                                </span>
+                                <button onClick={() => copyToken(token)} className="shrink-0 p-1.5 rounded-lg hover:bg-[#0A1F44]/15 dark:hover:bg-[#0A1F44]/40 transition-colors" title="Copy token">
+                                  {copiedToken === token ? <Check className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" /> : <Copy className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" />}
+                                </button>
+                              </motion.div>
+                            ))}
+                          </div>
+                        )}
+                        <button onClick={resetPayment} className="w-full mt-2 py-2.5 text-sm font-semibold text-white bg-[#0A1F44] hover:bg-[#081735] rounded-xl border border-[#0A1F44] transition-colors">
+                          Make Another Purchase
+                        </button>
+                      </div>
+                    )}
 
-              {/* Payment Failed */}
-              {paymentResult.status === 'failed' && (
-                <div className="rounded-2xl border border-red-200 dark:border-red-800/50 bg-red-50/80 dark:bg-red-950/30 p-5 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 15 }}
-                    >
-                      <XCircle className="w-7 h-7 text-red-500 dark:text-red-400" />
-                    </motion.div>
-                    <div>
-                      <p className="font-bold text-red-800 dark:text-red-300 text-sm">Payment Failed</p>
-                      <p className="text-xs text-red-600/80 dark:text-red-400/70 mt-0.5">
-                        {paymentResult.failureReason}
-                      </p>
+                    {paymentResult.status === "failed" && (
+                      <div className="rounded-2xl border border-red-200 dark:border-red-800/50 bg-red-50/80 dark:bg-red-950/30 p-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 15 }}>
+                            <XCircle className="w-7 h-7 text-red-500 dark:text-red-400" />
+                          </motion.div>
+                          <div>
+                            <p className="font-bold text-red-800 dark:text-red-300 text-sm">Payment Failed</p>
+                            <p className="text-xs text-red-600/80 dark:text-red-400/70 mt-0.5">{paymentResult.failureReason}</p>
+                          </div>
+                        </div>
+                        <button onClick={resetPayment} className="w-full py-2.5 text-sm font-semibold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-xl border border-red-200 dark:border-red-800/50 transition-colors">
+                          Try Again
+                        </button>
+                      </div>
+                    )}
+
+                    {paymentResult.status === "timeout" && (
+                      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-5 space-y-3">
+                        <div className="flex items-center gap-3">
+                          <Clock className="w-6 h-6 text-slate-500 dark:text-slate-400" />
+                          <div>
+                            <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">Payment Pending</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">We haven't received confirmation yet. Check your M-Pesa SMS shortly.</p>
+                          </div>
+                        </div>
+                        <button onClick={resetPayment} className="w-full py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                          Try Again
+                        </button>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* STK Form */}
+              {paymentResult.status !== "confirmed" && (
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div>
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">M-Pesa Phone to receive prompt</label>
+                    <div className="relative">
+                      <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="tel"
+                        placeholder="0712345678"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44] ${validationErrors.phone ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
+                        disabled={loading}
+                      />
                     </div>
+                    {validationErrors.phone && <p className="text-xs text-red-500 mt-1">{validationErrors.phone}</p>}
                   </div>
-                  <button
-                    onClick={resetPayment}
-                    className="w-full py-2.5 text-sm font-semibold text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/30 hover:bg-red-200 dark:hover:bg-red-900/50 rounded-xl border border-red-200 dark:border-red-800/50 transition-colors"
-                  >
-                    Try Again
-                  </button>
-                </div>
-              )}
 
-              {/* Timeout */}
-              {paymentResult.status === 'timeout' && (
-                <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/80 dark:bg-slate-800/40 p-5 space-y-3">
-                  <div className="flex items-center gap-3">
-                    <Clock className="w-6 h-6 text-slate-500 dark:text-slate-400" />
-                    <div>
-                      <p className="font-bold text-slate-700 dark:text-slate-300 text-sm">Payment Pending</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                        We haven't received confirmation yet. Please check your M-Pesa SMS shortly.
-                      </p>
+                  <div>
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">Meter Number</label>
+                    <div className="relative">
+                      <Gauge className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="14123456789"
+                        value={meterNumber}
+                        onChange={(e) => setMeterNumber(e.target.value)}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44] ${validationErrors.meterNumber ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
+                        readOnly={true}
+                        disabled={loading}
+                      />
                     </div>
+                    {validationErrors.meterNumber && <p className="text-xs text-red-500 mt-1">{validationErrors.meterNumber}</p>}
                   </div>
+
+                  <div>
+                    <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">Amount (KES)</label>
+                    <div className="relative">
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">KSh</span>
+                      <input
+                        type="number"
+                        placeholder={`${minAmount}`}
+                        min={minAmount}
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44] ${validationErrors.amount ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
+                        disabled={loading}
+                      />
+                    </div>
+                    {validationErrors.amount ? (
+                      <p className="text-xs text-red-500 mt-1">{validationErrors.amount}</p>
+                    ) : (
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Minimum purchase: KES {minAmount}</p>
+                    )}
+                  </div>
+
                   <button
-                    onClick={resetPayment}
-                    className="w-full py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors"
+                    type="submit"
+                    disabled={loading}
+                    className="w-full flex items-center justify-center py-3 font-semibold text-white bg-[#0A1F44] hover:bg-[#081735] rounded-xl transition disabled:opacity-50"
                   >
-                    Try Again
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      `Pay KES ${Number(amount) || 0}`
+                    )}
                   </button>
-                </div>
+                </form>
               )}
             </motion.div>
           )}
-        </AnimatePresence>
 
-        {/* Form — hide when confirmed, to let results breathe */}
-        {paymentResult.status !== 'confirmed' && (
-          <form onSubmit={handleSubmit} className="space-y-6">
-
-            {/* Phone */}
-            <div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
-                M-Pesa Phone to receive prompt
-              </label>
-              <div className="relative">
-                <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"/>
-                <input
-                  type="tel"
-                  placeholder="0712345678"
-                  value={phone}
-                  onChange={(e)=>setPhone(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44]
-                  ${validationErrors.phone ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
-                  disabled={loading}
-                />
-              </div>
-              {validationErrors.phone && (
-                <p className="text-xs text-red-500 mt-1">{validationErrors.phone}</p>
-              )}
-            </div>
-
-            {/* Meter Number */}
-            <div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
-                Meter Number
-              </label>
-              <div className="relative">
-                <Gauge className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400"/>
-                <input
-                  type="text"
-                  placeholder="14123456789"
-                  value={meterNumber}
-                  onChange={(e) => setMeterNumber(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44]
-                  ${validationErrors.meterNumber ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
-                  readOnly={true}
-                  disabled={loading}
-                />
-              </div>
-              {validationErrors.meterNumber && (
-                <p className="text-xs text-red-500 mt-1">{validationErrors.meterNumber}</p>
-              )}
-            </div>
-
-            {/* Amount */}
-            <div>
-              <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">
-                Amount (KES)
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold">
-                  KSh
-                </span>
-                <input
-                  type="number"
-                  placeholder={`${minAmount}`}
-                  min={minAmount}
-                  value={amount}
-                  onChange={(e)=>setAmount(e.target.value)}
-                  className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44]
-                  ${validationErrors.amount ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
-                  disabled={loading}
-                />
-              </div>
-              {validationErrors.amount ? (
-                <p className="text-xs text-red-500 mt-1">{validationErrors.amount}</p>
-              ) : (
-                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Minimum purchase: KES {minAmount}</p>
-              )}
-            </div>
-
-            {/* Button */}
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full flex items-center justify-center py-3 font-semibold text-white bg-[#0A1F44] hover:bg-[#081735] rounded-xl transition disabled:opacity-50"
+          {/* ── NCBA PAYBILL PANEL ── */}
+          {paymentMethod === "paybill" && (
+            <motion.div
+              key="paybill"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.25 }}
+              className="space-y-4"
             >
-              {loading ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin"/>
-                  Processing...
-                </>
-              ) : (
-                `Pay KES ${Number(amount) || 0}`
-              )}
-            </button>
+              {/* Info Banner */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
 
-          </form>
-        )}
+                {/* NCBA Header */}
+                <div className="bg-gradient-to-r from-[#0A1F44] to-[#1a3a6b] px-6 py-5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-white/10 rounded-xl">
+                      <Building2 className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-white text-base">NCBA Paybill Payment</p>
+                      <p className="text-xs text-blue-200/80 mt-0.5">Manual payment via M-Pesa Paybill</p>
+                    </div>
+                  </div>
+                </div>
 
+                {/* Paybill Details Cards */}
+                <div className="p-5 space-y-3">
+                  {/* Business Number */}
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-800 dark:to-slate-800/60 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-[#0A1F44]/10 dark:bg-blue-900/30 rounded-xl">
+                        <Building2 className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Business Number</p>
+                        <p className="text-xl font-bold text-[#0A1F44] dark:text-white font-mono tracking-widest">{NCBA_BUSINESS_NUMBER}</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => copyField(NCBA_BUSINESS_NUMBER, "business")}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0A1F44] hover:bg-[#081735] text-white text-xs font-semibold transition-colors"
+                    >
+                      {copiedField === "business" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {copiedField === "business" ? "Copied!" : "Copy"}
+                    </button>
+                  </div>
+
+                  {/* Account Number (Meter) */}
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-green-50/50 dark:from-slate-800 dark:to-slate-800/60 border border-slate-200 dark:border-slate-700">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                        <Hash className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Account Number (Meter)</p>
+                        <p className="text-xl font-bold text-[#0A1F44] dark:text-white font-mono tracking-widest">
+                          {meterNumber || <span className="text-slate-400 text-sm">Loading...</span>}
+                        </p>
+                      </div>
+                    </div>
+                    {meterNumber && (
+                      <button
+                        onClick={() => copyField(meterNumber, "meter")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-colors"
+                      >
+                        {copiedField === "meter" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        {copiedField === "meter" ? "Copied!" : "Copy"}
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Steps */}
+                <div className="px-5 pb-5">
+                  <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">How to Pay</p>
+                  <div className="space-y-2">
+                    {paybillSteps.map((step, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: idx * 0.06 }}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/50"
+                      >
+                        <div className="w-7 h-7 rounded-full bg-[#0A1F44] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                          {step.icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">{step.label}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{step.desc}</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0" />
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Auto-token notice */}
+                <div className="mx-5 mb-5 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/40">
+                  <div className="flex gap-3">
+                    <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg shrink-0 h-fit">
+                      <Info className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Token sent automatically</p>
+                      <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1">
+                        Once your payment is confirmed, your electricity token will be sent to your registered phone number via SMS automatically. No action needed after payment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security note */}
+                <div className="mx-5 mb-5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
+                  <Shield className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Payments are securely processed by <span className="font-semibold">NCBA Bank</span> through the M-Pesa Paybill platform.
+                  </p>
+                </div>
+              </div>
+
+              {/* Flow summary */}
+              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow">
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Payment Flow</p>
+                <div className="flex items-center gap-1 flex-wrap">
+                  {["You Pay", "NCBA Confirms", "System Receives", "Token Generated", "SMS Delivered"].map((label, i, arr) => (
+                    <div key={i} className="flex items-center gap-1">
+                      <span className="text-xs font-medium text-[#0A1F44] dark:text-blue-300 bg-[#0A1F44]/8 dark:bg-blue-900/30 px-2 py-1 rounded-lg">{label}</span>
+                      {i < arr.length - 1 && <ChevronRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+        </AnimatePresence>
       </div>
     </div>
   );

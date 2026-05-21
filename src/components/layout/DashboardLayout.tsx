@@ -47,7 +47,7 @@ const DashboardLayout = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
       }
-    } catch (_) {
+    } catch {
       // ignore
     } finally {
       localStorage.removeItem('token');
@@ -100,7 +100,7 @@ const DashboardLayout = () => {
         }
       })
       .catch(() => setVendorProfile(null));
-  }, [user?.id, user?.role]);
+  }, [user]);
 
   useEffect(() => {
     const handleResize = () => {

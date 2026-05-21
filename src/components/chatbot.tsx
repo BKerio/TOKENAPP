@@ -26,31 +26,10 @@ const Chatbot = () => {
 
   const welcomeMessage = "👋 Hi there! I'm Opus Africa AI assistant. I can help you with information about our software development services and pricing. Feel free to ask any questions!";
 
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([{ role: 'assistant', content: welcomeMessage }]);
-    }
-  }, [isOpen]);
+  const sendMessage = async (messageText: string) => {
+    if (!messageText.trim() || isLoading) return;
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSuggestionClick = async (text: string) => {
-    setInput(text);
-    const fakeEvent = new Event('submit') as any;
-    await handleSubmit(fakeEvent);
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-
-    const userMessage = input.trim();
+    const userMessage = messageText.trim();
     setInput('');
     
     // Add user message immediately
@@ -81,10 +60,33 @@ const Chatbot = () => {
     }
   };
 
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      setMessages([{ role: 'assistant', content: welcomeMessage }]);
+    }
+  }, [isOpen, messages.length]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSuggestionClick = async (text: string) => {
+    await sendMessage(text);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await sendMessage(input);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSubmit(e);
+      sendMessage(input);
     }
   };
 

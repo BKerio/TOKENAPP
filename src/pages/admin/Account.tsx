@@ -73,12 +73,13 @@ const Account = () => {
                 showConfirmButton: false,
                 timer: 3000
             });
-        } catch (error: any) {
+        } catch (error) {
             console.error('Update failed', error);
+            const err = error as { response?: { data?: { message?: string } } };
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: error.response?.data?.message || 'Failed to update profile',
+                text: err.response?.data?.message || 'Failed to update profile',
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
@@ -127,12 +128,13 @@ const Account = () => {
             setCurrentPassword('');
             setNewPassword('');
             setConfirmPassword('');
-        } catch (error: any) {
+        } catch (error) {
             console.error('Password change failed', error);
+            const err = error as { response?: { data?: { message?: string } } };
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: error.response?.data?.message || 'Failed to change password',
+                text: err.response?.data?.message || 'Failed to change password',
                 toast: true,
                 position: 'top-end',
                 showConfirmButton: false,
