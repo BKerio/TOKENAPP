@@ -576,10 +576,10 @@ const LipaTokenNaMpesa = () => {
                   </div>
 
                   {/* Account Number (Meter) */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-green-50/50 dark:from-slate-800 dark:to-slate-800/60 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-[#0A1F44] dark:bg-[#081735] border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-                        <Hash className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                        <Hash className="w-4 h-4 text-[#0A1F44] dark:text-[#0A1F44]" />
                       </div>
                       <div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Account Number (Meter)</p>
