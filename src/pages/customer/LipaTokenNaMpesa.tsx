@@ -14,7 +14,6 @@ import {
   Building2,
   Hash,
   ChevronRight,
-  Info,
   Shield,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -625,20 +624,6 @@ const LipaTokenNaMpesa = () => {
                   </div>
                 </div>
 
-                {/* Auto-token notice */}
-                <div className="mx-5 mb-5 p-4 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-200 dark:border-amber-800/40">
-                  <div className="flex gap-3">
-                    <div className="p-1.5 bg-amber-100 dark:bg-amber-900/50 rounded-lg shrink-0 h-fit">
-                      <Info className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Token sent automatically</p>
-                      <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1">
-                        Once your payment is confirmed, your electricity token will be sent to your registered phone number via SMS automatically. No action needed after payment.
-                      </p>
-                    </div>
-                  </div>
-                </div>
 
                 {/* Security note */}
                 <div className="mx-5 mb-5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 flex items-center gap-3">
