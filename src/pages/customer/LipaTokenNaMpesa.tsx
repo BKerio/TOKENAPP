@@ -555,7 +555,7 @@ const LipaTokenNaMpesa = () => {
                 {/* Paybill Details Cards */}
                 <div className="p-5 space-y-3">
                   {/* Business Number */}
-                  <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 dark:from-slate-800 dark:to-slate-800/60 border border-slate-200 dark:border-slate-700">
+                  <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-800 dark:to-slate-800/60 border border-slate-200 dark:border-slate-700">
                     <div className="flex items-center gap-3">
                       <div className="p-2 bg-[#0A1F44]/10 dark:bg-blue-900/30 rounded-xl">
                         <Building2 className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" />
