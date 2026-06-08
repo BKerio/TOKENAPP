@@ -38,6 +38,7 @@ const LipaTokenNaMpesa = () => {
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
   const [meterNumber, setMeterNumber] = useState("");
+  const [tillNumber, setTillNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [minAmount, setMinAmount] = useState<number>(1);
   const [validationErrors, setValidationErrors] = useState<{
@@ -69,6 +70,10 @@ const LipaTokenNaMpesa = () => {
           const meter = res.data.user?.meter;
           if (meter && meter.meter_number) {
             setMeterNumber(meter.meter_number);
+          }
+          const vendor = res.data.user?.vendor;
+          if (vendor?.account_id) {
+            setTillNumber(String(vendor.account_id));
           }
           if (meter && meter.price_per_unit && Number(meter.price_per_unit) > 0) {
             setMinAmount(Number(meter.price_per_unit));
@@ -217,6 +222,9 @@ const LipaTokenNaMpesa = () => {
     setCopiedToken(null);
   };
 
+  const paybillAccountRef =
+    tillNumber && meterNumber ? `${tillNumber}#${meterNumber}` : meterNumber;
+
   const paybillSteps = [
     { icon: "1", label: "Open M-Pesa", desc: "Go to M-Pesa on your phone" },
     { icon: "2", label: "Lipa na M-Pesa", desc: "Select 'Lipa na M-Pesa'" },
@@ -235,9 +243,14 @@ const LipaTokenNaMpesa = () => {
       label: "Account Number",
       desc: (
         <span>
-          Enter your meter number{" "}
-          {meterNumber && (
-            <span className="font-bold text-[#0A1F44] dark:text-blue-300">{meterNumber}</span>
+          Enter{" "}
+          <span className="font-bold text-[#0A1F44] dark:text-blue-300">
+            {paybillAccountRef || "TillNumber#MeterNumber"}
+          </span>
+          {tillNumber && meterNumber && (
+            <span className="block text-[11px] text-slate-400 mt-0.5">
+              Format: Till Number #{meterNumber ? "Meter Number" : "..."}
+            </span>
           )}
         </span>
       ),
@@ -574,26 +587,31 @@ const LipaTokenNaMpesa = () => {
                     </button>
                   </div>
 
-                  {/* Account Number (Meter) */}
+                  {/* Account Number: TillNumber#MeterNumber */}
                   <div className="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-slate-50 to-blue-50/50 dark:from-slate-800 dark:to-slate-800/60 border border-slate-200 dark:border-slate-700">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-[#0A1F44]/10 dark:bg-blue-900/30 rounded-xl">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="p-2 bg-[#0A1F44]/10 dark:bg-blue-900/30 rounded-xl shrink-0">
                         <Hash className="w-4 h-4 text-[#0A1F44] dark:text-blue-300" />
                       </div>
-                      <div>
-                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Account Number (Meter)</p>
-                        <p className="text-xl font-bold text-[#0A1F44] dark:text-white font-mono tracking-widest">
-                          {meterNumber || <span className="text-slate-400 text-sm">Loading...</span>}
+                      <div className="min-w-0">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Account Number</p>
+                        <p className="text-lg sm:text-xl font-bold text-[#0A1F44] dark:text-white font-mono tracking-wide break-all">
+                          {paybillAccountRef || <span className="text-slate-400 text-sm">Loading...</span>}
                         </p>
+                        {tillNumber && meterNumber && (
+                          <p className="text-[11px] text-slate-400 mt-0.5">
+                            Till {tillNumber} · Meter {meterNumber}
+                          </p>
+                        )}
                       </div>
                     </div>
-                    {meterNumber && (
+                    {paybillAccountRef && (
                       <button
-                        onClick={() => copyField(meterNumber, "meter")}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0A1F44] hover:bg-[#081735] text-white text-xs font-semibold transition-colors"
+                        onClick={() => copyField(paybillAccountRef, "account")}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#0A1F44] hover:bg-[#081735] text-white text-xs font-semibold transition-colors shrink-0 ml-2"
                       >
-                        {copiedField === "meter" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                        {copiedField === "meter" ? "Copied!" : "Copy"}
+                        {copiedField === "account" ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                        {copiedField === "account" ? "Copied!" : "Copy"}
                       </button>
                     )}
                   </div>
