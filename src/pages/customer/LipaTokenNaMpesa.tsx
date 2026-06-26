@@ -50,6 +50,9 @@ const LipaTokenNaMpesa = () => {
   const [pollingError, setPollingError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("stk");
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [mpesaReceipt, setMpesaReceipt] = useState("");
+  const [claimLoading, setClaimLoading] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const [paymentResult, setPaymentResult] = useState<PaymentResult>({ status: "idle" });
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
@@ -220,6 +223,80 @@ const LipaTokenNaMpesa = () => {
     setPaymentResult({ status: "idle" });
     setAmount("");
     setCopiedToken(null);
+    setMpesaReceipt("");
+    setClaimError(null);
+  };
+
+  const handlePaybillClaim = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setClaimError(null);
+
+    if (!/^(01|07)\d{8}$/.test(phone)) {
+      setClaimError("Enter a valid phone number (0712345678)");
+      return;
+    }
+    const numericAmount = Number(amount);
+    if (isNaN(numericAmount) || numericAmount <= 0) {
+      setClaimError("Enter the exact amount you paid");
+      return;
+    }
+    if (!meterNumber || meterNumber.trim().length < 5) {
+      setClaimError("Enter a valid meter number");
+      return;
+    }
+    if (!mpesaReceipt || mpesaReceipt.trim().length < 8) {
+      setClaimError("Enter your M-Pesa confirmation code (e.g. UF8QO6SD87)");
+      return;
+    }
+
+    setClaimLoading(true);
+    setPaymentResult({ status: "sending", meterNumber });
+
+    try {
+      const response = await api.post("/paybill/claim", {
+        mpesa_receipt: mpesaReceipt.trim().toUpperCase(),
+        phone: "254" + phone.slice(-9),
+        amount: numericAmount,
+        meter_number: meterNumber.trim(),
+      });
+
+      const { tokens, sms_sent: smsSent, status, message } = response.data;
+
+      if (status === "duplicate" && tokens?.length) {
+        setPaymentResult({
+          status: "confirmed",
+          amount: numericAmount,
+          mpesaReceipt: mpesaReceipt.trim().toUpperCase(),
+          tokens,
+          meterNumber,
+        });
+        return;
+      }
+
+      if (tokens?.length) {
+        setPaymentResult({
+          status: "confirmed",
+          amount: numericAmount,
+          mpesaReceipt: mpesaReceipt.trim().toUpperCase(),
+          tokens,
+          meterNumber,
+        });
+        if (!smsSent) {
+          setClaimError("Token generated. SMS could not be sent — copy your token below.");
+        }
+      } else {
+        throw new Error(message || "Could not generate token");
+      }
+    } catch (error: any) {
+      const msg =
+        error.response?.data?.message ||
+        error.message ||
+        "Could not process receipt. Check the code and try again.";
+      setClaimError(msg);
+      setPaymentResult({ status: "failed", failureReason: msg, meterNumber });
+    } finally {
+      setClaimLoading(false);
+    }
   };
 
   const paybillAccountRef =
@@ -549,7 +626,155 @@ const LipaTokenNaMpesa = () => {
               transition={{ duration: 0.25 }}
               className="space-y-4"
             >
-              {/* Info Banner */}
+              {/* Auto STK — same instant flow as STK tab */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="p-2 bg-emerald-500/10 rounded-xl">
+                    <Zap className="w-5 h-5 text-emerald-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-[#0A1F44] dark:text-white text-sm">Automatic Payment (Recommended)</p>
+                    <p className="text-xs text-slate-400">M-Pesa prompt on your phone → token SMS in seconds</p>
+                  </div>
+                </div>
+
+                {paymentResult.status !== "idle" && paymentResult.status !== "sending" && paymentResult.status !== "waiting" ? (
+                  <div className="text-center py-4">
+                    {paymentResult.status === "confirmed" && paymentResult.tokens ? (
+                      <div className="space-y-3">
+                        <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto" />
+                        <p className="font-bold text-emerald-600">Token Ready!</p>
+                        {paymentResult.tokens.map((token, i) => (
+                          <div key={i} className="p-3 bg-slate-50 dark:bg-slate-800 rounded-xl font-mono text-sm break-all">
+                            {token.match(/.{1,4}/g)?.join(" ")}
+                            <button onClick={() => copyToken(token)} className="ml-2 text-xs text-blue-500">
+                              {copiedToken === token ? "Copied!" : "Copy"}
+                            </button>
+                          </div>
+                        ))}
+                        <button onClick={resetPayment} className="text-sm text-slate-500 underline">Pay again</button>
+                      </div>
+                    ) : paymentResult.status === "failed" ? (
+                      <div>
+                        <XCircle className="w-12 h-12 text-red-500 mx-auto mb-2" />
+                        <p className="text-red-500 text-sm">{paymentResult.failureReason}</p>
+                        <button onClick={resetPayment} className="mt-3 text-sm text-slate-500 underline">Try again</button>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-500">Phone Number</label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="0712345678"
+                        className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
+                      {validationErrors.phone && <p className="text-xs text-red-500 mt-1">{validationErrors.phone}</p>}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-500">Amount (KES)</label>
+                      <input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder={`Min ${minAmount}`}
+                        className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
+                      {validationErrors.amount && <p className="text-xs text-red-500 mt-1">{validationErrors.amount}</p>}
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-500">Meter Number</label>
+                      <input
+                        type="text"
+                        value={meterNumber}
+                        onChange={(e) => setMeterNumber(e.target.value)}
+                        className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm transition-colors disabled:opacity-60"
+                    >
+                      {loading ? (
+                        <span className="flex items-center justify-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" /> Sending M-Pesa prompt...
+                        </span>
+                      ) : (
+                        "Send M-Pesa Prompt (Auto Token)"
+                      )}
+                    </button>
+                    {(paymentResult.status === "waiting" || loading) && (
+                      <p className="text-xs text-center text-slate-400 flex items-center justify-center gap-1">
+                        <Clock className="w-3 h-3" /> Enter your M-Pesa PIN on your phone...
+                      </p>
+                    )}
+                  </form>
+                )}
+              </div>
+
+              {/* Receipt claim — for manual paybill payments */}
+              <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-amber-200 dark:border-amber-900/50 p-6">
+                <div className="flex items-center gap-2 mb-1">
+                  <Hash className="w-5 h-5 text-amber-600" />
+                  <p className="font-bold text-[#0A1F44] dark:text-white text-sm">Already paid via Paybill?</p>
+                </div>
+                <p className="text-xs text-slate-500 mb-4">
+                  Enter your M-Pesa confirmation code below to get your token instantly.
+                </p>
+                <form onSubmit={handlePaybillClaim} className="space-y-3">
+                  <div>
+                    <label className="text-xs font-medium text-slate-500">M-Pesa Confirmation Code</label>
+                    <input
+                      type="text"
+                      value={mpesaReceipt}
+                      onChange={(e) => setMpesaReceipt(e.target.value.toUpperCase())}
+                      placeholder="e.g. UF8QO6SD87"
+                      className="w-full mt-1 px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm font-mono uppercase"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-xs font-medium text-slate-500">Phone</label>
+                      <input
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        className="w-full mt-1 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-xs font-medium text-slate-500">Amount (KES)</label>
+                      <input
+                        type="number"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="w-full mt-1 px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-sm"
+                      />
+                    </div>
+                  </div>
+                  {claimError && <p className="text-xs text-red-500">{claimError}</p>}
+                  <button
+                    type="submit"
+                    disabled={claimLoading}
+                    className="w-full py-3 rounded-xl bg-[#0A1F44] hover:bg-[#081735] text-white font-bold text-sm transition-colors disabled:opacity-60"
+                  >
+                    {claimLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Generating token...
+                      </span>
+                    ) : (
+                      "Get My Token"
+                    )}
+                  </button>
+                </form>
+              </div>
+
+              {/* Manual paybill instructions */}
               <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
 
                 {/* NCBA Header */}
@@ -559,8 +784,8 @@ const LipaTokenNaMpesa = () => {
                       <Building2 className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <p className="font-bold text-white text-base">NCBA Paybill Payment</p>
-                      <p className="text-xs text-blue-200/80 mt-0.5">Manual payment via M-Pesa Paybill</p>
+                      <p className="font-bold text-white text-base">Manual Paybill Steps</p>
+                      <p className="text-xs text-blue-200/80 mt-0.5">Use only if STK prompt is unavailable</p>
                     </div>
                   </div>
                 </div>
@@ -653,16 +878,11 @@ const LipaTokenNaMpesa = () => {
               </div>
 
               {/* Flow summary */}
-              <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow">
-                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Payment Flow</p>
-                <div className="flex items-center gap-1 flex-wrap">
-                  {["You Pay", "NCBA Confirms", "System Receives", "Token Generated", "SMS Delivered"].map((label, i, arr) => (
-                    <div key={i} className="flex items-center gap-1">
-                      <span className="text-xs font-medium text-[#0A1F44] dark:text-blue-300 bg-[#0A1F44]/8 dark:bg-blue-900/30 px-2 py-1 rounded-lg">{label}</span>
-                      {i < arr.length - 1 && <ChevronRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />}
-                    </div>
-                  ))}
-                </div>
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl border border-amber-200 dark:border-amber-800 p-4">
+                <p className="text-xs text-amber-800 dark:text-amber-200">
+                  <strong>Note:</strong> Manual Paybill payments need NCBA to forward notifications to TokenPap for fully automatic SMS.
+                  Until that is enabled by NCBA/Millicom, use <strong>Send M-Pesa Prompt</strong> above, or enter your M-Pesa code after paying manually.
+                </p>
               </div>
             </motion.div>
           )}
