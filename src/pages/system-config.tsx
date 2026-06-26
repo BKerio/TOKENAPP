@@ -316,14 +316,13 @@ const SystemConfigPage = () => {
       }
 
       setConfigs(configsData);
-      // Initialize edited configs with current values
+      // Replace edited state entirely so values never leak between tabs/vendors
       const initial: Record<string, string> = {};
       configsData.forEach((config: SystemConfig) => {
-        if (!config.is_masked) {
-          initial[config.key] = config.value;
-        }
+        initial[config.key] = config.is_masked ? '' : (config.value ?? '');
       });
       setEditedConfigs(initial);
+      setVisiblePasswords({});
       console.log('Configs loaded successfully:', configsData.length, 'items');
     } catch (error: any) {
       console.error('Error loading configs:', error);
@@ -343,11 +342,10 @@ const SystemConfigPage = () => {
             setConfigs(configsData);
             const initial: Record<string, string> = {};
             configsData.forEach((config: SystemConfig) => {
-              if (!config.is_masked) {
-                initial[config.key] = config.value;
-              }
+              initial[config.key] = config.is_masked ? '' : (config.value ?? '');
             });
             setEditedConfigs(initial);
+            setVisiblePasswords({});
             return; // Successfully loaded global config
           }
         } catch (fallbackError) {
