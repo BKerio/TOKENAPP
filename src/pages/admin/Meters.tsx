@@ -18,7 +18,8 @@ import {
     Zap,
     Key,
     RefreshCw,
-    Settings
+    Settings,
+    Home
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -29,6 +30,12 @@ import { useOutletContext } from 'react-router-dom';
 interface Vendor {
     id: string;
     business_name: string;
+}
+
+interface LandlordOption {
+    id: string;
+    full_name: string;
+    user?: { email?: string };
 }
 
 /** Normalize API vendor to { id, business_name } (MongoDB may return _id) */
@@ -47,7 +54,9 @@ interface Meter {
     price_per_unit: number;
     status: 'active' | 'inactive' | 'maintenance';
     vendor_id: string | null;
+    landlord_id?: string | null;
     vendor?: Vendor;
+    landlord?: LandlordOption;
 }
 
 interface User {
@@ -66,6 +75,7 @@ const Meters = () => {
 
     const [meters, setMeters] = useState<Meter[]>([]);
     const [vendors, setVendors] = useState<Vendor[]>([]);
+    const [landlords, setLandlords] = useState<LandlordOption[]>([]);
     const [loading, setLoading] = useState(true);
     const [metersFetchError, setMetersFetchError] = useState<string | null>(null);
     const [showModal, setShowModal] = useState(false);
@@ -77,6 +87,7 @@ const Meters = () => {
         initial_reading: '0',
         price_per_unit: '0',
         vendor_id: '',
+        landlord_id: '',
         status: 'active',
         sgc: '201457',
         krn: '1',
@@ -153,19 +164,41 @@ const Meters = () => {
         }
     }, [API_URL]);
 
+    const fetchLandlords = useCallback(async () => {
+        const token = localStorage.getItem('token');
+        if (!token) return;
+        try {
+            const response = await axios.get(`${API_URL}/admin/landlords?per_page=200`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const raw = response.data?.data ?? [];
+            setLandlords(Array.isArray(raw) ? raw.map((l: any) => ({
+                id: String(l.id ?? l._id ?? ''),
+                full_name: l.full_name || l.user?.name || 'Landlord',
+                user: l.user,
+            })).filter((l: LandlordOption) => l.id) : []);
+        } catch (error) {
+            console.error('Failed to fetch landlords', error);
+            setLandlords([]);
+        }
+    }, [API_URL]);
+
     useEffect(() => {
         fetchMeters();
     }, [fetchMeters]);
 
-    // Fetch available vendors on load (for admin assign dropdown)
     useEffect(() => {
         fetchVendors();
-    }, [fetchVendors]);
+        if (isAdmin) fetchLandlords();
+    }, [fetchVendors, fetchLandlords, isAdmin]);
 
-    // When admin opens the modal, refetch vendors so the dropdown shows all current vendors
+    // When admin opens the modal, refetch vendors/landlords so dropdowns are current
     useEffect(() => {
-        if (isAdmin && showModal) fetchVendors();
-    }, [isAdmin, showModal, fetchVendors]);
+        if (isAdmin && showModal) {
+            fetchVendors();
+            fetchLandlords();
+        }
+    }, [isAdmin, showModal, fetchVendors, fetchLandlords]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -176,6 +209,7 @@ const Meters = () => {
                 type: formData.type,
                 initial_reading: parseFloat(formData.initial_reading),
                 vendor_id: formData.vendor_id || null,
+                landlord_id: formData.landlord_id || null,
                 status: formData.status,
                 sgc: parseInt(formData.sgc || '201457', 10),
                 krn: parseInt(formData.krn || '1', 10),
@@ -282,6 +316,7 @@ const Meters = () => {
                 initial_reading: meter.initial_reading.toString(),
                 price_per_unit: meter.price_per_unit.toString(),
                 vendor_id: meter.vendor_id || '',
+                landlord_id: meter.landlord_id || '',
                 status: meter.status,
                 sgc: (meter as any).sgc?.toString() || '201457',
                 krn: (meter as any).krn?.toString() || '1',
@@ -297,6 +332,7 @@ const Meters = () => {
                 initial_reading: '0',
                 price_per_unit: '0',
                 vendor_id: '',
+                landlord_id: '',
                 status: 'active',
                 sgc: '201457',
                 krn: '1',
@@ -527,7 +563,7 @@ const Meters = () => {
                                 </div>
                             </div>
 
-                            <div className="pt-4 border-t border-gray-50 dark:border-gray-800 relative z-10">
+                            <div className="pt-4 border-t border-gray-50 dark:border-gray-800 relative z-10 space-y-2">
                                 {meter.vendor ? (
                                     <div className="flex items-center justify-between group/vendor cursor-pointer">
                                         <div className="flex items-center gap-3">
@@ -535,7 +571,7 @@ const Meters = () => {
                                                 <Building2 size={16} />
                                             </div>
                                             <div>
-                                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Ownership</p>
+                                                <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Vendor</p>
                                                 <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
                                                     {meter.vendor.business_name}
                                                 </p>
@@ -543,7 +579,21 @@ const Meters = () => {
                                         </div>
                                         <ChevronRight size={16} className="text-gray-300 group-hover/vendor:translate-x-1 group-hover/vendor:text-indigo-500 transition-all" />
                                     </div>
-                                ) : (
+                                ) : null}
+                                {meter.landlord ? (
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center text-emerald-600 dark:text-emerald-400 border border-emerald-100/50 dark:border-emerald-800/30">
+                                            <Home size={16} />
+                                        </div>
+                                        <div>
+                                            <p className="text-[8px] font-black text-gray-400 uppercase tracking-widest">Landlord</p>
+                                            <p className="text-xs font-bold text-gray-700 dark:text-gray-200">
+                                                {meter.landlord.full_name}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ) : null}
+                                {!meter.vendor && !meter.landlord && (
                                     <div className="flex items-center justify-between py-2 bg-amber-50/30 dark:bg-amber-900/10 px-4 rounded-2xl border border-dashed border-amber-200/50 dark:border-amber-800/30">
                                         <p className="text-[10px] font-black text-amber-600 dark:text-amber-500 uppercase tracking-widest">Unassigned Asset</p>
                                         <ArrowUpRight size={14} className="text-amber-400" />
@@ -612,7 +662,7 @@ const Meters = () => {
 
                                         {isAdmin && (
                                             <div className="col-span-1 md:col-span-2 space-y-1.5">
-                                                <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-0.5">Assign to Entity</label>
+                                                <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-0.5">Assign to Vendor</label>
                                                 <div className="relative group/input">
                                                     <Building2 className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 group-focus-within/input:text-gray-900 dark:group-focus-within/input:text-white transition-colors" />
                                                     <select
@@ -620,9 +670,30 @@ const Meters = () => {
                                                         onChange={(e) => setFormData({ ...formData, vendor_id: e.target.value })}
                                                         className="w-full pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl outline-none focus:ring-4 focus:ring-gray-500/10 focus:border-gray-900/50 transition-all font-bold text-sm appearance-none cursor-pointer"
                                                     >
-                                                        <option value="">Unassigned (Vault Reserve)</option>
+                                                        <option value="">Unassigned vendor</option>
                                                         {vendors.map((v) => (
                                                             <option key={v.id} value={v.id}>{v.business_name}</option>
+                                                        ))}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {isAdmin && (
+                                            <div className="col-span-1 md:col-span-2 space-y-1.5">
+                                                <label className="text-[10px] font-black text-gray-500 dark:text-gray-400 uppercase tracking-widest ml-0.5">Assign to Landlord</label>
+                                                <div className="relative group/input">
+                                                    <Home className="absolute left-3.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 group-focus-within/input:text-gray-900 dark:group-focus-within/input:text-white transition-colors" />
+                                                    <select
+                                                        value={formData.landlord_id}
+                                                        onChange={(e) => setFormData({ ...formData, landlord_id: e.target.value })}
+                                                        className="w-full pl-9 pr-8 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white rounded-xl outline-none focus:ring-4 focus:ring-gray-500/10 focus:border-gray-900/50 transition-all font-bold text-sm appearance-none cursor-pointer"
+                                                    >
+                                                        <option value="">Unassigned landlord</option>
+                                                        {landlords.map((l) => (
+                                                            <option key={l.id} value={l.id}>
+                                                                {l.full_name}{l.user?.email ? ` (${l.user.email})` : ''}
+                                                            </option>
                                                         ))}
                                                     </select>
                                                 </div>

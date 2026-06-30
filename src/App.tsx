@@ -24,6 +24,7 @@ import CustomerDashboard from '@/pages/customer/CustomerDashboard';
 import PurchaseHistory from '@/pages/customer/PurchaseHistory';
 import LandlordDashboard from '@/pages/landlord/LandlordDashboard';
 import MyProperties from '@/pages/landlord/MyProperties';
+import LocationHierarchy from '@/pages/landlord/LocationHierarchy';
 import ForgotPassword from '@/pages/forgotpassword';
 import Register from '@/pages/register';
 import VendorApprovals from '@/pages/admin/VendorApprovals';
@@ -67,6 +68,7 @@ function App() {
                 <Route path="landlords" element={<Landlords />} />
                 <Route path="landlord" element={<LandlordDashboard />} />
                 <Route path="properties" element={<MyProperties />} />
+                <Route path="location-hierarchy" element={<LocationHierarchy />} />
                 <Route path="vendor-overview" element={<AdminMeter />} />
                 <Route path="meters" element={<Meters />} />
                 <Route path="customer-management" element={<CustomerManagement />} />

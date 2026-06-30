@@ -12,6 +12,10 @@ import {
     ChevronRight,
     ShieldCheck,
     AlertTriangle,
+    Layers,
+    MapPin,
+    Users,
+    Gauge,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import dayjs from 'dayjs';
@@ -90,15 +94,26 @@ const StatCard = ({
 const LandlordDashboard: React.FC = () => {
     useOutletContext<OutletContextType>();
     const [profile, setProfile] = useState<LandlordProfile | null>(null);
+    const [summary, setSummary] = useState({ properties: 0, zones: 0, routes: 0, streets: 0, units: 0, tenants: 0, meters: 0 });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProfile = async () => {
             try {
-                const res = await api.get<{ status: number; landlord: LandlordProfile }>('/landlord/profile');
-                if (res.data.status === 200) {
-                    setProfile(res.data.landlord);
+                const [profileRes, summaryRes, metersRes] = await Promise.all([
+                    api.get<{ status: number; landlord: LandlordProfile }>('/landlord/profile'),
+                    api.get<{ status: number; summary: typeof summary }>('/landlord/hierarchy/summary'),
+                    api.get<{ status: number; meters: unknown[] }>('/landlord/meters'),
+                ]);
+                if (profileRes.data.status === 200) {
+                    setProfile(profileRes.data.landlord);
+                }
+                if (summaryRes.data.status === 200) {
+                    setSummary({
+                        ...summaryRes.data.summary,
+                        meters: metersRes.data.status === 200 ? (metersRes.data.meters?.length ?? 0) : 0,
+                    });
                 }
             } catch (err: any) {
                 setError(err.response?.data?.message || 'Failed to load profile');
@@ -111,8 +126,8 @@ const LandlordDashboard: React.FC = () => {
 
     const quickActions = [
         { text: 'My Profile', desc: 'View & edit details', icon: User, path: '/dashboard/account' },
-        { text: 'Payment Info', desc: 'Account & billing', icon: CreditCard, path: '/dashboard/landlord/payment' },
         { text: 'Properties', desc: 'Manage properties', icon: Home, path: '/dashboard/properties' },
+        { text: 'Location Hierarchy', desc: 'Zones, routes & units', icon: Layers, path: '/dashboard/location-hierarchy' },
         { text: 'Security', desc: 'Password & access', icon: ShieldCheck, path: '/dashboard/account' },
     ];
 
@@ -151,7 +166,7 @@ const LandlordDashboard: React.FC = () => {
                         <span className="text-[#0A1F44] dark:text-blue-400 capitalize">{displayName}</span>
                     </h1>
                     <p className="mt-2 text-slate-600 dark:text-slate-400 max-w-2xl text-sm font-medium opacity-80">
-                        Welcome to your Landlord Portal - manage your property account and details.
+                        Manage properties, zone hierarchy, and customer assignments from your portal.
                     </p>
                 </motion.div>
                 <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full shadow-sm text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
@@ -162,10 +177,10 @@ const LandlordDashboard: React.FC = () => {
 
             {/* Stat Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard icon={User} label="Full Name" value={displayName} sub="Property Owner" color="emerald" delay={0} />
-                <StatCard icon={Mail} label="Email" value={profile?.user?.email || '—'} sub="Registered email" color="blue" delay={0.1} />
-                <StatCard icon={Phone} label="Phone" value={profile?.phone || '—'} sub="Contact number" color="amber" delay={0.2} />
-                <StatCard icon={CreditCard} label="Payment Account" value={profile?.payment_account || '—'} sub="M-Pesa / Bank" color="slate" delay={0.3} />
+                <StatCard icon={Home} label="Properties" value={String(summary.properties)} sub="Registered estates" color="emerald" delay={0} />
+                <StatCard icon={Layers} label="Zones" value={String(summary.zones)} sub={`${summary.routes} routes · ${summary.streets} streets`} color="blue" delay={0.1} />
+                <StatCard icon={MapPin} label="Units" value={String(summary.units)} sub="Across all locations" color="amber" delay={0.2} />
+                <StatCard icon={Gauge} label="Meters" value={String(summary.meters)} sub="Assigned by admin" color="slate" delay={0.3} />
             </div>
 
             {/* Bottom Grid */}
@@ -210,10 +225,10 @@ const LandlordDashboard: React.FC = () => {
                                 Edit My Profile <ChevronRight size={16} />
                             </Link>
                             <Link
-                                to="/dashboard/landlord/properties"
+                                to="/dashboard/location-hierarchy"
                                 className="px-5 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center gap-2 border border-slate-100 dark:border-slate-700"
                             >
-                                My Properties <ChevronRight size={16} />
+                                Location Hierarchy <ChevronRight size={16} />
                             </Link>
                         </div>
                     </motion.div>

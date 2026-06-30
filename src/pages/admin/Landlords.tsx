@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Plus, Search, Edit2, Trash2, Home, Phone, CreditCard, User, Mail, AtSign, ShieldCheck, Loader2, X, Filter, RefreshCw } from 'lucide-react';
+import { Plus, Search, Edit2, Trash2, Home, Phone, CreditCard, User, Mail, AtSign, ShieldCheck, Loader2, X, Filter, RefreshCw, Gauge } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLoader from '@/lib/loader';
 import Swal from 'sweetalert2';
@@ -19,6 +19,12 @@ interface LandlordData {
     };
 }
 
+interface MeterOption {
+    id: string;
+    meter_number: string;
+    landlord_id?: string | null;
+}
+
 const Landlords = () => {
     const [landlords, setLandlords] = useState<LandlordData[]>([]);
     const [loading, setLoading] = useState(true);
@@ -26,6 +32,11 @@ const Landlords = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingLandlord, setEditingLandlord] = useState<LandlordData | null>(null);
     const [submitting, setSubmitting] = useState(false);
+    const [meterModalLandlord, setMeterModalLandlord] = useState<LandlordData | null>(null);
+    const [allMeters, setAllMeters] = useState<MeterOption[]>([]);
+    const [selectedMeterIds, setSelectedMeterIds] = useState<string[]>([]);
+    const [loadingMeters, setLoadingMeters] = useState(false);
+    const [savingMeters, setSavingMeters] = useState(false);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -148,6 +159,63 @@ const Landlords = () => {
             } catch {
                 Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to remove landlord', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
             }
+        }
+    };
+
+    const openMeterModal = async (landlord: LandlordData) => {
+        setMeterModalLandlord(landlord);
+        setLoadingMeters(true);
+        try {
+            const token = localStorage.getItem('token');
+            const [metersRes, assignedRes] = await Promise.all([
+                axios.get(`${API_URL}/admin/meters?per_page=500`, { headers: { Authorization: `Bearer ${token}` } }),
+                axios.get(`${API_URL}/admin/landlords/${landlord.id}/meters`, { headers: { Authorization: `Bearer ${token}` } }),
+            ]);
+            const list = metersRes.data?.data ?? [];
+            const normalized: MeterOption[] = Array.isArray(list)
+                ? list.map((m: any) => ({
+                    id: String(m.id ?? m._id ?? ''),
+                    meter_number: m.meter_number,
+                    landlord_id: m.landlord_id ?? null,
+                })).filter((m) => m.id)
+                : [];
+            setAllMeters(normalized);
+            const assigned = assignedRes.data?.meters ?? [];
+            setSelectedMeterIds(
+                Array.isArray(assigned)
+                    ? assigned.map((m: any) => String(m.id ?? m._id ?? '')).filter(Boolean)
+                    : []
+            );
+        } catch (error) {
+            console.error('Failed to load meters', error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to load meters', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+        } finally {
+            setLoadingMeters(false);
+        }
+    };
+
+    const toggleMeterSelection = (meterId: string) => {
+        setSelectedMeterIds((prev) =>
+            prev.includes(meterId) ? prev.filter((id) => id !== meterId) : [...prev, meterId]
+        );
+    };
+
+    const handleSaveMeterAssignments = async () => {
+        if (!meterModalLandlord) return;
+        setSavingMeters(true);
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put(
+                `${API_URL}/admin/landlords/${meterModalLandlord.id}/meters`,
+                { meter_ids: selectedMeterIds },
+                { headers: { Authorization: `Bearer ${token}` } }
+            );
+            Swal.fire({ icon: 'success', title: 'Meters assigned', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+            setMeterModalLandlord(null);
+        } catch (error: any) {
+            Swal.fire({ icon: 'error', title: 'Error', text: error.response?.data?.message || 'Failed to assign meters', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000 });
+        } finally {
+            setSavingMeters(false);
         }
     };
 
@@ -295,6 +363,13 @@ const Landlords = () => {
                                             </td>
                                             <td className="px-6 py-5 text-right">
                                                 <div className="flex justify-end gap-1">
+                                                    <button
+                                                        onClick={() => openMeterModal(landlord)}
+                                                        className="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors"
+                                                        title="Assign meters"
+                                                    >
+                                                        <Gauge size={16} />
+                                                    </button>
                                                     <button
                                                         onClick={() => handleOpenModal(landlord)}
                                                         className="p-2 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-gray-900/20 rounded-lg transition-colors"
@@ -510,6 +585,96 @@ const Landlords = () => {
                                     </button>
                                 </div>
                             </form>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Assign Meters Modal */}
+            <AnimatePresence>
+                {meterModalLandlord && (
+                    <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="absolute inset-0 bg-gray-900/60 backdrop-blur-md"
+                            onClick={() => setMeterModalLandlord(null)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            className="relative bg-white dark:bg-gray-900 w-full max-w-lg rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden"
+                        >
+                            <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center">
+                                <div>
+                                    <h2 className="text-lg font-bold text-gray-900 dark:text-white">Assign Meters</h2>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {meterModalLandlord.full_name || meterModalLandlord.user?.name}
+                                    </p>
+                                </div>
+                                <button onClick={() => setMeterModalLandlord(null)} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full">
+                                    <X size={18} />
+                                </button>
+                            </div>
+                            <div className="p-6 max-h-[50vh] overflow-y-auto">
+                                {loadingMeters ? (
+                                    <div className="flex justify-center py-10">
+                                        <Loader2 className="w-6 h-6 animate-spin text-emerald-600" />
+                                    </div>
+                                ) : allMeters.length === 0 ? (
+                                    <p className="text-sm text-gray-500 text-center py-8">No meters in the system yet. Create meters under Meter Management first.</p>
+                                ) : (
+                                    <div className="space-y-2">
+                                        {allMeters.map((meter) => {
+                                            const assignedElsewhere = meter.landlord_id && meter.landlord_id !== meterModalLandlord.id;
+                                            return (
+                                                <label
+                                                    key={meter.id}
+                                                    className={`flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-colors ${
+                                                        selectedMeterIds.includes(meter.id)
+                                                            ? 'border-emerald-300 bg-emerald-50 dark:bg-emerald-900/20'
+                                                            : 'border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+                                                    }`}
+                                                >
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedMeterIds.includes(meter.id)}
+                                                        onChange={() => toggleMeterSelection(meter.id)}
+                                                        className="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                                                    />
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-bold text-gray-900 dark:text-white">{meter.meter_number}</p>
+                                                        {assignedElsewhere && (
+                                                            <p className="text-[10px] text-amber-600">Currently assigned to another landlord — will reassign</p>
+                                                        )}
+                                                    </div>
+                                                    <Gauge size={16} className="text-gray-400 shrink-0" />
+                                                </label>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => setMeterModalLandlord(null)}
+                                    className="px-4 py-2 text-sm font-semibold text-gray-500"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleSaveMeterAssignments}
+                                    disabled={savingMeters || loadingMeters}
+                                    className="px-5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white text-sm font-bold rounded-xl disabled:opacity-50 flex items-center gap-2"
+                                >
+                                    {savingMeters && <Loader2 className="w-4 h-4 animate-spin" />}
+                                    Save Assignments
+                                </button>
+                            </div>
                         </motion.div>
                     </div>
                 )}

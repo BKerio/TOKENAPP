@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home, MessageSquare, ShieldAlert } from 'lucide-react';
+import { LayoutDashboard, LogOut, ArrowRight, Activity, Shield, User, Building2, Gauge, Users, ShieldCheck, Zap, Clock, Home, MessageSquare, ShieldAlert, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface UserProfile {
@@ -55,6 +55,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
     { name: 'Account Approvals', icon: ShieldAlert, path: '/dashboard/approvals' },
     { name: 'Landlord Management', icon: Home, path: '/dashboard/landlords' },
     { name: 'My Properties', icon: Home, path: '/dashboard/properties' },
+    { name: 'Location Hierarchy', icon: MapPin, path: '/dashboard/location-hierarchy' },
     { name: 'Assigned Meters', icon: Users, path: '/dashboard/vendor-overview' },
     { name: 'Meter Management', icon: Gauge, path: '/dashboard/meters' },
     { name: 'Customer Overview', icon: Users, path: '/dashboard/customer-management' },
@@ -85,7 +86,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
         return user.role === 'admin' || user.role === 'system_admin' || user.roles?.includes('admin');
     }
     if (link.name === 'System Configuration') {
-        return isVendorUser; // Admins now use Callback Settings instead
+        return user.role === 'admin' || user.role === 'system_admin' || user.roles?.includes('admin');
     }
 
     // Admin/SuperAdmin see everything (except the restricted items above and customer specific items)
@@ -105,7 +106,7 @@ const Sidebar = ({ user, sidebarOpen, isMobile, onLogout, onCloseMobile }: Sideb
 
     // Landlord-specific view — only Dashboard + Account Settings + Properties
     if (isLandlord) {
-      return ['Dashboard', 'My Properties', 'Account Settings'].includes(link.name);
+      return ['Dashboard', 'My Properties', 'Location Hierarchy', 'Meter Management', 'Account Settings'].includes(link.name);
     }
 
     // Default: for other roles (attendance staff etc) or fallback

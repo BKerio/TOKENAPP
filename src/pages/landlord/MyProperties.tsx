@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Home,
@@ -11,7 +12,8 @@ import {
     RefreshCw,
     Edit2,
     Trash2,
-    Eye
+    Eye,
+    Layers,
 } from 'lucide-react';
 import Swal from 'sweetalert2';
 import DashboardLoader from '@/lib/loader';
@@ -149,6 +151,7 @@ const MyProperties: React.FC = () => {
                     </p>
                 </div>
                 
+                <div className="flex flex-wrap gap-3">
                 <button
                     onClick={() => handleOpenModal()}
                     className="px-4 py-2 bg-[#0A1F44] hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-500/20 transition-all flex items-center gap-2 whitespace-nowrap"
@@ -156,6 +159,14 @@ const MyProperties: React.FC = () => {
                     <Plus size={18} />
                     Add Property
                 </button>
+                <Link
+                    to="/dashboard/location-hierarchy"
+                    className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center gap-2 whitespace-nowrap"
+                >
+                    <Layers size={18} />
+                    Manage Zones & Units
+                </Link>
+                </div>
             </div>
 
             {/* Toolbar */}
