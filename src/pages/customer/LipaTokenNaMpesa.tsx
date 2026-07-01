@@ -3,7 +3,6 @@ import api from "@/lib/api";
 import {
   Gauge,
   Loader2,
-  Smartphone,
   CheckCircle2,
   XCircle,
   Clock,
@@ -18,6 +17,13 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
+import PhoneInput from "@/components/ui/PhoneInput";
+import {
+  CountryCode,
+  isValidLocalPhone,
+  parseInternational,
+  toMpesaFormat,
+} from "@/lib/phone";
 
 type PaymentStatus = "idle" | "sending" | "waiting" | "confirmed" | "failed" | "timeout";
 type PaymentMethod = "stk" | "paybill";
@@ -35,6 +41,7 @@ const NCBA_BUSINESS_NUMBER = "880100";
 
 const LipaTokenNaMpesa = () => {
   const { user } = useAuth();
+  const [phoneCountry, setPhoneCountry] = useState<CountryCode>("KE");
   const [phone, setPhone] = useState("");
   const [amount, setAmount] = useState("");
   const [meterNumber, setMeterNumber] = useState("");
@@ -79,11 +86,9 @@ const LipaTokenNaMpesa = () => {
             setMinAmount(Number(meter.price_per_unit));
           }
           if (res.data.user?.phone) {
-            let displayPhone = res.data.user.phone;
-            if (displayPhone.startsWith("254")) {
-              displayPhone = "0" + displayPhone.slice(3);
-            }
-            setPhone(displayPhone);
+            const parsedPhone = parseInternational(res.data.user.phone);
+            setPhoneCountry(parsedPhone.country);
+            setPhone(parsedPhone.local);
           }
         })
         .catch((err) => console.error("Failed to fetch customer details", err));
@@ -92,8 +97,8 @@ const LipaTokenNaMpesa = () => {
 
   const validateInputs = () => {
     const errors: { phone?: string; amount?: string; meterNumber?: string } = {};
-    if (!/^(01|07)\d{8}$/.test(phone)) {
-      errors.phone = "Enter valid phone number (0712345678)";
+    if (!isValidLocalPhone(phone, phoneCountry)) {
+      errors.phone = "Enter a valid phone number (e.g. 0712345678)";
     }
     const numericAmount = Number(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -187,7 +192,7 @@ const LipaTokenNaMpesa = () => {
     setLoading(true);
     setPaymentResult({ status: "sending" });
     try {
-      const formattedPhone = "254" + phone.slice(-9);
+      const formattedPhone = toMpesaFormat(phone, phoneCountry);
       const numericAmount = Number(amount);
       const response = await api.post("/mpesa/stkpush", {
         phone: formattedPhone,
@@ -468,17 +473,15 @@ const LipaTokenNaMpesa = () => {
                 <form onSubmit={handleSubmit} className="space-y-5">
                   <div>
                     <label className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2 block">M-Pesa Phone to receive prompt</label>
-                    <div className="relative">
-                      <Smartphone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                      <input
-                        type="tel"
-                        placeholder="0712345678"
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className={`w-full pl-12 pr-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-800 dark:text-white transition focus:ring-2 focus:ring-[#0A1F44] ${validationErrors.phone ? "border-red-400" : "border-slate-300 dark:border-slate-700"}`}
-                        disabled={loading}
-                      />
-                    </div>
+                    <PhoneInput
+                      country={phoneCountry}
+                      value={phone}
+                      onCountryChange={setPhoneCountry}
+                      onChange={setPhone}
+                      disabled={loading}
+                      error={!!validationErrors.phone}
+                      placeholder="0717000440"
+                    />
                     {validationErrors.phone && <p className="text-xs text-red-500 mt-1">{validationErrors.phone}</p>}
                   </div>
 

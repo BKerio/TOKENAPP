@@ -19,6 +19,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import Swal from 'sweetalert2';
 import DashboardLoader from '@/lib/loader';
+import PhoneInput from '@/components/ui/PhoneInput';
+import { CountryCode, parseInternational, toInternational } from '@/lib/phone';
 
 interface Meter {
     id: string;
@@ -76,6 +78,8 @@ const CustomerManagement = () => {
         ward_id: '',
         status: 'active'
     });
+    const [phoneCountry, setPhoneCountry] = useState<CountryCode>('KE');
+    const [phoneLocal, setPhoneLocal] = useState('');
 
     const API_URL = import.meta.env.VITE_API_URL;
 
@@ -171,10 +175,26 @@ const CustomerManagement = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!phoneLocal.trim()) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Phone number is required',
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            return;
+        }
         try {
             const token = localStorage.getItem('token');
+            const payload = {
+                ...formData,
+                phone: toInternational(phoneLocal, phoneCountry),
+            };
             if (editingCustomer) {
-                await axios.put(`${API_URL}/admin/customers/${editingCustomer.id}`, formData, {
+                await axios.put(`${API_URL}/admin/customers/${editingCustomer.id}`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 Swal.fire({
@@ -187,7 +207,7 @@ const CustomerManagement = () => {
                     timer: 3000
                 });
             } else {
-                await axios.post(`${API_URL}/admin/customers`, formData, {
+                await axios.post(`${API_URL}/admin/customers`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 Swal.fire({
@@ -406,7 +426,10 @@ const CustomerManagement = () => {
 
     const openModal = async (customer: Customer | null = null) => {
         if (customer) {
+            const parsedPhone = parseInternational(customer.phone);
             setEditingCustomer(customer);
+            setPhoneCountry(parsedPhone.country);
+            setPhoneLocal(parsedPhone.local);
             setFormData({
                 name: customer.name,
                 phone: customer.phone,
@@ -423,6 +446,8 @@ const CustomerManagement = () => {
             await fetchWards(customer.constituency_id);
         } else {
             setEditingCustomer(null);
+            setPhoneCountry('KE');
+            setPhoneLocal('');
             setFormData({
                 name: '',
                 phone: '',
@@ -639,17 +664,13 @@ const CustomerManagement = () => {
                                             </div>
                                             <div>
                                                 <label className="block text-xs font-bold text-slate-500 mb-1 ml-1">Mobile Phone</label>
-                                                <div className="relative">
-                                                    <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
-                                                    <input
-                                                        type="text"
-                                                        required
-                                                        value={formData.phone}
-                                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                                        className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800 rounded-xl py-2 pl-9 pr-3 text-sm text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all"
-                                                        placeholder="+254..."
-                                                    />
-                                                </div>
+                                                <PhoneInput
+                                                    country={phoneCountry}
+                                                    value={phoneLocal}
+                                                    onCountryChange={setPhoneCountry}
+                                                    onChange={setPhoneLocal}
+                                                    placeholder="0717000440"
+                                                />
                                             </div>
                                             <div className="md:col-span-2">
                                                 <label className="block text-xs font-bold text-slate-500 mb-1 ml-1">Email Address</label>
