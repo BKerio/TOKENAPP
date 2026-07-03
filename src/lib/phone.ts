@@ -21,7 +21,8 @@ export function getCountryByCode(code: CountryCode): PhoneCountry {
   return PHONE_COUNTRIES.find((c) => c.code === code) ?? PHONE_COUNTRIES[0];
 }
 
-export function toInternational(localPhone: string, countryCode: CountryCode): string {
+/** Strip country code and leading 0, leaving the 9-digit subscriber number. */
+export function normalizeLocalDigits(localPhone: string, countryCode: CountryCode): string {
   const country = getCountryByCode(countryCode);
   let digits = localPhone.replace(/\D/g, '');
 
@@ -33,6 +34,12 @@ export function toInternational(localPhone: string, countryCode: CountryCode): s
     digits = digits.slice(1);
   }
 
+  return digits;
+}
+
+export function toInternational(localPhone: string, countryCode: CountryCode): string {
+  const country = getCountryByCode(countryCode);
+  const digits = normalizeLocalDigits(localPhone, countryCode);
   return `+${country.dialCode}${digits}`;
 }
 
@@ -57,15 +64,19 @@ export function parseInternational(phone: string): { country: CountryCode; local
 }
 
 export function isValidLocalPhone(localPhone: string, countryCode: CountryCode): boolean {
-  const digits = localPhone.replace(/\D/g, '');
+  const digits = normalizeLocalDigits(localPhone, countryCode);
+
+  if (!/^\d{9}$/.test(digits)) {
+    return false;
+  }
 
   switch (countryCode) {
     case 'KE':
-      return /^(01|07)\d{8}$/.test(digits);
+      return /^[17]\d{8}$/.test(digits);
     case 'UG':
-      return /^07\d{8}$/.test(digits);
+      return /^7\d{8}$/.test(digits);
     case 'TZ':
-      return /^(06|07)\d{8}$/.test(digits);
+      return /^[67]\d{8}$/.test(digits);
     default:
       return false;
   }

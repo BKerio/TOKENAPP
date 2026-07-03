@@ -98,7 +98,7 @@ const LipaTokenNaMpesa = () => {
   const validateInputs = () => {
     const errors: { phone?: string; amount?: string; meterNumber?: string } = {};
     if (!isValidLocalPhone(phone, phoneCountry)) {
-      errors.phone = "Enter a valid phone number (e.g. 0712345678)";
+      errors.phone = "Enter a valid phone number (e.g. 717000480 or 0717000480)";
     }
     const numericAmount = Number(amount);
     if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -480,7 +480,7 @@ const LipaTokenNaMpesa = () => {
                       onChange={setPhone}
                       disabled={loading}
                       error={!!validationErrors.phone}
-                      placeholder="0717000440"
+                      placeholder="717000480"
                     />
                     {validationErrors.phone && <p className="text-xs text-red-500 mt-1">{validationErrors.phone}</p>}
                   </div>
