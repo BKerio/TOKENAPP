@@ -10,17 +10,26 @@ function cn(...inputs: ClassValue[]) {
 interface LoaderProps extends React.HTMLAttributes<HTMLDivElement> {
     title?: string;
     subtitle?: string;
-    size?: "sm" | "md" | "lg";
+    size?: "xs" | "sm" | "md" | "lg";
+    showText?: boolean;
 }
 
 const DashboardLoader = ({
     title = "Wait for a moment...",
     subtitle = "Please wait while we prepare everything for you",
     size = "md",
+    showText = true,
     className,
     ...props
 }: LoaderProps) => {
     const sizeConfig = {
+        xs: {
+            container: "size-5",
+            titleClass: "text-xs/tight font-medium",
+            subtitleClass: "text-xs/relaxed",
+            spacing: "space-y-1",
+            maxWidth: "max-w-40",
+        },
         sm: {
             container: "size-20",
             titleClass: "text-sm/tight font-medium",
@@ -49,7 +58,8 @@ const DashboardLoader = ({
     return (
         <div
             className={cn(
-                "flex flex-col items-center justify-center gap-8 p-8",
+                "flex flex-col items-center justify-center",
+                showText ? "gap-8 p-8" : "p-0",
                 className
             )}
             {...props}
@@ -119,7 +129,7 @@ const DashboardLoader = ({
                 />
             </motion.div>
 
-            {/* Enhanced Typography with Breathing Animation */}
+            {showText && (
             <motion.div
                 className={cn("text-center", config.spacing, config.maxWidth)}
                 initial={{ opacity: 0, y: 12 }}
@@ -160,6 +170,7 @@ const DashboardLoader = ({
                     </motion.span>
                 </motion.p>
             </motion.div>
+            )}
         </div>
     );
 }
