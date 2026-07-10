@@ -19,10 +19,10 @@ interface UserProfile {
   permissions?: string[];
 }
 
-const SIDEBAR_WIDTH = 256; // 256px when expanded
-const SIDEBAR_COLLAPSED_WIDTH = 80; // 80px when collapsed
-const NAVBAR_HEIGHT = 72; // 72px for Navbar (Condensed)
-const HEADER_HEIGHT = 72; // additional mobile header height
+const SIDEBAR_WIDTH = 256; // w-64 when expanded
+const SIDEBAR_COLLAPSED_WIDTH = 80; // w-20 when collapsed
+const NAVBAR_HEIGHT = 64; // dashboard navbar height
+const HEADER_HEIGHT = 56; // additional mobile header height
 
 interface VendorProfile {
   logo_url?: string | null;
@@ -34,7 +34,11 @@ const DashboardLayout = () => {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [vendorProfile, setVendorProfile] = useState<VendorProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 768);
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    if (window.innerWidth < 768) return false;
+    return localStorage.getItem('tokenpap_sidebar_collapsed') !== 'true';
+  });
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   const navigate = useNavigate();
@@ -106,11 +110,21 @@ const DashboardLayout = () => {
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setSidebarOpen(!mobile);
+      if (mobile) {
+        setSidebarOpen(false);
+      } else {
+        setSidebarOpen(localStorage.getItem('tokenpap_sidebar_collapsed') !== 'true');
+      }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!isMobile) {
+      localStorage.setItem('tokenpap_sidebar_collapsed', String(!sidebarOpen));
+    }
+  }, [sidebarOpen, isMobile]);
 
   if (loading || !user) {
     return (
@@ -142,12 +156,11 @@ const DashboardLayout = () => {
 
         {/* Fixed Sidebar with top offset */}
         <div
-          className={`fixed left-0 z-20 transition-all duration-300 ease-in-out
-            ${isMobile ? (sidebarOpen ? 'translate-x-0' : '-translate-x-full') : 'translate-x-0'}`}
+          className="fixed left-0 z-20 transition-all duration-300 ease-in-out"
           style={{
             width: isMobile ? `${SIDEBAR_WIDTH}px` : (sidebarOpen ? `${SIDEBAR_WIDTH}px` : `${SIDEBAR_COLLAPSED_WIDTH}px`),
             top: `${NAVBAR_HEIGHT}px`,
-            height: `calc(100% - ${NAVBAR_HEIGHT}px)`
+            height: `calc(100vh - ${NAVBAR_HEIGHT}px)`,
           }}
         >
           <Sidebar
@@ -157,13 +170,9 @@ const DashboardLayout = () => {
             isMobile={isMobile}
             onLogout={handleLogout}
             onCloseMobile={() => setSidebarOpen(false)}
+            onToggleSidebar={() => setSidebarOpen((prev) => !prev)}
           />
         </div>
-
-        {/* Overlay for mobile */}
-        {isMobile && sidebarOpen && (
-          <div onClick={() => setSidebarOpen(false)} className="fixed inset-0 bg-black/40 z-10"></div>
-        )}
 
         {/* Mobile Greeting Header */}
         {isMobile && (

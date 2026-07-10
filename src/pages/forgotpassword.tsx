@@ -208,7 +208,7 @@ const ForgotPassword = () => {
               className="mb-4"
             >
               <div className="h-16 w-auto">
-                <TokenPapLogo className="h-full w-auto" />
+                <TokenPapLogo size="xl" />
               </div>
             </motion.div>
             <h2 className="text-xl font-bold text-slate-800 dark:text-white">Reset Password</h2>

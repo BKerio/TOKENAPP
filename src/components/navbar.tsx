@@ -1,11 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import {
-  Menu, LogOut,
-  User as UserIcon, ChevronDown,
-  Search, Plus, Bell,
-  Mail, Phone,
-  X
+  Menu,
+  LogOut,
+  User as UserIcon,
+  ChevronDown,
+  Search,
+  Plus,
+  Bell,
+  Mail,
+  Phone,
+  X,
+  Shield,
+  Building2,
+  Gauge,
+  Users,
 } from "lucide-react";
 import Swal from 'sweetalert2';
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,7 +23,6 @@ import { getVendorLogoUrl } from "@/lib/utils";
 import TokenPapLogo from "@/components/TokenPapLogo";
 import KenyaFlag from "@/assets/kenya-flag.svg";
 
-// Types
 interface User {
   name: string;
   email: string;
@@ -38,7 +46,15 @@ interface NavbarProps {
   hideTopBar?: boolean;
 }
 
-const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = false, sidebarOpen, onLogout, hideTopBar = false }: NavbarProps) => {
+const Navbar = ({
+  user,
+  vendorProfile,
+  onToggleSidebar,
+  showSidebarToggle = false,
+  sidebarOpen,
+  onLogout,
+  hideTopBar = false,
+}: NavbarProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -48,41 +64,52 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
   const location = useLocation();
   const profileRef = useRef<HTMLDivElement>(null);
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin' || user?.roles?.includes('admin') || (!user?.role && user); // Fallback for admin if role missing but user exists
+  const isAdmin =
+    user?.role === 'admin' ||
+    user?.role === 'system_admin' ||
+    user?.roles?.includes('admin') ||
+    (!user?.role && !!user);
 
+  const isVendor = user?.role === 'vendor' || user?.roles?.includes('vendor');
+  const isDashboardMode = hideTopBar && !!user;
 
+  const getDashboardTitle = () => {
+    if (isVendor) return 'Vendor Dashboard';
+    if (user?.role === 'customer') return 'Customer Dashboard';
+    if (user?.role === 'landlord') return 'Landlord Dashboard';
+    return 'Admin Dashboard';
+  };
 
   const handleLogout = async () => {
     const isDarkMode = document.documentElement.classList.contains('dark');
 
     const result = await Swal.fire({
-      title: 'Ready to leave?',
-      text: 'You are about to sign out of the system.',
+      title: 'Logout from Dashboard?',
+      text: 'You will need to log in again to continue.',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: isDarkMode ? '#334155' : '#94a3b8',
-      confirmButtonText: 'Sign Out',
+      confirmButtonText: 'Logout',
       cancelButtonText: 'Stay',
       background: isDarkMode ? '#020617' : '#ffffff',
       color: isDarkMode ? '#f1f5f9' : '#1e293b',
       customClass: {
         popup: `rounded-3xl border ${isDarkMode ? 'border-slate-800' : 'border-slate-200'}`,
         confirmButton: 'rounded-xl px-6',
-        cancelButton: 'rounded-xl px-6'
-      }
+        cancelButton: 'rounded-xl px-6',
+      },
     });
 
     if (result.isConfirmed) {
-      if (onLogout) onLogout();
+      onLogout?.();
       Swal.fire({
         icon: 'success',
-        title: 'Logged Out',
-        text: 'Logged out successfully.',
+        title: 'Logged out successfully',
         toast: true,
         position: 'top-end',
         showConfirmButton: false,
-        timer: 3000
+        timer: 3000,
       });
     }
   };
@@ -94,13 +121,14 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
       const currentScrollY = window.pageYOffset;
       setScrolled(currentScrollY > 10);
 
-      // Auto-hide logic: scroll down hides, scroll up shows
-      if (currentScrollY < 50) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY + 15) {
-        setIsVisible(false);
-      } else if (currentScrollY < lastScrollY - 10) {
-        setIsVisible(true);
+      if (!isDashboardMode) {
+        if (currentScrollY < 50) {
+          setIsVisible(true);
+        } else if (currentScrollY > lastScrollY + 15) {
+          setIsVisible(false);
+        } else if (currentScrollY < lastScrollY - 10) {
+          setIsVisible(true);
+        }
       }
 
       lastScrollY = currentScrollY;
@@ -108,7 +136,7 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isDashboardMode]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -135,8 +163,94 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
   }, [location]);
 
   const coverageBarHeight = hideTopBar ? 0 : 44;
-  const navBarBaseHeight = scrolled ? 72 : 88;
+  const navBarBaseHeight = isDashboardMode ? 64 : (scrolled ? 72 : 88);
   const totalHeaderHeight = coverageBarHeight + navBarBaseHeight;
+
+  if (isDashboardMode) {
+    return (
+      <>
+        <motion.nav
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="sticky top-0 z-40 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 shadow-sm"
+        >
+          <div className="px-4 md:px-6 py-3 flex items-center justify-between gap-4">
+            {/* Left: sidebar toggle + admin info */}
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="h-10 w-10 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 font-semibold text-lg shrink-0">
+                {user!.name.charAt(0).toUpperCase()}
+              </div>
+
+              <div className="min-w-0">
+                <h1 className="text-base font-semibold text-gray-800 dark:text-white flex items-center gap-1 truncate">
+                  <Shield size={18} className="text-red-500 shrink-0" />
+                  {getDashboardTitle()}
+                </h1>
+                <p className="text-sm text-gray-500 dark:text-slate-400 truncate">
+                  Welcome, {user!.name}
+                </p>
+              </div>
+            </div>
+
+            {/* Center: quick links */}
+            <div className="hidden md:flex items-center gap-2">
+              {isAdmin && (
+                <>
+                  <Link
+                    to="/dashboard/vendors"
+                    className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-[#0A1F44] dark:hover:text-blue-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                  >
+                    <Building2 size={16} />
+                    Vendors
+                  </Link>
+                  <Link
+                    to="/dashboard/meters"
+                    className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-[#0A1F44] dark:hover:text-blue-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                  >
+                    <Gauge size={16} />
+                    Meters
+                  </Link>
+                </>
+              )}
+              {isVendor && (
+                <Link
+                  to="/dashboard/customer-management"
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-[#0A1F44] dark:hover:text-blue-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                >
+                  <Users size={16} />
+                  Customers
+                </Link>
+              )}
+              {user?.role === 'customer' && (
+                <Link
+                  to="/dashboard/lipa-mpesa"
+                  className="flex items-center gap-1.5 text-sm font-medium text-gray-600 dark:text-slate-300 hover:text-[#0A1F44] dark:hover:text-blue-300 px-3 py-1.5 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800 transition"
+                >
+                  Buy Tokens
+                </Link>
+              )}
+            </div>
+
+            {/* Right: theme + logout */}
+            <div className="flex items-center gap-2 shrink-0">
+              <ThemeToggle />
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={handleLogout}
+                className="flex items-center gap-2 bg-red-500 text-white px-3 md:px-4 py-2 rounded-lg hover:bg-red-600 transition-all duration-200 shadow-sm"
+              >
+                <LogOut size={18} />
+                <span className="text-sm font-medium hidden sm:inline">Logout</span>
+              </motion.button>
+            </div>
+          </div>
+        </motion.nav>
+        <div style={{ height: navBarBaseHeight }} />
+      </>
+    );
+  }
 
   return (
     <>
@@ -144,7 +258,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
         className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
           }`}
       >
-        {/* TOP BAR / COVERAGE BAR */}
         {!hideTopBar && (
           <div
             className="w-full bg-white/80 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 backdrop-blur-md"
@@ -177,7 +290,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
           </div>
         )}
 
-        {/* MAIN NAVIGATION BAR */}
         <motion.nav
           initial={false}
           animate={{ height: navBarBaseHeight }}
@@ -190,7 +302,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
           `}
         >
           <div className="max-w-7xl mx-auto px-4 md:px-8 h-full flex justify-between items-center px-0">
-            {/* Left Section */}
             <div className="flex items-center gap-6 h-full">
               {showSidebarToggle && (
                 <motion.button
@@ -229,7 +340,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
               </Link>
             </div>
 
-            {/* Middle Section (Desktop Dashboard Search) */}
             {isAdmin && !isMobile && (
               <div className="hidden lg:flex flex-1 max-w-md px-12">
                 <div className="relative w-full group">
@@ -243,7 +353,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
               </div>
             )}
 
-            {/* Right Section */}
             <div className="flex items-center gap-3">
               {isAdmin && !isMobile && (
                 <div className="flex items-center gap-1.5 mr-2">
@@ -304,7 +413,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
                 <Link to="/login" className="bg-slate-900 dark:bg-white text-white dark:text-slate-950 px-5 py-2 rounded-full text-xs font-black uppercase shadow-lg">Login</Link>
               )}
 
-              {/* Mobile Toggle */}
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="md:hidden p-2 rounded-xl text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 transition-all"
@@ -316,7 +424,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
         </motion.nav>
       </header>
 
-      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && isMobile && (
           <>
@@ -356,7 +463,6 @@ const Navbar = ({ user, vendorProfile, onToggleSidebar, showSidebarToggle = fals
         )}
       </AnimatePresence>
 
-      {/* Spacer */}
       <div style={{ height: totalHeaderHeight }} />
     </>
   );

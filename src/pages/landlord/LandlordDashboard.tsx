@@ -1,318 +1,334 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import api from '@/lib/api';
 import {
-    Home,
-    CreditCard,
-    Phone,
-    Mail,
-    User,
-    Activity,
-    Calendar,
-    ChevronRight,
-    ShieldCheck,
-    AlertTriangle,
-    Layers,
-    MapPin,
-    Users,
-    Gauge,
+  Home,
+  CreditCard,
+  Phone,
+  Mail,
+  User,
+  Activity,
+  ChevronRight,
+  ShieldCheck,
+  AlertTriangle,
+  Layers,
+  MapPin,
+  Gauge,
+  Zap,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import dayjs from 'dayjs';
 import DashboardLoader from '@/lib/loader';
+import {
+  StatCard,
+  DashboardHeader,
+  QuickActionGrid,
+  PieBarStatistics,
+  BarChartCard,
+  VerticalBarChart,
+  DashboardFooter,
+  toBarData,
+  getInitials,
+  CHART_COLORS,
+  CustomTooltip,
+  type StatCardData,
+  type QuickActionData,
+} from '@/lib/dashboard-ui';
+import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 
 interface OutletContextType {
-    user: {
-        id: string;
-        name: string;
-        email?: string;
-        role?: string;
-    };
+  user: {
+    id: string;
+    name: string;
+    email?: string;
+    role?: string;
+  };
 }
 
 interface LandlordProfile {
-    id: string;
-    full_name: string;
-    phone: string;
-    payment_account: string;
-    status: string;
-    user?: { id: string; name: string; email: string; username?: string };
+  id: string;
+  full_name: string;
+  phone: string;
+  payment_account: string;
+  status: string;
+  user?: { id: string; name: string; email: string; username?: string };
 }
 
-const getGreeting = () => {
-    const h = new Date().getHours();
-    if (h >= 5 && h < 12) return 'Good Morning';
-    if (h >= 12 && h < 18) return 'Good Afternoon';
-    return 'Good Evening';
-};
-
-const StatCard = ({
-    icon: Icon,
-    label,
-    value,
-    sub,
-    color = 'emerald',
-    delay = 0,
-}: {
-    icon: React.ElementType;
-    label: string;
-    value: string;
-    sub?: string;
-    color?: string;
-    delay?: number;
-}) => {
-    const colors: Record<string, string> = {
-        emerald: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-        blue: 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400',
-        amber: 'bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400',
-        slate: 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400',
-    };
-
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay }}
-            className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md hover:border-blue-500/30 transition-all duration-300 group"
-        >
-            <div className="flex justify-between items-start gap-3">
-                <div className="flex-1 min-w-0">
-                    <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">{label}</p>
-                    <p className="text-sm font-bold text-slate-900 dark:text-white break-all leading-snug group-hover:text-blue-900 dark:group-hover:text-blue-400 transition-colors">
-                        {value}
-                    </p>
-                    {sub && <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium">{sub}</p>}
-                </div>
-                <div className={`p-2.5 rounded-xl shrink-0 ${colors[color]}`}>
-                    <Icon size={18} />
-                </div>
-            </div>
-        </motion.div>
-    );
-};
-
 const LandlordDashboard: React.FC = () => {
-    useOutletContext<OutletContextType>();
-    const [profile, setProfile] = useState<LandlordProfile | null>(null);
-    const [summary, setSummary] = useState({ properties: 0, zones: 0, routes: 0, streets: 0, units: 0, tenants: 0, meters: 0 });
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  useOutletContext<OutletContextType>();
+  const [profile, setProfile] = useState<LandlordProfile | null>(null);
+  const [summary, setSummary] = useState({
+    properties: 0,
+    zones: 0,
+    routes: 0,
+    streets: 0,
+    units: 0,
+    tenants: 0,
+    meters: 0,
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const [profileRes, summaryRes, metersRes] = await Promise.all([
-                    api.get<{ status: number; landlord: LandlordProfile }>('/landlord/profile'),
-                    api.get<{ status: number; summary: typeof summary }>('/landlord/hierarchy/summary'),
-                    api.get<{ status: number; meters: unknown[] }>('/landlord/meters'),
-                ]);
-                if (profileRes.data.status === 200) {
-                    setProfile(profileRes.data.landlord);
-                }
-                if (summaryRes.data.status === 200) {
-                    setSummary({
-                        ...summaryRes.data.summary,
-                        meters: metersRes.data.status === 200 ? (metersRes.data.meters?.length ?? 0) : 0,
-                    });
-                }
-            } catch (err: any) {
-                setError(err.response?.data?.message || 'Failed to load profile');
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchProfile();
-    }, []);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const [profileRes, summaryRes, metersRes] = await Promise.all([
+          api.get<{ status: number; landlord: LandlordProfile }>('/landlord/profile'),
+          api.get<{ status: number; summary: typeof summary }>('/landlord/hierarchy/summary'),
+          api.get<{ status: number; meters: unknown[] }>('/landlord/meters'),
+        ]);
+        if (profileRes.data.status === 200) {
+          setProfile(profileRes.data.landlord);
+        }
+        if (summaryRes.data.status === 200) {
+          setSummary({
+            ...summaryRes.data.summary,
+            meters: metersRes.data.status === 200 ? (metersRes.data.meters?.length ?? 0) : 0,
+          });
+        }
+      } catch (err: unknown) {
+        const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message;
+        setError(message || 'Failed to load profile');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
 
-    const quickActions = [
-        { text: 'My Profile', desc: 'View & edit details', icon: User, path: '/dashboard/account' },
-        { text: 'Properties', desc: 'Manage properties', icon: Home, path: '/dashboard/properties' },
-        { text: 'Location Hierarchy', desc: 'Zones, routes & units', icon: Layers, path: '/dashboard/location-hierarchy' },
-        { text: 'Security', desc: 'Password & access', icon: ShieldCheck, path: '/dashboard/account' },
-    ];
+  const displayName = profile?.full_name || profile?.user?.name || 'Landlord';
 
-    if (loading) {
-        return <DashboardLoader title="Loading Landlord Portal" subtitle="Fetching your account details..." />;
-    }
+  const pieData = useMemo(
+    () =>
+      [
+        { name: 'Properties', value: summary.properties },
+        { name: 'Zones', value: summary.zones },
+        { name: 'Units', value: summary.units },
+        { name: 'Meters', value: summary.meters },
+        { name: 'Tenants', value: summary.tenants },
+      ].filter((d) => d.value > 0),
+    [summary]
+  );
 
-    if (error) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 bg-slate-50 dark:bg-slate-950">
-                <div className="bg-red-50 dark:bg-red-950/20 p-6 rounded-2xl border border-red-100 dark:border-red-900/30 text-center max-w-md">
-                    <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-red-900 dark:text-red-400">Dashboard Error</h3>
-                    <p className="text-red-700 dark:text-red-400 mt-2 text-sm">{error}</p>
-                </div>
-            </div>
-        );
-    }
+  const barData = useMemo(
+    () =>
+      toBarData([
+        { name: 'Properties', value: summary.properties },
+        { name: 'Zones', value: summary.zones },
+        { name: 'Routes', value: summary.routes },
+        { name: 'Streets', value: summary.streets },
+        { name: 'Units', value: summary.units },
+        { name: 'Tenants', value: summary.tenants },
+        { name: 'Meters', value: summary.meters },
+      ]),
+    [summary]
+  );
 
-    const displayName = profile?.full_name || profile?.user?.name || 'Landlord';
+  const occupancyBarData = useMemo(
+    () =>
+      toBarData([
+        { name: 'Tenants', value: summary.tenants },
+        { name: 'Meters', value: summary.meters },
+        { name: 'Units', value: summary.units },
+        { name: 'Properties', value: summary.properties },
+      ]),
+    [summary]
+  );
 
+  const locationBarData = useMemo(
+    () =>
+      toBarData([
+        { name: 'Zones', value: summary.zones },
+        { name: 'Routes', value: summary.routes },
+        { name: 'Streets', value: summary.streets },
+        { name: 'Units', value: summary.units },
+      ]).filter((d) => (d.count ?? 0) > 0),
+    [summary]
+  );
+
+  const quickActions: QuickActionData[] = [
+    { text: 'My Profile', desc: 'View & edit details', icon: User, path: '/dashboard/account' },
+    { text: 'Properties', desc: 'Manage properties', icon: Home, path: '/dashboard/properties' },
+    { text: 'Location Hierarchy', desc: 'Zones, routes & units', icon: Layers, path: '/dashboard/location-hierarchy' },
+    { text: 'Security', desc: 'Password & access', icon: ShieldCheck, path: '/dashboard/account' },
+  ];
+
+  const landlordStats: StatCardData[] = [
+    { title: 'Properties', value: String(summary.properties), change: 'Registered estates', icon: Home },
+    { title: 'Zones', value: String(summary.zones), change: `${summary.routes} routes · ${summary.streets} streets`, icon: Layers },
+    { title: 'Units', value: String(summary.units), change: 'Across all locations', icon: MapPin },
+    { title: 'Meters', value: String(summary.meters), change: `${summary.tenants} tenants linked`, icon: Gauge },
+  ];
+
+  if (loading) {
     return (
-        <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950 p-6 md:p-8 font-sans text-slate-900 dark:text-slate-100 transition-colors">
-
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-8">
-                <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                    <div className="flex items-center gap-2 mb-2">
-                        <Calendar className="w-4 h-4 text-slate-500 dark:text-slate-400" strokeWidth={1.5} />
-                        <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
-                            {dayjs().format('dddd, D MMMM YYYY')}
-                        </p>
-                    </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight">
-                        {getGreeting()},{' '}
-                        <span className="text-[#0A1F44] dark:text-blue-400 capitalize">{displayName}</span>
-                    </h1>
-                    <p className="mt-2 text-slate-600 dark:text-slate-400 max-w-2xl text-sm font-medium opacity-80">
-                        Manage properties, zone hierarchy, and customer assignments from your portal.
-                    </p>
-                </motion.div>
-                <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-full shadow-sm text-xs font-bold text-slate-600 dark:text-slate-400 uppercase">
-                    <div className={`w-2.5 h-2.5 rounded-full animate-pulse ${profile?.status === 'active' ? 'bg-green-500' : 'bg-amber-500'}`} />
-                    {profile?.status || 'Active'}
-                </div>
-            </div>
-
-            {/* Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <StatCard icon={Home} label="Properties" value={String(summary.properties)} sub="Registered estates" color="emerald" delay={0} />
-                <StatCard icon={Layers} label="Zones" value={String(summary.zones)} sub={`${summary.routes} routes · ${summary.streets} streets`} color="blue" delay={0.1} />
-                <StatCard icon={MapPin} label="Units" value={String(summary.units)} sub="Across all locations" color="amber" delay={0.2} />
-                <StatCard icon={Gauge} label="Meters" value={String(summary.meters)} sub="Assigned by admin" color="slate" delay={0.3} />
-            </div>
-
-            {/* Bottom Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-                {/* Quick Actions */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                        {quickActions.map((action, idx) => (
-                            <Link key={idx} to={action.path}>
-                                <motion.div
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
-                                    className="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm hover:border-blue-500/30 dark:hover:border-blue-800 hover:shadow-md transition-all cursor-pointer flex flex-col items-center text-center gap-3"
-                                >
-                                    <div className="w-12 h-12 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center text-blue-900 dark:text-blue-400">
-                                        <action.icon size={22} />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">{action.text}</h4>
-                                        <p className="text-xs text-slate-500 mt-0.5">{action.desc}</p>
-                                    </div>
-                                </motion.div>
-                            </Link>
-                        ))}
-                    </div>
-
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"
-                    >
-                        <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-1">Landlord Portal</h3>
-                        <p className="text-sm text-slate-500 dark:text-slate-400 mb-6 font-medium">
-                            Your personal property owner workspace.
-                        </p>
-                        <div className="flex flex-wrap gap-4">
-                            <Link
-                                to="/dashboard/account"
-                                className="px-5 py-2.5 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-blue-700 transition-all flex items-center gap-2 shadow-sm"
-                            >
-                                Edit My Profile <ChevronRight size={16} />
-                            </Link>
-                            <Link
-                                to="/dashboard/location-hierarchy"
-                                className="px-5 py-2.5 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 text-sm font-bold rounded-xl hover:bg-slate-100 dark:hover:bg-slate-700 transition-all flex items-center gap-2 border border-slate-100 dark:border-slate-700"
-                            >
-                                Location Hierarchy <ChevronRight size={16} />
-                            </Link>
-                        </div>
-                    </motion.div>
-                </div>
-
-                {/* Profile Card */}
-                <div className="space-y-6">
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden"
-                    >
-                        <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-800/30">
-                            <h3 className="font-bold text-slate-900 dark:text-white">Owner Profile</h3>
-                            <Link
-                                to="/dashboard/account"
-                                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:text-blue-800 flex items-center gap-1"
-                            >
-                                Edit <ChevronRight className="w-3 h-3" />
-                            </Link>
-                        </div>
-                        <div className="p-5 space-y-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-xl bg-[#0A1F44] text-white flex items-center justify-center text-sm font-bold shadow-sm shrink-0">
-                                    {displayName.substring(0, 2).toUpperCase()}
-                                </div>
-                                <div className="min-w-0">
-                                    <p className="font-bold text-slate-800 dark:text-slate-200 truncate">{displayName}</p>
-                                    <p className="text-xs text-slate-500 font-medium">Property Owner</p>
-                                </div>
-                            </div>
-                            <div className="space-y-2 text-sm">
-                                {profile?.user?.email && (
-                                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                                        <Mail size={14} className="shrink-0" />
-                                        <span className="truncate text-xs">{profile.user.email}</span>
-                                    </div>
-                                )}
-                                {profile?.phone && (
-                                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                                        <Phone size={14} className="shrink-0" />
-                                        <span className="text-xs">{profile.phone}</span>
-                                    </div>
-                                )}
-                                {profile?.payment_account && (
-                                    <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                                        <CreditCard size={14} className="shrink-0" />
-                                        <span className="text-xs font-mono">{profile.payment_account}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    </motion.div>
-
-                    {/* Status card */}
-                    <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="bg-[#0A1F44] dark:bg-slate-900 rounded-2xl shadow-lg p-6 text-white relative overflow-hidden border border-slate-700 dark:border-slate-800"
-                    >
-                        <div className="absolute top-0 right-0 opacity-10 transform translate-x-8 -translate-y-8">
-                            <Home size={100} />
-                        </div>
-                        <div className="relative z-10">
-                            <h3 className="font-bold text-lg mb-1">Account Status</h3>
-                            <p className="text-blue-200 dark:text-slate-400 text-xs mb-6 font-medium">Property owner account</p>
-                            <div className="flex justify-between items-center border-b border-blue-800/50 dark:border-slate-800/50 pb-2 text-sm">
-                                <span className="text-emerald-100 flex items-center gap-2">
-                                    <Activity size={16} /> Status
-                                </span>
-                                <span className="font-bold capitalize">{profile?.status || 'Active'}</span>
-                            </div>
-                            <div className="flex justify-between items-center pt-2 text-sm">
-                                <span className="text-emerald-100 flex items-center gap-2">
-                                    <ShieldCheck size={16} /> Role
-                                </span>
-                                <span className="font-bold">Landlord</span>
-                            </div>
-                        </div>
-                    </motion.div>
-                </div>
-            </div>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-100">
+        <DashboardLoader title="Loading Landlord Portal" subtitle="Fetching your account details..." />
+      </div>
     );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[80vh] p-4 bg-slate-100">
+        <div className="bg-red-50 p-6 rounded-2xl border border-red-100 text-center max-w-md">
+          <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-red-900">Dashboard Error</h3>
+          <p className="text-red-700 mt-2 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-slate-100 p-5 md:p-8 font-sans">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <DashboardHeader
+          title="Landlord Dashboard"
+          subtitle="Property & location hierarchy overview"
+          initials={getInitials(displayName, 'LL')}
+        />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 md:gap-5">
+          {landlordStats.map((stat, index) => (
+            <StatCard key={stat.title} stat={stat} index={index} />
+          ))}
+        </div>
+
+        <QuickActionGrid actions={quickActions} />
+
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 md:gap-6">
+          <div className="xl:col-span-2 space-y-5 md:space-y-6">
+            <PieBarStatistics
+              title="Portfolio Statistics"
+              subtitle="Properties, zones, units, meters & tenants"
+              pieData={pieData}
+              barData={barData}
+            />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 md:gap-6">
+              <BarChartCard title="Location Hierarchy" subtitle="Zones, routes, streets & units" delay={0.28}>
+                <VerticalBarChart data={locationBarData} emptyMessage="No location data yet" />
+              </BarChartCard>
+
+              <BarChartCard title="Occupancy Overview" subtitle="Tenants vs meters across portfolio" delay={0.32}>
+                <div className="h-[240px] w-full">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={occupancyBarData} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]} maxBarSize={48}>
+                        {occupancyBarData.map((entry, i) => (
+                          <Cell key={i} fill={entry.fill ?? CHART_COLORS[i % CHART_COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </BarChartCard>
+            </div>
+          </div>
+
+          <div className="space-y-5 md:space-y-6">
+            <motion.div
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden"
+            >
+              <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="font-extrabold text-[#0A1F44]">Owner Profile</h3>
+                <Link to="/dashboard/account" className="text-xs font-bold text-blue-600 hover:text-blue-800 flex items-center gap-1">
+                  Edit <ChevronRight className="w-3 h-3" />
+                </Link>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-[#0A1F44] text-white flex items-center justify-center text-sm font-bold shrink-0">
+                    {displayName.substring(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="font-bold text-slate-800 truncate">{displayName}</p>
+                    <p className="text-xs text-slate-500 font-medium">Property Owner</p>
+                  </div>
+                </div>
+                <div className="space-y-2 text-sm">
+                  {profile?.user?.email && (
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <Mail size={14} className="shrink-0" />
+                      <span className="truncate text-xs">{profile.user.email}</span>
+                    </div>
+                  )}
+                  {profile?.phone && (
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <Phone size={14} className="shrink-0" />
+                      <span className="text-xs">{profile.phone}</span>
+                    </div>
+                  )}
+                  {profile?.payment_account && (
+                    <div className="flex items-center gap-2 text-slate-600">
+                      <CreditCard size={14} className="shrink-0" />
+                      <span className="text-xs font-mono">{profile.payment_account}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 16 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25 }}
+              className="bg-[#0A1F44] rounded-2xl shadow-lg p-5 text-white relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 opacity-10 transform translate-x-6 -translate-y-6">
+                <Home size={120} />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center gap-2 mb-1">
+                  <Zap size={18} className="text-amber-400" />
+                  <h3 className="font-extrabold text-base">Account Status</h3>
+                </div>
+                <p className="text-blue-200/70 text-xs mb-5">Property owner account</p>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-sm border-b border-white/10 pb-2">
+                    <span className="text-blue-100 flex items-center gap-2"><Activity size={15} /> Status</span>
+                    <span className="font-bold capitalize">{profile?.status || 'Active'}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-white/10 pb-2">
+                    <span className="text-blue-100 flex items-center gap-2"><ShieldCheck size={15} /> Role</span>
+                    <span className="font-bold">Landlord</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-blue-100 flex items-center gap-2"><Gauge size={15} /> Meters</span>
+                    <span className="font-bold">{summary.meters}</span>
+                  </div>
+                </div>
+                <Link
+                  to="/dashboard/location-hierarchy"
+                  className="mt-5 w-full py-2.5 bg-white text-[#0A1F44] text-sm font-bold rounded-xl flex items-center justify-center hover:bg-blue-50 transition-all"
+                >
+                  Manage Locations
+                </Link>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+
+        <DashboardFooter />
+      </div>
+    </div>
+  );
 };
 
 export default LandlordDashboard;
