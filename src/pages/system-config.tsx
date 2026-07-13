@@ -1,23 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import axios from 'axios';
-import { Settings, Save, Eye, EyeOff, MessageSquare, RefreshCw, ChevronDown, Globe } from 'lucide-react';
+import { Settings, Save, Eye, EyeOff, MessageSquare, RefreshCw, ChevronDown, Globe, Building2, Home, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Swal from 'sweetalert2';
 import DashboardLoader from '@/lib/loader';
-
-interface SystemConfig {
-  id: number;
-  key: string;
-  value: string;
-  type: string;
-  category: string;
-  description: string | null;
-  is_encrypted: boolean;
-  is_masked?: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import type { SystemConfig, PaymentEntity, PaymentEntityType } from '@/pages/system-config-types';
+import {
+  buildVendorMpesaConfigs,
+  buildLandlordMpesaConfigs,
+  mapEditedToVendorMpesaConfig,
+} from '@/lib/payment-config-fields';
 
 interface UserContext {
   user: {
@@ -41,6 +34,13 @@ const SystemConfigPage = () => {
   const [vendorEmail, setVendorEmail] = useState('');
   const [isTabLoading, setIsTabLoading] = useState(false);
 
+  const [entityType, setEntityType] = useState<PaymentEntityType>('vendor');
+  const [selectedEntityId, setSelectedEntityId] = useState('');
+  const [entities, setEntities] = useState<PaymentEntity[]>([]);
+  const [entitiesLoading, setEntitiesLoading] = useState(false);
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'system_admin';
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
   useEffect(() => {
@@ -54,7 +54,40 @@ const SystemConfigPage = () => {
       setIsVendor(false);
       setVendorEmail('');
     }
-  }, [user?.email, user?.role]); // Use primitive strings, not the user object directly, to avoid infinite renders
+  }, [user?.email, user?.role]);
+
+  useEffect(() => {
+    if (isVendor && activeTab === 'mpesa') {
+      setActiveTab('sms');
+    }
+  }, [isVendor, activeTab]);
+
+  const loadPaymentEntities = useCallback(async () => {
+    try {
+      setEntitiesLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${API_URL}/admin/payment-config/entities`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.status === 200) {
+        const list: PaymentEntity[] = [
+          ...(response.data.vendors || []).map((v: PaymentEntity) => ({ ...v, type: 'vendor' as const })),
+          ...(response.data.landlords || []).map((l: PaymentEntity) => ({ ...l, type: 'landlord' as const })),
+        ];
+        setEntities(list);
+      }
+    } catch (error) {
+      console.error('Failed to load payment entities', error);
+    } finally {
+      setEntitiesLoading(false);
+    }
+  }, [API_URL]);
+
+  useEffect(() => {
+    if (isAdmin && activeTab === 'mpesa') {
+      loadPaymentEntities();
+    }
+  }, [isAdmin, activeTab, loadPaymentEntities]);
 
   useEffect(() => {
     // Only load configs if user is available
@@ -70,8 +103,7 @@ const SystemConfigPage = () => {
       setTimeout(() => setIsTabLoading(false), 200);
     };
     loadWithTransition();
-    // Use primitive dependencies to prevent infinite re-fetching
-  }, [activeTab, user?.email, user?.role]);
+  }, [activeTab, user?.email, user?.role, selectedEntityId, entityType]);
 
 
   const loadConfigs = async () => {
@@ -85,6 +117,7 @@ const SystemConfigPage = () => {
     }
 
     const isVendorUser = currentUser.role === 'vendor';
+    const isAdminUser = ['admin', 'system_admin'].includes(currentUser.role);
     const currentVendorEmail = currentUser.email || '';
 
     try {
@@ -98,18 +131,44 @@ const SystemConfigPage = () => {
         return;
       }
 
-      console.log('Loading configs:', {
-        isVendor,
-        vendorEmail,
-        isVendorUser,
-        currentVendorEmail,
-        userRole: currentUser?.role,
-        userEmail: currentUser?.email,
-      });
-
       let configsData: SystemConfig[] = [];
 
-      if (isVendorUser && currentVendorEmail) {
+      // Admin: per-vendor / per-landlord M-Pesa credentials
+      if (isAdminUser && activeTab === 'mpesa') {
+        if (!selectedEntityId) {
+          setConfigs([]);
+          setEditedConfigs({});
+          setVisiblePasswords({});
+          return;
+        }
+
+        if (entityType === 'vendor') {
+          const response = await axios.get(`${API_URL}/admin/payment-config/vendors/${selectedEntityId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.data.status === 200) {
+            configsData = buildVendorMpesaConfigs(response.data.mpesa_config || {});
+          }
+        } else {
+          const response = await axios.get(`${API_URL}/admin/payment-config/landlords/${selectedEntityId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.data.status === 200) {
+            configsData = buildLandlordMpesaConfigs(response.data.mpesa_config || {});
+          }
+        }
+
+        setConfigs(configsData);
+        const initial: Record<string, string> = {};
+        configsData.forEach((config) => {
+          initial[config.key] = config.is_masked ? '' : (config.value ?? '');
+        });
+        setEditedConfigs(initial);
+        setVisiblePasswords({});
+        return;
+      }
+
+      if (isVendorUser && currentVendorEmail && activeTab === 'sms') {
         // Load vendor-specific config
         console.log('Loading vendor config for:', currentVendorEmail);
         try {
@@ -122,188 +181,93 @@ const SystemConfigPage = () => {
           console.log('Vendor config response:', response.data);
 
           if (response.data.status === 200) {
-            const vendorConfig = activeTab === 'sms' ? response.data.sms_config : response.data.mpesa_config;
-
-            // Transform vendor config object to SystemConfig[] format
-            if (activeTab === 'sms') {
-              configsData = [
-                {
-                  id: 1,
-                  key: 'sms_provider',
-                  value: vendorConfig?.provider || '',
-                  type: 'string',
-                  category: 'sms',
-                  description: 'SMS Provider name (advanta, fornax, twilio, etc.)',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 2,
-                  key: 'sms_api_url',
-                  value: vendorConfig?.api_url || '',
-                  type: 'string',
-                  category: 'sms',
-                  description: 'SMS API endpoint URL',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 3,
-                  key: 'sms_api_key',
-                  value: vendorConfig?.api_key ? '***' : '',
-                  type: 'string',
-                  category: 'sms',
-                  description: 'SMS API Key',
-                  is_encrypted: true,
-                  is_masked: !!vendorConfig?.api_key,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 4,
-                  key: 'sms_partner_id',
-                  value: vendorConfig?.partner_id || '',
-                  type: 'string',
-                  category: 'sms',
-                  description: 'SMS Partner ID',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 5,
-                  key: 'sms_shortcode',
-                  value: vendorConfig?.shortcode || '',
-                  type: 'string',
-                  category: 'sms',
-                  description: 'SMS Shortcode/Sender ID',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 6,
-                  key: 'sms_enabled',
-                  value: vendorConfig?.enabled ? 'true' : 'false',
-                  type: 'boolean',
-                  category: 'sms',
-                  description: 'Enable or disable SMS service',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-              ];
-            } else {
-              // Mpesa config
-              configsData = [
-                {
-                  id: 7,
-                  key: 'mpesa_consumer_key',
-                  value: vendorConfig?.consumer_key ? '***' : '',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Consumer Key',
-                  is_encrypted: true,
-                  is_masked: !!vendorConfig?.consumer_key,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 8,
-                  key: 'mpesa_consumer_secret',
-                  value: vendorConfig?.consumer_secret ? '***' : '',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Consumer Secret',
-                  is_encrypted: true,
-                  is_masked: !!vendorConfig?.consumer_secret,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 9,
-                  key: 'mpesa_passkey',
-                  value: vendorConfig?.passkey ? '***' : '',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Passkey (for STK Push)',
-                  is_encrypted: true,
-                  is_masked: !!vendorConfig?.passkey,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 10,
-                  key: 'mpesa_shortcode',
-                  value: vendorConfig?.shortcode || '',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Business Shortcode (Paybill/Store)',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 11,
-                  key: 'mpesa_till_no',
-                  value: vendorConfig?.till_no || '',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Till Number (if applicable)',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 12,
-                  key: 'mpesa_env',
-                  value: vendorConfig?.env || 'sandbox',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Environment (sandbox or live)',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-                {
-                  id: 14,
-                  key: 'mpesa_transaction_type',
-                  value: vendorConfig?.transaction_type || 'CustomerBuyGoodsOnline',
-                  type: 'string',
-                  category: 'mpesa',
-                  description: 'M-Pesa Transaction Type (CustomerPayBillOnline or CustomerBuyGoodsOnline)',
-                  is_encrypted: false,
-                  is_masked: false,
-                  created_at: '',
-                  updated_at: '',
-                },
-              ];
-            }
+            const vendorConfig = response.data.sms_config;
+            configsData = [
+              {
+                id: 1,
+                key: 'sms_provider',
+                value: vendorConfig?.provider || '',
+                type: 'string',
+                category: 'sms',
+                description: 'SMS Provider name (advanta, fornax, twilio, etc.)',
+                is_encrypted: false,
+                is_masked: false,
+                created_at: '',
+                updated_at: '',
+              },
+              {
+                id: 2,
+                key: 'sms_api_url',
+                value: vendorConfig?.api_url || '',
+                type: 'string',
+                category: 'sms',
+                description: 'SMS API endpoint URL',
+                is_encrypted: false,
+                is_masked: false,
+                created_at: '',
+                updated_at: '',
+              },
+              {
+                id: 3,
+                key: 'sms_api_key',
+                value: vendorConfig?.api_key ? '***' : '',
+                type: 'string',
+                category: 'sms',
+                description: 'SMS API Key',
+                is_encrypted: true,
+                is_masked: !!vendorConfig?.api_key,
+                created_at: '',
+                updated_at: '',
+              },
+              {
+                id: 4,
+                key: 'sms_partner_id',
+                value: vendorConfig?.partner_id || '',
+                type: 'string',
+                category: 'sms',
+                description: 'SMS Partner ID',
+                is_encrypted: false,
+                is_masked: false,
+                created_at: '',
+                updated_at: '',
+              },
+              {
+                id: 5,
+                key: 'sms_shortcode',
+                value: vendorConfig?.shortcode || '',
+                type: 'string',
+                category: 'sms',
+                description: 'SMS Shortcode/Sender ID',
+                is_encrypted: false,
+                is_masked: false,
+                created_at: '',
+                updated_at: '',
+              },
+              {
+                id: 6,
+                key: 'sms_enabled',
+                value: vendorConfig?.enabled ? 'true' : 'false',
+                type: 'boolean',
+                category: 'sms',
+                description: 'Enable or disable SMS service',
+                is_encrypted: false,
+                is_masked: false,
+                created_at: '',
+                updated_at: '',
+              },
+            ];
           }
-        } catch (vendorError: any) {
+        } catch (vendorError: unknown) {
           console.error('Error loading vendor config:', vendorError);
-          // If vendor config fails, fallback to global config
-          if (vendorError.response?.status === 404) {
-            console.log('Vendor not found, falling back to global config');
-          } else {
+          const status = (vendorError as { response?: { status?: number } })?.response?.status;
+          if (status !== 404) {
             throw vendorError;
           }
         }
       }
 
-      // Load global SystemConfig for admins or if vendor config failed
-      if (!isVendorUser || configsData.length === 0) {
-        console.log('Loading global SystemConfig for admin');
+      // Global SystemConfig for admin SMS tab only
+      if (isAdminUser && activeTab === 'sms') {
         const response = await axios.get(`${API_URL}/admin/system-config/category/${activeTab}`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -389,83 +353,58 @@ const SystemConfigPage = () => {
       const token = localStorage.getItem('token');
 
       if (isVendor) {
-        // Save vendor-specific config
-        const vendorConfig: any = {};
+        if (activeTab !== 'sms') {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Not allowed',
+            text: 'M-Pesa API settings are managed by your administrator.',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+          });
+          return;
+        }
+
+        const vendorConfig: Record<string, string | boolean> = {};
 
         Object.entries(editedConfigs).forEach(([key, value]) => {
-          const originalConfig = configs.find(c => c.key === key);
+          const originalConfig = configs.find((c) => c.key === key);
           if (!originalConfig) return;
 
-          // Skip if value hasn't changed (unless it's a masked/encrypted field)
           if (!originalConfig.is_masked && value === originalConfig.value) {
             return;
           }
 
-          // Skip empty values for masked fields unless they're being updated
           if (originalConfig.is_masked && (!value || !value.trim())) {
             return;
           }
 
-          // Map SystemConfig keys to vendor config structure
-          if (activeTab === 'sms') {
-            switch (key) {
-              case 'sms_provider':
-                vendorConfig.provider = value;
-                break;
-              case 'sms_api_url':
-                vendorConfig.api_url = value;
-                break;
-              case 'sms_api_key':
-                if (value.trim()) vendorConfig.api_key = value;
-                break;
-              case 'sms_partner_id':
-                vendorConfig.partner_id = value;
-                break;
-              case 'sms_shortcode':
-                vendorConfig.shortcode = value;
-                break;
-              case 'sms_enabled':
-                vendorConfig.enabled = value === 'true';
-                break;
-            }
-          } else {
-            // Mpesa
-            switch (key) {
-              case 'mpesa_consumer_key':
-                if (value.trim()) vendorConfig.consumer_key = value;
-                break;
-              case 'mpesa_consumer_secret':
-                if (value.trim()) vendorConfig.consumer_secret = value;
-                break;
-              case 'mpesa_passkey':
-                if (value.trim()) vendorConfig.passkey = value;
-                break;
-              case 'mpesa_shortcode':
-                vendorConfig.shortcode = value;
-                break;
-              case 'mpesa_till_no':
-                vendorConfig.till_no = value;
-                break;
-              case 'mpesa_env':
-                vendorConfig.env = value;
-                break;
-              case 'mpesa_transaction_type':
-                vendorConfig.transaction_type = value;
-                break;
-            }
+          switch (key) {
+            case 'sms_provider':
+              vendorConfig.provider = value;
+              break;
+            case 'sms_api_url':
+              vendorConfig.api_url = value;
+              break;
+            case 'sms_api_key':
+              if (value.trim()) vendorConfig.api_key = value;
+              break;
+            case 'sms_partner_id':
+              vendorConfig.partner_id = value;
+              break;
+            case 'sms_shortcode':
+              vendorConfig.shortcode = value;
+              break;
+            case 'sms_enabled':
+              vendorConfig.enabled = value === 'true';
+              break;
           }
         });
 
-        const payload: any = {};
-        if (activeTab === 'sms') {
-          payload.sms_config = vendorConfig;
-        } else {
-          payload.mpesa_config = vendorConfig;
-        }
-
         const response = await axios.put(
           `${API_URL}/vendor/config`,
-          payload,
+          { sms_config: vendorConfig },
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -477,19 +416,87 @@ const SystemConfigPage = () => {
           Swal.fire({
             icon: 'success',
             title: 'Success',
-            text: `Your ${activeTab.toUpperCase()} configuration updated successfully`,
+            text: 'Your SMS configuration updated successfully',
             toast: true,
             position: 'top-end',
             showConfirmButton: false,
-            timer: 3000
+            timer: 3000,
           });
-          // Reload configs smoothly without full page reload
           setIsTabLoading(true);
           await loadConfigs();
           setTimeout(() => {
             setIsTabLoading(false);
             setVisiblePasswords({});
           }, 300);
+        }
+      } else if (isAdmin && activeTab === 'mpesa') {
+        if (!selectedEntityId) {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Select account',
+            text: 'Choose a vendor or landlord before saving payment settings.',
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+          });
+          return;
+        }
+
+        if (entityType === 'vendor') {
+          const mpesaConfig = mapEditedToVendorMpesaConfig(editedConfigs);
+          const response = await axios.put(
+            `${API_URL}/admin/payment-config/vendors/${selectedEntityId}`,
+            mpesaConfig,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (response.data.status === 200) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Vendor M-Pesa configuration updated successfully',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+            });
+            setIsTabLoading(true);
+            await loadConfigs();
+            setTimeout(() => {
+              setIsTabLoading(false);
+              setVisiblePasswords({});
+            }, 300);
+          }
+        } else {
+          const mpesaConfig = mapEditedToVendorMpesaConfig(editedConfigs);
+          const response = await axios.put(
+            `${API_URL}/admin/payment-config/landlords/${selectedEntityId}`,
+            mpesaConfig,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          if (response.data.status === 200) {
+            Swal.fire({
+              icon: 'success',
+              title: 'Success',
+              text: 'Landlord M-Pesa configuration updated successfully',
+              toast: true,
+              position: 'top-end',
+              showConfirmButton: false,
+              timer: 3000,
+            });
+            setIsTabLoading(true);
+            await loadConfigs();
+            setTimeout(() => {
+              setIsTabLoading(false);
+              setVisiblePasswords({});
+            }, 300);
+          }
         }
       } else {
         // Save global SystemConfig for admins
@@ -558,6 +565,20 @@ const SystemConfigPage = () => {
 
 
 
+  const filteredEntities = useMemo(
+    () => entities.filter((e) => e.type === entityType),
+    [entities, entityType]
+  );
+
+  useEffect(() => {
+    if (!isAdmin || activeTab !== 'mpesa') return;
+    if (filteredEntities.length > 0 && !filteredEntities.some((e) => e.id === selectedEntityId)) {
+      setSelectedEntityId(filteredEntities[0].id);
+    } else if (filteredEntities.length === 0) {
+      setSelectedEntityId('');
+    }
+  }, [entityType, filteredEntities, isAdmin, activeTab, selectedEntityId]);
+
   const hasChanges = () => {
     return Object.keys(editedConfigs).length > 0;
   };
@@ -587,8 +608,10 @@ const SystemConfigPage = () => {
                 </h1>
                 <p className="text-sm text-gray-500 dark:text-gray-400 truncate mt-0.5">
                   {isVendor
-                    ? `Manage your ${activeTab === 'sms' ? 'SMS' : 'M-Pesa'} service settings`
-                    : `Manage ${activeTab === 'sms' ? 'SMS' : 'M-Pesa'} service settings`}
+                    ? 'Manage your SMS service settings (M-Pesa is configured by admin)'
+                    : isAdmin && activeTab === 'mpesa'
+                      ? 'Configure M-Pesa API credentials per vendor or landlord'
+                      : `Manage ${activeTab === 'sms' ? 'SMS' : 'M-Pesa'} service settings`}
                   {isVendor && vendorEmail && (
                     <span className="inline-flex mt-1 md:mt-0 md:ml-3 items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide normal bg-[#0A1F44]-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800 shadow-sm">
                       Vendor: {vendorEmail}
@@ -621,16 +644,18 @@ const SystemConfigPage = () => {
                 <MessageSquare className="w-4 h-4" />
                 SMS Config
               </button>
-              <button
-                onClick={() => setActiveTab('mpesa')}
-                className={`flex-none px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeTab === 'mpesa'
-                  ? 'bg-blue-50 dark:bg-gray-700/80 border-blue-100 dark:border-gray-600 text-blue-700 dark:text-blue-400 shadow-sm border'
-                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent'
-                  }`}
-              >
-                <Globe className="w-4 h-4" />
-                M-Pesa API
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => setActiveTab('mpesa')}
+                  className={`flex-none px-6 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 flex items-center gap-2 ${activeTab === 'mpesa'
+                    ? 'bg-blue-50 dark:bg-gray-700/80 border-blue-100 dark:border-gray-600 text-blue-700 dark:text-blue-400 shadow-sm border'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 border border-transparent'
+                    }`}
+                >
+                  <Shield className="w-4 h-4" />
+                  Payment API
+                </button>
+              )}
             </div>
 
             <div className="flex items-center gap-3">
@@ -665,6 +690,73 @@ const SystemConfigPage = () => {
               </button>
             </div>
           </div>
+
+          {isAdmin && activeTab === 'mpesa' && (
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700/50 bg-white dark:bg-gray-800 space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="inline-flex bg-gray-100 dark:bg-gray-900/50 p-1 rounded-xl">
+                  <button
+                    type="button"
+                    onClick={() => setEntityType('vendor')}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 transition-colors ${
+                      entityType === 'vendor'
+                        ? 'bg-white dark:bg-gray-700 text-blue-700 dark:text-blue-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    <Building2 className="w-4 h-4" />
+                    Vendors
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setEntityType('landlord')}
+                    className={`px-4 py-2 text-sm font-semibold rounded-lg flex items-center gap-2 transition-colors ${
+                      entityType === 'landlord'
+                        ? 'bg-white dark:bg-gray-700 text-blue-700 dark:text-blue-400 shadow-sm'
+                        : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
+                    }`}
+                  >
+                    <Home className="w-4 h-4" />
+                    Landlords
+                  </button>
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1.5">
+                    {entityType === 'vendor' ? 'Select vendor' : 'Select landlord'}
+                  </label>
+                  <div className="relative">
+                    <select
+                      value={selectedEntityId}
+                      onChange={(e) => setSelectedEntityId(e.target.value)}
+                      disabled={entitiesLoading || filteredEntities.length === 0}
+                      className="w-full pl-4 pr-10 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white appearance-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-60"
+                    >
+                      <option value="">
+                        {entitiesLoading
+                          ? 'Loading accounts...'
+                          : filteredEntities.length === 0
+                            ? `No ${entityType}s found`
+                            : `Choose a ${entityType}`}
+                      </option>
+                      {filteredEntities.map((entity) => (
+                        <option key={entity.id} value={entity.id}>
+                          {entity.name}
+                          {entity.subtitle ? ` (${entity.subtitle})` : ''}
+                          {entity.has_mpesa_config ? ' — configured' : ''}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  </div>
+                </div>
+              </div>
+              <p className="text-xs text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-lg px-3 py-2">
+                Only administrators can change payment API credentials. Vendors cannot switch M-Pesa keys to bypass platform service rates.
+              </p>
+            </div>
+          )}
+
           {/* Config content */}
           <div className="p-6 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center gap-3">
@@ -674,7 +766,11 @@ const SystemConfigPage = () => {
               </h2>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              Configure your {activeTab === 'sms' ? 'SMS provider' : 'Safaricom M-Pesa'} settings. Changes take effect immediately after saving.
+              {isAdmin && activeTab === 'mpesa'
+                ? entityType === 'vendor'
+                  ? 'Set Safaricom Daraja credentials for the selected vendor. Secrets are encrypted and masked after save.'
+                  : 'Set Safaricom Daraja credentials for the selected landlord. Secrets are encrypted and masked after save.'
+                : `Configure your ${activeTab === 'sms' ? 'SMS provider' : 'Safaricom M-Pesa'} settings. Changes take effect immediately after saving.`}
             </p>
           </div>
 
@@ -687,7 +783,26 @@ const SystemConfigPage = () => {
                 </div>
               </div>
             )}
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="popLayout">
+              {isAdmin && activeTab === 'mpesa' && !selectedEntityId ? (
+                <motion.div
+                  key="empty-entity"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="text-center py-12 text-gray-500 dark:text-gray-400"
+                >
+                  <Shield className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                  <p className="text-sm font-medium">Select a {entityType} to view and edit payment settings</p>
+                </motion.div>
+              ) : (
+                <motion.div
+                  key={`${activeTab}-${entityType}-${selectedEntityId}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="space-y-6"
+                >
               {configs.map((config, index) => (
                 <motion.div
                   key={`${activeTab}-${config.id}`}
@@ -795,6 +910,8 @@ const SystemConfigPage = () => {
                   )}
                 </motion.div>
               ))}
+                </motion.div>
+              )}
             </AnimatePresence>
           </div>
         </motion.div>
@@ -814,11 +931,17 @@ const SystemConfigPage = () => {
               <ul className="text-xs text-gray-600 dark:text-gray-400 space-y-1 list-disc list-inside">
                 <li>API Key and sensitive credentials are encrypted in the database</li>
                 <li>Changes take effect immediately after saving</li>
+                {isVendor && (
+                  <li>M-Pesa API keys are managed by your administrator — contact support if payments fail</li>
+                )}
+                {isAdmin && activeTab === 'mpesa' && (
+                  <li>Vendors cannot edit M-Pesa credentials; configure each vendor here to ensure platform rates apply</li>
+                )}
                 {activeTab === 'sms' ? (
                   <li>Disable SMS service by toggling "SMS Enabled" to off</li>
-                ) : (
-                  <li>Ensure your environment is set correctly (sandbox for testing, live for production)</li>
-                )}
+                ) : isAdmin ? (
+                  <li>Ensure environment is set correctly (sandbox for testing, live for production)</li>
+                ) : null}
                 <li>Ensure your API endpoint URL is correct for your provider.</li>
               </ul>
             </div>
