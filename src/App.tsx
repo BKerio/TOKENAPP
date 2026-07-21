@@ -30,6 +30,7 @@ import Register from '@/pages/register';
 import VendorApprovals from '@/pages/admin/VendorApprovals';
 import GlobalCallback from '@/pages/admin/GlobalCallback';
 import TrackToken from '@/pages/customer/TrackToken';
+import TokenManagement from '@/pages/TokenManagement';
 
 // Support Pages
 import ApiDocs from '@/pages/support/ApiDocs';
@@ -72,6 +73,7 @@ function App() {
                 <Route path="vendor-overview" element={<AdminMeter />} />
                 <Route path="meters" element={<Meters />} />
                 <Route path="customer-management" element={<CustomerManagement />} />
+                <Route path="token-management" element={<TokenManagement />} />
                 <Route path="vending-control" element={<VendingSettingsPage />} />
                 <Route path="system-config" element={<SystemConfigPage />} />
                 <Route path="callback-settings" element={<GlobalCallback />} />

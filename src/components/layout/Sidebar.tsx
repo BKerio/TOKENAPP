@@ -120,6 +120,7 @@ const Sidebar = ({
     { name: 'Assigned Meters', icon: Users, path: '/dashboard/vendor-overview' },
     { name: 'Meter Management', icon: Gauge, path: '/dashboard/meters' },
     { name: 'Customer Overview', icon: Users, path: '/dashboard/customer-management' },
+    { name: 'Token Management', icon: Zap, path: '/dashboard/token-management' },
     { name: 'System Logs', icon: Activity, path: '/dashboard/auditlogs' },
     { name: 'System Configuration', icon: Sliders, path: '/dashboard/system-config' },
     { name: 'Callback Settings', icon: ShieldCheck, path: '/dashboard/callback-settings' },
@@ -156,6 +157,7 @@ const Sidebar = ({
         'Dashboard',
         'Meter Management',
         'Customer Overview',
+        'Token Management',
         'System Configuration',
         'Account Settings',
         'Branding',
@@ -174,6 +176,7 @@ const Sidebar = ({
         'My Properties',
         'Location Hierarchy',
         'Meter Management',
+        'Token Management',
         'Account Settings',
       ].includes(link.name);
     }
@@ -196,6 +199,7 @@ const Sidebar = ({
       'Assigned Meters',
       'Meter Management',
       'Customer Overview',
+      'Token Management',
       'Lipa Tokens na Mpesa',
       'Purchase History',
       'Branding',

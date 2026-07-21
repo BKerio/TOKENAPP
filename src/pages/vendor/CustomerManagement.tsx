@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
     Users,
@@ -50,6 +51,7 @@ interface LocationItem {
 
 
 const CustomerManagement = () => {
+    const navigate = useNavigate();
 
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [availableMeters, setAvailableMeters] = useState<Meter[]>([]);
@@ -291,8 +293,7 @@ const CustomerManagement = () => {
             });
             return;
         }
-        setVendingCustomer(customer);
-        setVendAmount('');
+        navigate(`/dashboard/token-management?meter=${encodeURIComponent(customer.meter.meter_number)}`);
     };
 
     const submitVendToken = async (e: React.FormEvent) => {
