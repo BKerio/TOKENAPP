@@ -328,6 +328,7 @@ const Login = () => {
           >
             <img
               src={logo}
+              draggable={false}
               alt="TokenPap - Smart Metering & Vending Solution"
               className="h-28 sm:h-36 w-auto max-w-full object-contain"
             />
