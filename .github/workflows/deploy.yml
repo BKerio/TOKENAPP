@@ -15,53 +15,60 @@ jobs:
   deploy:
     name: Deploy TOKENPAPWEB
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
+      # Do NOT use script_stop: true — drone-ssh treats a false `if` test as
+      # failure (exit 1), which aborts before clone/update when .git already exists.
       - name: Deploy Frontend to Server
         uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script_stop: true
-          command_timeout: 15m
+          port: 22
+          command_timeout: 20m
           script: |
-            set -euo pipefail
+            set -euxo pipefail
 
             APP_DIR="/var/www/TOKENPAPWEB"
             REPO_URL="https://github.com/${{ github.repository }}.git"
 
+            echo "==> Who am I"
+            id
             echo "==> Preparing ${APP_DIR}"
             echo "==> Source repo: ${REPO_URL}"
+
             mkdir -p /var/www
             git config --global --add safe.directory "${APP_DIR}" || true
+            git config --global --add safe.directory '*' || true
 
-            if [ ! -d "${APP_DIR}/.git" ]; then
+            if [ -d "${APP_DIR}/.git" ]; then
+              echo "==> Updating existing repository"
+              cd "${APP_DIR}"
+              chown -R "$(id -u):$(id -g)" "${APP_DIR}" || true
+              git remote set-url origin "${REPO_URL}" || git remote add origin "${REPO_URL}"
+            else
               echo "==> Cloning frontend repository"
               rm -rf "${APP_DIR}"
               git clone "${REPO_URL}" "${APP_DIR}"
-            else
               cd "${APP_DIR}"
-              git remote set-url origin "${REPO_URL}" || git remote add origin "${REPO_URL}"
             fi
 
-            cd "${APP_DIR}"
+            chown -R "$(id -u):$(id -g)" "${APP_DIR}/.git" || true
 
             echo "==> Fetching latest changes"
             git fetch --all --prune
 
-            # Prefer current remote default / active branch (master or main)
-            BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null || true)"
             if git show-ref --verify --quiet refs/remotes/origin/master; then
               BRANCH="master"
             elif git show-ref --verify --quiet refs/remotes/origin/main; then
               BRANCH="main"
-            elif [ -z "${BRANCH}" ]; then
-              BRANCH="master"
+            else
+              BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null || echo master)"
             fi
 
             echo "==> Resetting to origin/${BRANCH}"
@@ -70,8 +77,6 @@ jobs:
 
             echo "==> Writing production .env"
             printf '%s\n' 'VITE_API_URL=https://api.tokenpap.com/api' > .env
-            echo "Wrote .env:"
-            cut -d= -f1 .env
 
             echo "==> Installing dependencies"
             npm install --legacy-peer-deps
@@ -79,8 +84,10 @@ jobs:
             echo "==> Building production bundle"
             npm run build
 
+            test -f dist/index.html
+
             echo "==> Fixing ownership and SELinux labels"
-            chown -R nginx:nginx "${APP_DIR}/dist"
+            chown -R nginx:nginx "${APP_DIR}"
             find "${APP_DIR}/dist" -type d -exec chmod 755 {} \;
             find "${APP_DIR}/dist" -type f -exec chmod 644 {} \;
             chcon -Rt httpd_sys_content_t "${APP_DIR}/dist" || true
@@ -91,3 +98,4 @@ jobs:
 
             echo "==> Deploy complete"
             ls -lah "${APP_DIR}/dist" | head -20
+            curl -sI https://api.tokenpap.com/ | head -8 || true
