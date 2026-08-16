@@ -6,7 +6,7 @@ import { Mail, User, Lock, Eye, EyeOff, ChevronDown, CheckCircle2, Phone, User2 
 import { useAuth } from "@/hooks/useAuth";
 import api from "@/lib/api";
 import React from "react";
-import TokenPapLogo from "@/components/TokenPapLogo";
+import logo from "@/assets/logo.png";
 
 type LoginMode = "email" | "accountid" | "customer";
 
@@ -326,9 +326,11 @@ const Login = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="flex flex-col items-center mb-8"
           >
-            <div className="h-16 w-auto">
-              <TokenPapLogo className="h-full w-auto" />
-            </div>
+            <img
+              src={logo}
+              alt="TokenPap - Smart Metering & Vending Solution"
+              className="h-16 sm:h-20 w-auto object-contain"
+            />
           </motion.div>
 
           <form onSubmit={handleLogin} className="space-y-3.5">

@@ -5,46 +5,89 @@ on:
     branches:
       - master
       - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-frontend
+  cancel-in-progress: true
 
 jobs:
   deploy:
+    name: Deploy TOKENPAPWEB
     runs-on: ubuntu-latest
+    timeout-minutes: 20
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Deploy to Server
-        uses: appleboy/ssh-action@v1.0.3
+      - name: Deploy Frontend to Server
+        uses: appleboy/ssh-action@v1.2.0
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script_stop: true
+          command_timeout: 15m
           script: |
-            cd /var/www/frontend
-            
-            # Tell Git it is safe to run commands in this folder
-            git config --global --add safe.directory /var/www/frontend
-            
-            # Fetch latest changes from github
-            git fetch --all
-            # Support both main and master branches depending on your setup
-            git reset --hard origin/$(git symbolic-ref --short HEAD || echo main)
+            set -euo pipefail
+
+            APP_DIR="/var/www/TOKENPAPWEB"
+            REPO_URL="https://github.com/${{ github.repository }}.git"
+
+            echo "==> Preparing ${APP_DIR}"
+            echo "==> Source repo: ${REPO_URL}"
+            mkdir -p /var/www
+            git config --global --add safe.directory "${APP_DIR}" || true
+
+            if [ ! -d "${APP_DIR}/.git" ]; then
+              echo "==> Cloning frontend repository"
+              rm -rf "${APP_DIR}"
+              git clone "${REPO_URL}" "${APP_DIR}"
+            else
+              cd "${APP_DIR}"
+              git remote set-url origin "${REPO_URL}" || git remote add origin "${REPO_URL}"
+            fi
+
+            cd "${APP_DIR}"
+
+            echo "==> Fetching latest changes"
+            git fetch --all --prune
+
+            # Prefer current remote default / active branch (master or main)
+            BRANCH="$(git symbolic-ref --short HEAD 2>/dev/null || true)"
+            if git show-ref --verify --quiet refs/remotes/origin/master; then
+              BRANCH="master"
+            elif git show-ref --verify --quiet refs/remotes/origin/main; then
+              BRANCH="main"
+            elif [ -z "${BRANCH}" ]; then
+              BRANCH="master"
+            fi
+
+            echo "==> Resetting to origin/${BRANCH}"
+            git reset --hard "origin/${BRANCH}"
             git clean -fd
-            
-            # Install Node dependencies
-            echo "Installing dependencies..."
+
+            echo "==> Writing production .env"
+            printf '%s\n' 'VITE_API_URL=https://api.tokenpap.com/api' > .env
+            echo "Wrote .env:"
+            cut -d= -f1 .env
+
+            echo "==> Installing dependencies"
             npm install --legacy-peer-deps
-            
-            # Build the static site bundle
-            echo "Building Vite application..."
+
+            echo "==> Building production bundle"
             npm run build
-            
-            # Fix Ownership permissions for Nginx to read the dist folder
-            chown -R nginx:nginx /var/www/frontend/dist
-            
-            # Fix SELinux permissions so Nginx avoids a 403 Forbidden Error
-            chcon -Rt httpd_sys_content_t /var/www/frontend/dist
-            
-            # Reload Nginx gracefully just in case new static files were dynamically cached
+
+            echo "==> Fixing ownership and SELinux labels"
+            chown -R nginx:nginx "${APP_DIR}/dist"
+            find "${APP_DIR}/dist" -type d -exec chmod 755 {} \;
+            find "${APP_DIR}/dist" -type f -exec chmod 644 {} \;
+            chcon -Rt httpd_sys_content_t "${APP_DIR}/dist" || true
+
+            echo "==> Reloading Nginx"
+            nginx -t
             systemctl reload nginx
+
+            echo "==> Deploy complete"
+            ls -lah "${APP_DIR}/dist" | head -20

@@ -7,7 +7,7 @@ PORT = 22
 USERNAME = "root"
 PASSWORD = "[PASSWORD]"
 GITHUB_REPO = "https://github.com/BKerio/TOKENAPP.git"
-APP_DIR = "/var/www/frontend"
+APP_DIR = "/var/www/TOKENPAPWEB"
 NGINX_SITE = "/etc/nginx/conf.d/frontend.conf"
 
 def run(shell, cmd, wait=3, show=True):
@@ -60,7 +60,7 @@ fi
     run(shell, f"""
 if [ -d "{APP_DIR}/.git" ]; then
   echo "Repo exists – pulling latest..."
-  cd {APP_DIR} && git fetch --all && git reset --hard origin/main
+  cd {APP_DIR} && git fetch --all && (git reset --hard origin/master || git reset --hard origin/main)
 else
   echo "Cloning repo..."
   rm -rf {APP_DIR}
@@ -122,7 +122,8 @@ echo "Nginx config written"
     # Done
     print("\n" + "=" * 60)
     print("  Deployment complete!")
-    print(f"  Frontend: https://app.tokenpap.com")
+    print(f"  Frontend: https://api.tokenpap.com")
+    print(f"  API:      https://api.tokenpap.com/api")
     print(f"  Files at: {APP_DIR}/dist")
     print("=" * 60)
 
