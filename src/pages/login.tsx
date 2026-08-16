@@ -324,12 +324,12 @@ const Login = () => {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex flex-col items-center mb-8"
+            className="flex flex-col items-center mb-6"
           >
             <img
               src={logo}
               alt="TokenPap - Smart Metering & Vending Solution"
-              className="h-16 sm:h-20 w-auto object-contain"
+              className="h-28 sm:h-36 w-auto max-w-full object-contain"
             />
           </motion.div>
 
